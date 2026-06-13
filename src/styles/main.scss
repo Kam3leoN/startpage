@@ -155,6 +155,19 @@ body.theme-transitioning * {
 .clock__colon {
   animation: blink 1s steps(1, end) infinite;
 }
+.clock--12h {
+  align-items: center;
+}
+.clock__period {
+  margin-left: 0.28em;
+  font-family: "Google Sans Flex", system-ui, sans-serif;
+  font-size: 0.34em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--md-sys-color-primary);
+  align-self: center;
+  line-height: 1;
+}
 @keyframes blink { 50% { opacity: 0.15; } }
 .greeting {
   margin: 0 auto;
@@ -357,6 +370,9 @@ k3ui-mason { display: block; width: 100%; }
   gap: 6px;
 }
 .seg--2 { grid-template-columns: repeat(2, 1fr); }
+.sheet__seg-row + .sheet__seg-row {
+  margin-top: 8px;
+}
 @media (min-width: 420px) { .seg:not(.seg--2) { grid-template-columns: repeat(4, 1fr); } }
 .seg button {
   border: 1px solid var(--md-sys-color-outline-variant);

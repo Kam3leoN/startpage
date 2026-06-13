@@ -14,6 +14,10 @@ interface Props {
   setFirstName: (name: string) => void;
   showSeconds: boolean;
   setShowSeconds: (value: boolean) => void;
+  showClock: boolean;
+  setShowClock: (value: boolean) => void;
+  hourFormat: "12" | "24";
+  setHourFormat: (value: "12" | "24") => void;
 }
 
 const MODES: { id: K3ThemeMode; icon: typeof SunIcon; key: string }[] = [
@@ -36,6 +40,10 @@ export function SettingsSheet({
   setFirstName,
   showSeconds,
   setShowSeconds,
+  showClock,
+  setShowClock,
+  hourFormat,
+  setHourFormat,
 }: Props) {
   const { t, i18n } = useTranslation();
 
@@ -70,7 +78,39 @@ export function SettingsSheet({
 
         <div className="sheet__group">
           <div className="sheet__label">{t("clock.title")}</div>
-          <div className="seg seg--2">
+          <div className="seg seg--2 sheet__seg-row">
+            <button
+              type="button"
+              aria-pressed={showClock}
+              onClick={() => setShowClock(true)}
+            >
+              {t("clock.show")}
+            </button>
+            <button
+              type="button"
+              aria-pressed={!showClock}
+              onClick={() => setShowClock(false)}
+            >
+              {t("clock.hide")}
+            </button>
+          </div>
+          <div className="seg seg--2 sheet__seg-row">
+            <button
+              type="button"
+              aria-pressed={hourFormat === "24"}
+              onClick={() => setHourFormat("24")}
+            >
+              {t("clock.format24")}
+            </button>
+            <button
+              type="button"
+              aria-pressed={hourFormat === "12"}
+              onClick={() => setHourFormat("12")}
+            >
+              {t("clock.format12")}
+            </button>
+          </div>
+          <div className="seg seg--2 sheet__seg-row">
             <button
               type="button"
               aria-pressed={!showSeconds}

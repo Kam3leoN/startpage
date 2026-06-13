@@ -13,14 +13,15 @@ import { SettingsSheet } from "./components/SettingsSheet";
 import { SettingsIcon } from "./components/icons";
 import { Greeting } from "./components/Greeting";
 import { Clock } from "./components/Clock";
-import { WordWheelCarousel } from "./components/WordWheelCarousel";
+import { PerspectiveShowcase } from "./components/PerspectiveShowcase";
 import { formatTodayDate } from "./utils/formatTodayDate";
 
 export default function App() {
   const { t, i18n } = useTranslation();
   const { mode, seed, setMode, setSeed } = useTheme();
   const { firstName, setFirstName } = useProfile();
-  const { showSeconds, setShowSeconds } = useClockSettings();
+  const { showClock, setShowClock, hourFormat, setHourFormat, showSeconds, setShowSeconds } =
+    useClockSettings();
   const k3ready = useK3UI();
   const { hh, mm, ss, date } = useClock();
 
@@ -45,9 +46,17 @@ export default function App() {
           <span className="appbar__brand-dot" />
           <span className="appbar__brand-text">StartPage</span>
         </span>
-        <div className="appbar__clock">
-          <Clock hh={hh} mm={mm} ss={ss} showSeconds={showSeconds} />
-        </div>
+        {showClock && (
+          <div className="appbar__clock">
+            <Clock
+              hh={hh}
+              mm={mm}
+              ss={ss}
+              showSeconds={showSeconds}
+              hourFormat={hourFormat}
+            />
+          </div>
+        )}
         <button
           className="iconbtn"
           onClick={() => setSettingsOpen(true)}
@@ -68,7 +77,7 @@ export default function App() {
 
         <FavoritesGrid favorites={FAVORITES} filter={filter} k3ready={k3ready} />
 
-        <WordWheelCarousel />
+        <PerspectiveShowcase k3ready={k3ready} />
 
         <footer className="footer">© {new Date().getFullYear()} — {t("footer")}</footer>
       </main>
@@ -82,6 +91,10 @@ export default function App() {
         setSeed={setSeed}
         firstName={firstName}
         setFirstName={setFirstName}
+        showClock={showClock}
+        setShowClock={setShowClock}
+        hourFormat={hourFormat}
+        setHourFormat={setHourFormat}
         showSeconds={showSeconds}
         setShowSeconds={setShowSeconds}
       />

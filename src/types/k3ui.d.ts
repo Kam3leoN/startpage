@@ -39,6 +39,10 @@ export interface K3API {
   DynamicColorManager: K3DynamicColorManager;
   Mason: { init(el: Element, opts?: Record<string, unknown>): unknown };
   IsoFilter: { init(el: Element, opts?: Record<string, unknown>): unknown };
+  Perspective: {
+    init(els: HTMLElement | NodeListOf<HTMLElement> | string, opts?: Record<string, unknown>): unknown;
+    getInstance(el: HTMLElement): { destroy?: () => void } | undefined;
+  };
   Toast: K3Toast;
   initManagers?: (opts?: Record<string, unknown>) => void;
   initComponents?: (root?: Element) => void;
