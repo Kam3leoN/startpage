@@ -60,14 +60,18 @@ body.theme-transitioning * {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
+  padding: 5px 14px;
+  min-height: 44px;
+  overflow: visible;
   background: color-mix(in srgb, var(--md-sys-color-surface) 78%, transparent);
   backdrop-filter: saturate(160%) blur(14px);
   border-bottom: 1px solid var(--md-sys-color-outline-variant, transparent);
 }
 .appbar__clock {
-  grid-column: 2;
-  justify-self: center;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   pointer-events: none;
 }
 .appbar__clock .clock {
@@ -104,7 +108,7 @@ body.theme-transitioning * {
 }
 
 /* ====== Hero: greeting + search ====== */
-.hero { text-align: center; padding: 18px 0 4px; }
+.hero { text-align: center; padding: 26px 0 4px; }
 .clock {
   display: inline-flex;
   align-items: flex-end;
