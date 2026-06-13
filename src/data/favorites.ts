@@ -6,6 +6,10 @@ export interface Favorite {
   url: string;
   icon: string;
   tags: Category[];
+  /** User-defined shortcut appended after built-in favorites. */
+  custom?: boolean;
+  /** Optional tile background for custom shortcuts. */
+  color?: string;
 }
 
 /** Default M3 accent seed — overridable in settings. */
@@ -18,56 +22,56 @@ export const FAVORITES: Favorite[] = [
     id: "gmail",
     label: "Gmail",
     url: "https://mail.google.com/",
-    icon: ICON("gmail.svg"),
+    icon: ICON("gmail.png"),
     tags: ["infos"],
   },
   {
     id: "google",
     label: "Google",
     url: "https://www.google.com/",
-    icon: ICON("google.svg"),
+    icon: ICON("google.png"),
     tags: ["infos"],
   },
   {
-    id: "inbox",
-    label: "Inbox",
-    url: "https://mail.google.com/",
-    icon: ICON("inbox.svg"),
+    id: "outlook",
+    label: "Outlook",
+    url: "https://outlook.live.com/",
+    icon: ICON("outlook.png"),
     tags: ["infos"],
   },
   {
     id: "github",
     label: "GitHub",
     url: "https://github.com/",
-    icon: ICON("github.svg"),
+    icon: ICON("github.png"),
     tags: ["dev"],
   },
   {
     id: "codepen",
     label: "CodePen",
     url: "https://codepen.io/",
-    icon: ICON("codepen.svg"),
+    icon: ICON("codepen.png"),
     tags: ["dev"],
   },
   {
     id: "youtube",
     label: "YouTube",
     url: "https://www.youtube.com/",
-    icon: ICON("netflix.svg"),
+    icon: ICON("youtube.svg"),
     tags: ["divertissement", "jeux"],
   },
   {
     id: "netflix",
     label: "Netflix",
     url: "https://www.netflix.com/",
-    icon: ICON("netflix.svg"),
+    icon: ICON("netflix.png"),
     tags: ["divertissement", "boutiques", "jeux"],
   },
   {
     id: "instagram",
     label: "Instagram",
     url: "https://instagram.com/",
-    icon: ICON("instagram.svg"),
+    icon: ICON("instagram.png"),
     tags: ["divertissement"],
   },
   {

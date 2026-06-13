@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import type { K3ThemeMode } from "../types/k3ui";
+import type { CustomShortcut } from "../types/shortcuts";
 import { SunIcon, MoonIcon, MonitorIcon, ClockIcon } from "./icons";
+import { CustomShortcutsEditor } from "./CustomShortcutsEditor";
 
 interface Props {
   open: boolean;
@@ -18,6 +20,12 @@ interface Props {
   setShowClock: (value: boolean) => void;
   hourFormat: "12" | "24";
   setHourFormat: (value: "12" | "24") => void;
+  customShortcuts: CustomShortcut[];
+  onAddShortcut: (input: Omit<CustomShortcut, "id">) => boolean;
+  onUpdateShortcut: (id: string, input: Omit<CustomShortcut, "id">) => boolean;
+  onRemoveShortcut: (id: string) => void;
+  onExportShortcuts: () => void;
+  onImportShortcuts: (file: File) => Promise<boolean>;
 }
 
 const MODES: { id: K3ThemeMode; icon: typeof SunIcon; key: string }[] = [
@@ -44,6 +52,12 @@ export function SettingsSheet({
   setShowClock,
   hourFormat,
   setHourFormat,
+  customShortcuts,
+  onAddShortcut,
+  onUpdateShortcut,
+  onRemoveShortcut,
+  onExportShortcuts,
+  onImportShortcuts,
 }: Props) {
   const { t, i18n } = useTranslation();
 
@@ -162,6 +176,18 @@ export function SettingsSheet({
               />
             </label>
           </div>
+        </div>
+
+        <div className="sheet__group">
+          <div className="sheet__label">{t("shortcuts.title")}</div>
+          <CustomShortcutsEditor
+            shortcuts={customShortcuts}
+            onAdd={onAddShortcut}
+            onUpdate={onUpdateShortcut}
+            onRemove={onRemoveShortcut}
+            onExport={onExportShortcuts}
+            onImport={onImportShortcuts}
+          />
         </div>
 
         <div className="sheet__group">

@@ -1,42 +1,63 @@
 import { useEffect, useRef } from "react";
+import { initK3UISubtree } from "../utils/k3uiDeferred";
 
-const SLIDES = [1, 2, 3, 4, 5] as const;
+const SLIDES = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
+
+const PERSPECTIVE_OPTIONS = {
+  effect: "wave" as const,
+  focus: 8,
+  shadows: { enabled: true },
+  autoplay: { enabled: true, speed: 2500 },
+  loop: { enabled: true },
+  navigation: { enabled: true },
+  indicators: true,
+  indicatorsPosition: "bottom" as const,
+};
 
 interface Props {
   k3ready: boolean;
 }
 
-/** K3UI Perspective slider — 5 placeholder cards below the favorites grid. */
+/**
+ * K3UI Perspective — markup aligned with k3ui-docs/perspective.php (grid demo).
+ * Init via initComponents(subtree) after deferred load, with Perspective.init fallback.
+ */
 export function PerspectiveShowcase({ k3ready }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!k3ready || !rootRef.current) return;
-    const el = rootRef.current;
 
-    const timer = window.setTimeout(() => {
-      try {
-        window.K?.Perspective?.init(el, {
-          effect: "wave",
-          autoplay: { enabled: true, speed: 2500 },
-          loop: { enabled: true },
-          navigation: { enabled: true },
-          indicators: true,
-        });
-      } catch {
-        window.K?.initComponents?.(el);
+    const el = rootRef.current;
+    let cancelled = false;
+
+    const boot = async () => {
+      await initK3UISubtree(el);
+      if (cancelled) return;
+
+      const K = window.K;
+      if (!K?.Perspective?.init) return;
+
+      if (!K.Perspective.getInstance(el)) {
+        K.Perspective.init(el, PERSPECTIVE_OPTIONS);
       }
-    }, 0);
+    };
+
+    void boot();
 
     return () => {
-      window.clearTimeout(timer);
+      cancelled = true;
       window.K?.Perspective?.getInstance(el)?.destroy?.();
     };
   }, [k3ready]);
 
   return (
-    <section className="perspective-section">
-      <div ref={rootRef} className="perspective perspective--grid perspective--startpage">
+    <section className="perspective-section" aria-label="Perspective">
+      <div
+        ref={rootRef}
+        id="startpage-perspective"
+        className="perspective perspective--grid"
+      >
         {SLIDES.map((value) => (
           <section key={value} className="perspective__slide">
             <div className="perspective__slide-inner">

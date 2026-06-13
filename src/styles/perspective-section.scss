@@ -1,18 +1,10 @@
-/* ====== K3UI Perspective showcase ====== */
+/* Wrapper — height comes from k3ui `.perspective--grid` (600px / 400px mobile). */
 .perspective-section {
   margin-top: 8px;
   padding: 8px 0 4px;
+  width: 100%;
 }
 
-.perspective--startpage {
-  margin: 0 auto;
+.perspective-section .perspective--grid {
   max-width: 100%;
-}
-
-.perspective--startpage .perspective-demo-text {
-  margin: 0;
-  font-size: clamp(2.5rem, 8vw, 4rem);
-  font-weight: 600;
-  line-height: 1;
-  text-align: center;
 }

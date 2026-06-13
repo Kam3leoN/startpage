@@ -5,6 +5,7 @@ import { useTheme } from "./hooks/useTheme";
 import { useClock } from "./hooks/useClock";
 import { useClockSettings } from "./hooks/useClockSettings";
 import { useProfile } from "./hooks/useProfile";
+import { useCustomShortcuts } from "./hooks/useCustomShortcuts";
 import { useK3UI } from "./hooks/useK3UI";
 import { SearchBar } from "./components/SearchBar";
 import { Filters } from "./components/Filters";
@@ -24,15 +25,29 @@ export default function App() {
     useClockSettings();
   const k3ready = useK3UI();
   const { hh, mm, ss, date } = useClock();
+  const {
+    shortcuts: customShortcuts,
+    favorites: customFavorites,
+    addShortcut,
+    updateShortcut,
+    removeShortcut,
+    exportJson,
+    importJson,
+  } = useCustomShortcuts();
 
   const [filter, setFilter] = useState<Category | "all">("all");
   const [settingsOpen, setSettingsOpen] = useState(false);
 
+  const allFavorites = useMemo(
+    () => [...FAVORITES, ...customFavorites],
+    [customFavorites]
+  );
+
   const availableCats = useMemo(() => {
     const set = new Set<Category>();
-    FAVORITES.forEach((f) => f.tags.forEach((tg) => set.add(tg)));
+    allFavorites.forEach((f) => f.tags.forEach((tg) => set.add(tg)));
     return Array.from(set);
-  }, []);
+  }, [allFavorites]);
 
   const dateLabel = useMemo(
     () => formatTodayDate(date, i18n.language, t("date.todayPrefix")),
@@ -75,7 +90,7 @@ export default function App() {
 
         <Filters active={filter} available={availableCats} onChange={setFilter} />
 
-        <FavoritesGrid favorites={FAVORITES} filter={filter} k3ready={k3ready} />
+        <FavoritesGrid favorites={allFavorites} filter={filter} k3ready={k3ready} />
 
         <PerspectiveShowcase k3ready={k3ready} />
 
@@ -97,6 +112,12 @@ export default function App() {
         setHourFormat={setHourFormat}
         showSeconds={showSeconds}
         setShowSeconds={setShowSeconds}
+        customShortcuts={customShortcuts}
+        onAddShortcut={addShortcut}
+        onUpdateShortcut={updateShortcut}
+        onRemoveShortcut={removeShortcut}
+        onExportShortcuts={exportJson}
+        onImportShortcuts={importJson}
       />
     </>
   );

@@ -37,13 +37,17 @@ export interface K3Toast {
 export interface K3API {
   ThemeManager: K3ThemeManager;
   DynamicColorManager: K3DynamicColorManager;
-  Mason: { init(el: Element, opts?: Record<string, unknown>): unknown };
+  Mason: {
+    init(el: Element, opts?: Record<string, unknown>): unknown;
+    getInstance(el: HTMLElement): { destroy?: () => void; refresh?: () => void } | undefined;
+  };
   IsoFilter: { init(el: Element, opts?: Record<string, unknown>): unknown };
   Perspective: {
     init(els: HTMLElement | NodeListOf<HTMLElement> | string, opts?: Record<string, unknown>): unknown;
     getInstance(el: HTMLElement): { destroy?: () => void } | undefined;
   };
   Toast: K3Toast;
+  loadDeferredComponents?: () => Promise<void>;
   initManagers?: (opts?: Record<string, unknown>) => void;
   initComponents?: (root?: Element) => void;
 }

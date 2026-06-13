@@ -21,3 +21,6 @@ export const DEFAULT_SHOW_SECONDS = true;
 
 /** localStorage key for the clock seconds display preference. */
 export const SHOW_SECONDS_KEY = "k3-clock-show-seconds";
+
+/** localStorage key for custom shortcuts JSON (mirrors public/data/custom-shortcuts.json). */
+export const CUSTOM_SHORTCUTS_KEY = "k3-custom-shortcuts";

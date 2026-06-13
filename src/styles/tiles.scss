@@ -23,7 +23,7 @@
 .fav[data-tile="heroku"] { background: #430098; }
 .fav[data-tile="hulu"] { background: #66aa33; }
 .fav[data-tile="imgur"] { background: #34373c; }
-.fav[data-tile="inbox"] { background: #4285f4; }
+.fav[data-tile="outlook"] { background: #0078d4; }
 .fav[data-tile="instapaper"] { background: #1f1f1f; }
 .fav[data-tile="instagram"] {
   background: radial-gradient(circle farthest-corner at 35% 90%, #fec564, transparent 50%),
@@ -57,11 +57,4 @@
 .fav[data-tile="wikipedia"] { background: #ffffff; }
 .fav[data-tile="youtube"] { background: #fd0016; }
 .fav[data-tile="youtubemusic"] { background: #191919; }
-
-/* Light-background tiles need dark label text for contrast. */
-.fav[data-tile="deezer"] .fav__label,
-.fav[data-tile="chromestore"] .fav__label,
-.fav[data-tile="wikipedia"] .fav__label {
-  color: #1b1b1b;
-  text-shadow: none;
-}
+.fav[data-tile="custom"] { background: var(--fav-custom-bg, var(--md-sys-color-primary)); }
