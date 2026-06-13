@@ -19,5 +19,5 @@ export function Greeting({ firstName, hour }: Props) {
     return t(`greeting.generic.${period}`);
   }, [firstName, period, t]);
 
-  return <p className="greeting">{text}</p>;
+  return <h1 className="greeting">{text}</h1>;
 }

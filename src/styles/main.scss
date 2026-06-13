@@ -74,11 +74,36 @@ body.theme-transitioning * {
 .led-clock.autosize::-webkit-scrollbar { display: none; }
 .led-clock svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
 .greeting {
-  margin: 10px 0 0;
-  font-size: clamp(1.05rem, 3.5vw, 1.35rem);
+  /* Google I/O 2026 — .stacked-hero-title (https://io.google/2026/) */
+  margin: 12px auto 0;
+  max-width: 89%;
+  font-family: "Google Sans", "Google Sans Flex", system-ui, sans-serif;
   font-weight: 500;
+  font-size: 40px;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  text-align: center;
+  text-wrap: pretty;
   color: var(--md-sys-color-on-surface);
-  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+@media (min-width: 576px) {
+  .greeting {
+    max-width: 90%;
+    font-size: 72px;
+    line-height: 1.1;
+    letter-spacing: -2.16px;
+  }
+}
+@media (min-width: 1025px) {
+  .greeting {
+    max-width: 89%;
+    font-size: 120px;
+    line-height: 1.05;
+    letter-spacing: -4.8px;
+    padding-bottom: 0.1em;
+  }
 }
 .clock__date {
   margin-top: 4px;
