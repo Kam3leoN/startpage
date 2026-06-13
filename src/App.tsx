@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { FAVORITES, type Category } from "./data/favorites";
 import { useTheme } from "./hooks/useTheme";
 import { useClock } from "./hooks/useClock";
+import { useClockSettings } from "./hooks/useClockSettings";
 import { useProfile } from "./hooks/useProfile";
 import { useK3UI } from "./hooks/useK3UI";
 import { SearchBar } from "./components/SearchBar";
@@ -18,6 +19,7 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const { mode, seed, setMode, setSeed } = useTheme();
   const { firstName, setFirstName } = useProfile();
+  const { showSeconds, setShowSeconds } = useClockSettings();
   const k3ready = useK3UI();
   const { hh, mm, ss, date } = useClock();
 
@@ -43,7 +45,7 @@ export default function App() {
           <span className="appbar__brand-text">StartPage</span>
         </span>
         <div className="appbar__clock">
-          <Clock hh={hh} mm={mm} ss={ss} />
+          <Clock hh={hh} mm={mm} ss={ss} showSeconds={showSeconds} />
         </div>
         <button
           className="iconbtn"
@@ -77,6 +79,8 @@ export default function App() {
         setSeed={setSeed}
         firstName={firstName}
         setFirstName={setFirstName}
+        showSeconds={showSeconds}
+        setShowSeconds={setShowSeconds}
       />
     </>
   );
