@@ -41,6 +41,17 @@ dérivés de la palette neutre aux tons fixes définis par M3. Préférences per
 couleur seed et sa liste de favoris taggés par catégorie (jeux / infos / boutiques /
 divertissement / dev). Changer de profil applique sa couleur d'accent.
 
+## Déploiement
+
+| Environnement | URL |
+|---|---|
+| Production | [startpage-ten-iota.vercel.app](https://startpage-ten-iota.vercel.app/) |
+| GitHub | [github.com/Kam3leoN/startpage](https://github.com/Kam3leoN/startpage) |
+| Vercel | [vercel.com/kam3leons-projects/startpage](https://vercel.com/kam3leons-projects/startpage) |
+
+Chaque push sur `master` déclenche un déploiement automatique sur Vercel.
+La PWA utilise `registerType: "autoUpdate"` — les visiteurs reçoivent la nouvelle version au prochain rechargement.
+
 ## Lancer
 
 ```bash
@@ -48,6 +59,8 @@ npm install
 npm run dev      # développement
 npm run build    # build de production -> dist/
 npm run preview  # prévisualiser le build
+npx vercel       # déploiement manuel (preview)
+npx vercel --prod  # déploiement manuel (production)
 ```
 
 ## Personnalisation
