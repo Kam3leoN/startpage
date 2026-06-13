@@ -42,6 +42,9 @@ export default function App() {
           <span className="appbar__brand-dot" />
           <span className="appbar__brand-text">StartPage</span>
         </span>
+        <div className="appbar__clock">
+          <Clock hh={hh} mm={mm} ss={ss} />
+        </div>
         <button
           className="iconbtn"
           onClick={() => setSettingsOpen(true)}
@@ -53,7 +56,6 @@ export default function App() {
 
       <main className="shell">
         <section className="hero">
-          <Clock hh={hh} mm={mm} ss={ss} />
           <Greeting firstName={firstName} hour={date.getHours()} />
           <p className="clock__date">{dateLabel}</p>
           <SearchBar />

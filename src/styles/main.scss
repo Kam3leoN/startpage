@@ -64,6 +64,15 @@ body.theme-transitioning * {
   backdrop-filter: saturate(160%) blur(14px);
   border-bottom: 1px solid var(--md-sys-color-outline-variant, transparent);
 }
+.appbar__clock {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.appbar__clock .clock {
+  font-size: clamp(22px, 4.5vw, 36px);
+}
 .appbar__brand {
   font-weight: 600;
   letter-spacing: 0.2px;
@@ -89,7 +98,7 @@ body.theme-transitioning * {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-sys-color-primary) 22%, transparent);
 }
 
-/* ====== Hero: clock + greeting + search ====== */
+/* ====== Hero: greeting + search ====== */
 .hero { text-align: center; padding: 18px 0 4px; }
 .clock {
   display: inline-flex;
@@ -116,7 +125,7 @@ body.theme-transitioning * {
   white-space: nowrap;
 }
 .clock__ghost {
-  opacity: 0.2;
+  opacity: 0.1;
   color: var(--md-sys-color-primary);
   pointer-events: none;
 }
