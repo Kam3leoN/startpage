@@ -73,8 +73,15 @@ body.theme-transitioning * {
 }
 .led-clock.autosize::-webkit-scrollbar { display: none; }
 .led-clock svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.greeting {
+  margin: 10px 0 0;
+  font-size: clamp(1.05rem, 3.5vw, 1.35rem);
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  letter-spacing: 0.01em;
+}
 .clock__date {
-  margin-top: 6px;
+  margin-top: 4px;
   color: var(--md-sys-color-on-surface-variant);
   font-size: 0.95rem;
   text-transform: capitalize;
@@ -293,6 +300,32 @@ k3ui-mason { display: block; width: 100%; }
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
   border-color: transparent;
+}
+
+.sheet__field { display: flex; flex-direction: column; gap: 6px; }
+.sheet__field-label {
+  font-size: 0.85rem;
+  color: var(--md-sys-color-on-surface-variant);
+}
+.sheet__input {
+  width: 100%;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-low);
+  color: var(--md-sys-color-on-surface);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.sheet__input:focus {
+  border-color: var(--md-sys-color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--md-sys-color-primary) 22%, transparent);
+}
+.sheet__input::placeholder {
+  color: var(--md-sys-color-on-surface-variant);
+  opacity: 0.7;
 }
 
 /* ====== Icon button (appbar) ====== */

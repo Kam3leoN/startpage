@@ -24,6 +24,23 @@ const resources = {
         color: "Couleur d'accent",
       },
       lang: { label: "Langue", fr: "Français", en: "English" },
+      profile: {
+        title: "Profil",
+        firstName: "Prénom",
+        firstNamePlaceholder: "Votre prénom…",
+      },
+      greeting: {
+        withName: {
+          morning: "Bonjour, {{name}} !",
+          afternoon: "Bonne après-midi, {{name}} !",
+          evening: "Bonne soirée, {{name}} !",
+        },
+        generic: {
+          morning: "Bienvenue",
+          afternoon: "Bonne après-midi",
+          evening: "Bonne soirée",
+        },
+      },
       footer: "StartPage — Material 3 Expressive",
       a11y: { openMenu: "Ouvrir le menu", settings: "Réglages" },
     },
@@ -49,6 +66,23 @@ const resources = {
         color: "Accent color",
       },
       lang: { label: "Language", fr: "Français", en: "English" },
+      profile: {
+        title: "Profile",
+        firstName: "First name",
+        firstNamePlaceholder: "Your first name…",
+      },
+      greeting: {
+        withName: {
+          morning: "Good morning, {{name}}!",
+          afternoon: "Good afternoon, {{name}}!",
+          evening: "Good evening, {{name}}!",
+        },
+        generic: {
+          morning: "Welcome",
+          afternoon: "Good afternoon",
+          evening: "Good evening",
+        },
+      },
       footer: "StartPage — Material 3 Expressive",
       a11y: { openMenu: "Open menu", settings: "Settings" },
     },

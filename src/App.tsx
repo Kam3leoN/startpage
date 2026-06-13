@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { FAVORITES, type Category } from "./data/favorites";
 import { useTheme } from "./hooks/useTheme";
 import { useClock } from "./hooks/useClock";
+import { useProfile } from "./hooks/useProfile";
 import { useK3UI } from "./hooks/useK3UI";
 import { SearchBar } from "./components/SearchBar";
 import { Filters } from "./components/Filters";
@@ -10,12 +11,14 @@ import { FavoritesGrid } from "./components/FavoritesGrid";
 import { SettingsSheet } from "./components/SettingsSheet";
 import { SettingsIcon } from "./components/icons";
 import { LedClock } from "./components/LedClock";
+import { Greeting } from "./components/Greeting";
 
 export default function App() {
   const { t, i18n } = useTranslation();
   const { mode, seed, setMode, setSeed } = useTheme();
+  const { firstName, setFirstName } = useProfile();
   const k3ready = useK3UI();
-  const { hh, mm, ss } = useClock();
+  const { hh, mm, ss, date } = useClock();
 
   const [filter, setFilter] = useState<Category | "all">("all");
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -30,12 +33,12 @@ export default function App() {
 
   const dateLabel = useMemo(
     () =>
-      new Date().toLocaleDateString(i18n.language, {
+      date.toLocaleDateString(i18n.language, {
         weekday: "long",
         day: "numeric",
         month: "long",
       }),
-    [i18n.language, hh]
+    [i18n.language, date, hh]
   );
 
   return (
@@ -57,6 +60,7 @@ export default function App() {
       <main className="shell">
         <section className="hero">
           <LedClock timeLabel={timeLabel} colorKey={`${seed}-${mode}`} />
+          <Greeting firstName={firstName} hour={date.getHours()} />
           <div className="clock__date">{dateLabel}</div>
           <SearchBar />
         </section>
@@ -75,6 +79,8 @@ export default function App() {
         setMode={setMode}
         seed={seed}
         setSeed={setSeed}
+        firstName={firstName}
+        setFirstName={setFirstName}
       />
     </>
   );

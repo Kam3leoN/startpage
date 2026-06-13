@@ -16,6 +16,8 @@ export interface LedConfig {
   timer?: string;
   length?: number;
   num?: string;
+  char_cols?: number;
+  font_skip?: number;
 }
 
 declare global {

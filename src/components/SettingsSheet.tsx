@@ -10,6 +10,8 @@ interface Props {
   setMode: (m: K3ThemeMode) => void;
   seed: string;
   setSeed: (s: string) => void;
+  firstName: string;
+  setFirstName: (name: string) => void;
 }
 
 const MODES: { id: K3ThemeMode; icon: typeof SunIcon; key: string }[] = [
@@ -21,7 +23,16 @@ const MODES: { id: K3ThemeMode; icon: typeof SunIcon; key: string }[] = [
 
 const SWATCHES = ["#6750A4", "#0B57D0", "#B3261E", "#1E6E3C", "#E8A800", "#00696F"];
 
-export function SettingsSheet({ open, onClose, mode, setMode, seed, setSeed }: Props) {
+export function SettingsSheet({
+  open,
+  onClose,
+  mode,
+  setMode,
+  seed,
+  setSeed,
+  firstName,
+  setFirstName,
+}: Props) {
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
@@ -37,6 +48,21 @@ export function SettingsSheet({ open, onClose, mode, setMode, seed, setSeed }: P
     <div className="sheet-backdrop" onClick={onClose}>
       <div className="sheet" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
         <div className="sheet__grab" />
+
+        <div className="sheet__group">
+          <div className="sheet__label">{t("profile.title")}</div>
+          <label className="sheet__field">
+            <span className="sheet__field-label">{t("profile.firstName")}</span>
+            <input
+              className="sheet__input"
+              type="text"
+              value={firstName}
+              placeholder={t("profile.firstNamePlaceholder")}
+              autoComplete="given-name"
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+          </label>
+        </div>
 
         <div className="sheet__group">
           <div className="sheet__label">{t("theme.title")}</div>

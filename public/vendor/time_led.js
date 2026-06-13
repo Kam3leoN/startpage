@@ -33,8 +33,8 @@ ident.Led = function(conf) {
             "0   0     0     0     0 0   0 0     0         0 0   0 0   0            ",
             "0   0     0     0     0 0   0 0     0         0 0   0 0   0   0        ",
             "0   0     0 00000 00000 00000 00000 00000     0 00000 00000            ",
+            "0   0     0 0         0     0     0 0   0     0 0   0   0     0      ",
             "0   0     0 0         0     0     0 0   0     0 0   0     0            ",
-            "0   0     0 0         0     0     0 0   0     0 0   0     0   0        ",
             "00000     0 00000 00000     0 00000 00000     0 00000 00000            "
         ],
         m_d = 0, m_h = 0, m_m = 0, m_s = 0,
@@ -60,6 +60,8 @@ ident.Led = function(conf) {
     const hourformat = conf.hourformat === undefined ? 24 : conf.hourformat;
     const n_length = conf.length === undefined ? 8 : conf.length;
     const h_w = conf.size === undefined ? 16 : parseInt(conf.size);
+    const col_w = conf.char_cols === undefined ? 6 : parseInt(conf.char_cols, 10);
+    const font_skip = conf.font_skip === undefined ? Math.max(0, Math.floor((6 - col_w) / 2)) : parseInt(conf.font_skip, 10);
     const rnum = conf.num === undefined ? "0,9999999" : conf.num;
     const time_zone = conf.time_zone === undefined ? undefined : parseInt(conf.time_zone);
 
@@ -126,7 +128,7 @@ ident.Led = function(conf) {
         updateLedRandom();
     } else {
         // Set SVG dimensions for time/countdown display
-        svg.setAttribute('width', format.length * 6 * (h_w + pix_between) - (h_w + 2 * pix_between));
+        svg.setAttribute('width', format.length * col_w * (h_w + pix_between) - (h_w + 2 * pix_between));
         svg.setAttribute('height', 7 * (h_w + pix_between) - pix_between);
     }
 
@@ -139,7 +141,7 @@ ident.Led = function(conf) {
         const digitCount = format.length;
         
         // Initialize digit array with SVG elements
-        for (i = 0; i < digitCount * 6; i++) {
+        for (i = 0; i < digitCount * col_w; i++) {
             dig[i] = [];
             for (let y = 0; y < 7; y++) {
                 const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -166,7 +168,7 @@ ident.Led = function(conf) {
         const digitCount = format.length;
         
         // Initialize digit array with SVG elements
-        for (i = 0; i < digitCount * 6; i++) {
+        for (i = 0; i < digitCount * col_w; i++) {
             dig[i] = [];
             for (let y = 0; y < 7; y++) {
                 const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -318,10 +320,10 @@ ident.Led = function(conf) {
             // Determine which character to display
             razd = num.charAt(l) === ":" ? 10 : (num.charAt(l) === " " ? 11 : num.charAt(l));
             
-            for (i = 0; i < 6; i++) {
+            for (i = 0; i < col_w; i++) {
                 for (let y = 0; y < 7; y++) {
-                    const segment = dig[l * 6 + i][y];
-                    if (font[y].charAt(razd * 6 + i) === "0") {
+                    const segment = dig[l * col_w + i][y];
+                    if (font[y].charAt(razd * 6 + font_skip + i) === "0") {
                         // Turn on LED segment
                         segment.setAttribute('fill', color);
                         segment.setAttribute('opacity', 1);
