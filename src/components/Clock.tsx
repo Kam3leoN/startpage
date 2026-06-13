@@ -16,7 +16,7 @@ function Digit({ value }: { value: string }) {
   );
 }
 
-/** Colon slot with ghost separator at 10% opacity. */
+/** Colon slot with ghost separator at 5% opacity. */
 function Colon() {
   return (
     <span className="clock__slot clock__slot--colon">
