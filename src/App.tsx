@@ -10,7 +10,6 @@ import { Filters } from "./components/Filters";
 import { FavoritesGrid } from "./components/FavoritesGrid";
 import { SettingsSheet } from "./components/SettingsSheet";
 import { SettingsIcon } from "./components/icons";
-import { LedClock } from "./components/LedClock";
 import { Greeting } from "./components/Greeting";
 import { formatTodayDate } from "./utils/formatTodayDate";
 
@@ -19,7 +18,7 @@ export default function App() {
   const { mode, seed, setMode, setSeed } = useTheme();
   const { firstName, setFirstName } = useProfile();
   const k3ready = useK3UI();
-  const { hh, mm, ss, date } = useClock();
+  const { hh, mm, date } = useClock();
 
   const [filter, setFilter] = useState<Category | "all">("all");
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -29,8 +28,6 @@ export default function App() {
     FAVORITES.forEach((f) => f.tags.forEach((tg) => set.add(tg)));
     return Array.from(set);
   }, []);
-
-  const timeLabel = `${hh}:${mm}:${ss}`;
 
   const dateLabel = useMemo(
     () => formatTodayDate(date, i18n.language, t("date.todayPrefix")),
@@ -44,9 +41,6 @@ export default function App() {
           <span className="appbar__brand-dot" />
           <span className="appbar__brand-text">StartPage</span>
         </span>
-        <div className="appbar__clock">
-          <LedClock timeLabel={timeLabel} colorKey={`${seed}-${mode}`} compact />
-        </div>
         <button
           className="iconbtn"
           onClick={() => setSettingsOpen(true)}
@@ -58,6 +52,11 @@ export default function App() {
 
       <main className="shell">
         <section className="hero">
+          <div className="clock" aria-label={`${hh}:${mm}`}>
+            {hh}
+            <span className="clock__colon">:</span>
+            {mm}
+          </div>
           <Greeting firstName={firstName} hour={date.getHours()} />
           <p className="clock__date">{dateLabel}</p>
           <SearchBar />

@@ -1,5 +1,14 @@
 @use "sass:map";
 
+/* ====== Digital-7 clock font ====== */
+@font-face {
+  font-family: "Digital-7";
+  src: url("/fonts/Digital-7.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --shell-max: 1100px;
   --gap: 14px;
@@ -47,21 +56,18 @@ body.theme-transitioning * {
   position: sticky;
   top: 0;
   z-index: 50;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(max-content, auto) minmax(0, 1fr);
+  display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  min-height: 52px;
-  overflow: visible;
   background: color-mix(in srgb, var(--md-sys-color-surface) 78%, transparent);
   backdrop-filter: saturate(160%) blur(14px);
   border-bottom: 1px solid var(--md-sys-color-outline-variant, transparent);
 }
 .appbar__brand {
-  justify-self: start;
   font-weight: 600;
   letter-spacing: 0.2px;
+  margin-right: auto;
   color: var(--md-sys-color-primary);
   display: flex;
   align-items: center;
@@ -76,19 +82,6 @@ body.theme-transitioning * {
 @media (max-width: 480px) {
   .appbar__brand-text { display: none; }
 }
-.appbar__clock {
-  justify-self: center;
-  grid-column: 2;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-width: max-content;
-  overflow: visible;
-}
-.appbar .iconbtn {
-  justify-self: end;
-  grid-column: 3;
-}
 .appbar__brand-dot {
   width: 10px; height: 10px; border-radius: 999px;
   flex-shrink: 0;
@@ -96,39 +89,20 @@ body.theme-transitioning * {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-sys-color-primary) 22%, transparent);
 }
 
-/* ====== Hero: greeting + search ====== */
-.hero { text-align: center; padding: 24px 0 4px; }
-.led-clock.autosize {
-  font-size: 0;
-  display: inline-block;
-  max-width: 100%;
-  overflow-x: auto;
-  scrollbar-width: none;
+/* ====== Hero: clock + greeting + search ====== */
+.hero { text-align: center; padding: 18px 0 4px; }
+.clock {
+  font-family: "Digital-7", monospace;
+  font-size: clamp(64px, 22vw, 132px);
+  line-height: 0.9;
+  color: var(--md-sys-color-primary);
   user-select: none;
 }
-.led-clock--compact.autosize {
-  max-width: none;
-  overflow: visible;
+.clock__colon {
+  animation: blink 1s steps(1, end) infinite;
+  padding: 0 0.04em;
 }
-.led-clock--compact svg {
-  display: block;
-  height: var(--led-display-height, 32px);
-  width: auto;
-  max-width: none;
-  overflow: visible;
-}
-@media (max-width: 480px) {
-  .led-clock--compact svg {
-    height: 28px;
-  }
-}
-.led-clock.autosize::-webkit-scrollbar { display: none; }
-.led-clock:not(.led-clock--compact) svg {
-  display: block;
-  margin: 0 auto;
-  max-width: 100%;
-  height: auto;
-}
+@keyframes blink { 50% { opacity: 0.15; } }
 .greeting {
   margin: 0 auto;
   max-width: 100%;
