@@ -42,7 +42,7 @@ function buildConfig(): LedConfig {
     rounded: 2,
     pix_between: 1,
     font: "font3",
-    char_cols: 4,
+    compact_colon: true,
   };
 }
 

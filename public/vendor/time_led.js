@@ -33,7 +33,7 @@ ident.Led = function(conf) {
             "0   0     0     0     0 0   0 0     0         0 0   0 0   0            ",
             "0   0     0     0     0 0   0 0     0         0 0   0 0   0   0        ",
             "0   0     0 00000 00000 00000 00000 00000     0 00000 00000            ",
-            "0   0     0 0         0     0     0 0   0     0 0   0   0     0      ",
+            "0   0     0 0         0     0     0 0   0     0 0   0     0   0        ",
             "0   0     0 0         0     0     0 0   0     0 0   0     0            ",
             "00000     0 00000 00000     0 00000 00000     0 00000 00000            "
         ],
@@ -48,6 +48,49 @@ ident.Led = function(conf) {
         num,
         flash_dot = true;
 
+    /** Slot width per format character (digits = 6 cols, colons = 4 when compact). */
+    var slotStarts = [];
+    var totalLedCols = 0;
+
+    function formatSlotCols(formatChar) {
+        if (compact_colon && formatChar === ":") return 4;
+        return 6;
+    }
+
+    function charSlot(ch) {
+        if (compact_colon && (ch === ":" || ch === " ")) return { cols: 4, skip: 1 };
+        return { cols: 6, skip: 0 };
+    }
+
+    function buildSlotLayout(template) {
+        slotStarts = [];
+        totalLedCols = 0;
+        for (let l = 0; l < template.length; l++) {
+            slotStarts[l] = totalLedCols;
+            totalLedCols += formatSlotCols(template.charAt(l));
+        }
+    }
+
+    function initLedGrid(colCount) {
+        for (i = 0; i < colCount; i++) {
+            dig[i] = [];
+            for (let y = 0; y < 7; y++) {
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute('x', i * (h_w + pix_between));
+                rect.setAttribute('y', y * (h_w + pix_between));
+                rect.setAttribute('width', h_w);
+                rect.setAttribute('height', h_w);
+                rect.setAttribute('rx', rounded);
+                rect.setAttribute('ry', rounded);
+                rect.setAttribute('fill', bgcolor);
+                rect.setAttribute('opacity', bgvisible);
+                rect.classList.add('led-segment');
+                svg.appendChild(rect);
+                dig[i][y] = rect;
+            }
+        }
+    }
+
     // Default configuration values
     const id = conf.id === undefined ? "ledtime" : conf.id;
     const type = conf.type === undefined ? "time" : conf.type;
@@ -60,8 +103,7 @@ ident.Led = function(conf) {
     const hourformat = conf.hourformat === undefined ? 24 : conf.hourformat;
     const n_length = conf.length === undefined ? 8 : conf.length;
     const h_w = conf.size === undefined ? 16 : parseInt(conf.size);
-    const col_w = conf.char_cols === undefined ? 6 : parseInt(conf.char_cols, 10);
-    const font_skip = conf.font_skip === undefined ? Math.max(0, Math.floor((6 - col_w) / 2)) : parseInt(conf.font_skip, 10);
+    const compact_colon = conf.compact_colon === undefined ? true : !!conf.compact_colon;
     const rnum = conf.num === undefined ? "0,9999999" : conf.num;
     const time_zone = conf.time_zone === undefined ? undefined : parseInt(conf.time_zone);
 
@@ -127,8 +169,8 @@ ident.Led = function(conf) {
         }
         updateLedRandom();
     } else {
-        // Set SVG dimensions for time/countdown display
-        svg.setAttribute('width', format.length * col_w * (h_w + pix_between) - (h_w + 2 * pix_between));
+        buildSlotLayout(format);
+        svg.setAttribute('width', totalLedCols * (h_w + pix_between) - (h_w + 2 * pix_between));
         svg.setAttribute('height', 7 * (h_w + pix_between) - pix_between);
     }
 
@@ -139,53 +181,15 @@ ident.Led = function(conf) {
         
         // Determine digit count based on format
         const digitCount = format.length;
-        
-        // Initialize digit array with SVG elements
-        for (i = 0; i < digitCount * col_w; i++) {
-            dig[i] = [];
-            for (let y = 0; y < 7; y++) {
-                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                rect.setAttribute('x', i * (h_w + pix_between));
-                rect.setAttribute('y', y * (h_w + pix_between));
-                rect.setAttribute('width', h_w);
-                rect.setAttribute('height', h_w);
-                rect.setAttribute('rx', rounded);
-                rect.setAttribute('ry', rounded);
-                rect.setAttribute('fill', bgcolor);
-                rect.setAttribute('opacity', bgvisible);
-                rect.classList.add('led-segment');
-                svg.appendChild(rect);
-                
-                dig[i][y] = rect;
-            }
-        }
+        buildSlotLayout(format);
+        initLedGrid(totalLedCols);
         updateTime();
     }
 
     // Initialize time display
     if (type === "time") {
-        // Determine digit count based on format
-        const digitCount = format.length;
-        
-        // Initialize digit array with SVG elements
-        for (i = 0; i < digitCount * col_w; i++) {
-            dig[i] = [];
-            for (let y = 0; y < 7; y++) {
-                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                rect.setAttribute('x', i * (h_w + pix_between));
-                rect.setAttribute('y', y * (h_w + pix_between));
-                rect.setAttribute('width', h_w);
-                rect.setAttribute('height', h_w);
-                rect.setAttribute('rx', rounded);
-                rect.setAttribute('ry', rounded);
-                rect.setAttribute('fill', bgcolor);
-                rect.setAttribute('opacity', bgvisible);
-                rect.classList.add('led-segment');
-                svg.appendChild(rect);
-                
-                dig[i][y] = rect;
-            }
-        }
+        buildSlotLayout(format);
+        initLedGrid(totalLedCols);
         updateTime();
     }
 
@@ -317,18 +321,18 @@ ident.Led = function(conf) {
     function dig_to_led(num) {
         razd = 0;
         for (let l = 0; l < num.length; l++) {
-            // Determine which character to display
-            razd = num.charAt(l) === ":" ? 10 : (num.charAt(l) === " " ? 11 : num.charAt(l));
-            
-            for (i = 0; i < col_w; i++) {
+            const ch = num.charAt(l);
+            razd = ch === ":" ? 10 : (ch === " " ? 11 : ch);
+            const spec = charSlot(ch);
+            const base = slotStarts.length ? slotStarts[l] : l * 6;
+
+            for (i = 0; i < spec.cols; i++) {
                 for (let y = 0; y < 7; y++) {
-                    const segment = dig[l * col_w + i][y];
-                    if (font[y].charAt(razd * 6 + font_skip + i) === "0") {
-                        // Turn on LED segment
+                    const segment = dig[base + i][y];
+                    if (font[y].charAt(razd * 6 + spec.skip + i) === "0") {
                         segment.setAttribute('fill', color);
                         segment.setAttribute('opacity', 1);
                     } else {
-                        // Turn off LED segment
                         segment.setAttribute('fill', bgcolor);
                         segment.setAttribute('opacity', bgvisible);
                     }
