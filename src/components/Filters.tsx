@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { CATEGORIES, type Category } from "../data/profiles";
+import { CATEGORIES, type Category } from "../data/favorites";
 
 interface Props {
   active: Category | "all";

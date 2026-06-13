@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { PROFILES, type Category } from "./data/profiles";
+import { FAVORITES, type Category } from "./data/favorites";
 import { useTheme } from "./hooks/useTheme";
 import { useClock } from "./hooks/useClock";
 import { useK3UI } from "./hooks/useK3UI";
@@ -16,20 +16,14 @@ export default function App() {
   const k3ready = useK3UI();
   const { hh, mm } = useClock();
 
-  const [profileKey, setProfileKey] = useState(PROFILES[0].key);
   const [filter, setFilter] = useState<Category | "all">("all");
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const profile = useMemo(
-    () => PROFILES.find((p) => p.key === profileKey) ?? PROFILES[0],
-    [profileKey]
-  );
-
   const availableCats = useMemo(() => {
     const set = new Set<Category>();
-    profile.favorites.forEach((f) => f.tags.forEach((tg) => set.add(tg)));
+    FAVORITES.forEach((f) => f.tags.forEach((tg) => set.add(tg)));
     return Array.from(set);
-  }, [profile]);
+  }, []);
 
   const dateLabel = useMemo(
     () =>
@@ -38,15 +32,8 @@ export default function App() {
         day: "numeric",
         month: "long",
       }),
-    [i18n.language, hh] // refresh label across day boundary
+    [i18n.language, hh]
   );
-
-  const selectProfile = (key: string) => {
-    setProfileKey(key);
-    setFilter("all");
-    const p = PROFILES.find((x) => x.key === key);
-    if (p) setSeed(p.seed);
-  };
 
   return (
     <>
@@ -65,19 +52,6 @@ export default function App() {
       </header>
 
       <main className="shell">
-        <nav className="tabs" aria-label="Profils">
-          {PROFILES.map((p) => (
-            <button
-              key={p.key}
-              className="tab"
-              aria-selected={p.key === profileKey}
-              onClick={() => selectProfile(p.key)}
-            >
-              {p.label}
-            </button>
-          ))}
-        </nav>
-
         <section className="hero">
           <div className="clock" aria-label={`${hh}:${mm}`}>
             {hh}
@@ -90,12 +64,7 @@ export default function App() {
 
         <Filters active={filter} available={availableCats} onChange={setFilter} />
 
-        <FavoritesGrid
-          key={profile.key}
-          favorites={profile.favorites}
-          filter={filter}
-          k3ready={k3ready}
-        />
+        <FavoritesGrid favorites={FAVORITES} filter={filter} k3ready={k3ready} />
 
         <footer className="footer">© {new Date().getFullYear()} — {t("footer")}</footer>
       </main>

@@ -70,34 +70,6 @@ body.theme-transitioning * {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-sys-color-primary) 22%, transparent);
 }
 
-/* ====== Profile tabs ====== */
-.tabs {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  padding: 2px;
-}
-.tabs::-webkit-scrollbar { display: none; }
-.tab {
-  flex: 0 0 auto;
-  border: none;
-  cursor: pointer;
-  padding: 9px 16px;
-  border-radius: 999px;
-  font: inherit;
-  font-weight: 500;
-  color: var(--md-sys-color-on-surface-variant);
-  background: var(--md-sys-color-surface-container-high);
-  transition: transform 0.28s cubic-bezier(0.2, 0, 0, 1), background-color 0.28s, color 0.28s;
-}
-.tab[aria-selected="true"] {
-  color: var(--md-sys-color-on-primary);
-  background: var(--md-sys-color-primary);
-  transform: translateY(-1px);
-}
-.tab:active { transform: scale(0.96); }
-
 /* ====== Hero: clock + search ====== */
 .hero { text-align: center; padding: 18px 0 4px; }
 .clock {

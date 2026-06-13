@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { Favorite, Category } from "../data/profiles";
+import type { Favorite, Category } from "../data/favorites";
 import { FavoriteCard } from "./FavoriteCard";
 
 interface Props {

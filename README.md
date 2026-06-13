@@ -37,9 +37,8 @@ dérivés de la palette neutre aux tons fixes définis par M3. Préférences per
 
 ## Données
 
-`src/data/profiles.ts` : 4 profils (Accueil, Cédric, Céline, Enfants), chacun avec sa
-couleur seed et sa liste de favoris taggés par catégorie (jeux / infos / boutiques /
-divertissement / dev). Changer de profil applique sa couleur d'accent.
+`src/data/favorites.ts` : liste unique de favoris taggés par catégorie (jeux / infos /
+boutiques / divertissement / dev). La couleur d'accent est réglable dans les paramètres.
 
 ## Déploiement
 
@@ -65,7 +64,7 @@ npx vercel --prod  # déploiement manuel (production)
 
 ## Personnalisation
 
-- Favoris & profils : `src/data/profiles.ts`
+- Favoris : `src/data/favorites.ts`
 - Couleurs de tuiles par marque : `src/styles/tiles.scss`
 - Traductions : `src/i18n/index.ts`
 - Icônes : `public/icons/`

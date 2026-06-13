@@ -1,4 +1,4 @@
-import type { Favorite } from "../data/profiles";
+import type { Favorite } from "../data/favorites";
 
 interface Props {
   fav: Favorite;
