@@ -34,6 +34,19 @@ export interface K3Toast {
   }): void;
 }
 
+export interface K3MenuInstance {
+  isOpen?: boolean;
+  open?: () => void;
+  close?: () => void;
+  destroy?: () => void;
+}
+
+export interface K3FieldInstance {
+  setValue?: (value: string) => void;
+  getValue?: () => string;
+  destroy?: () => void;
+}
+
 export interface K3API {
   ThemeManager: K3ThemeManager;
   DynamicColorManager: K3DynamicColorManager;
@@ -45,6 +58,66 @@ export interface K3API {
   Perspective: {
     init(els: HTMLElement | NodeListOf<HTMLElement> | string, opts?: Record<string, unknown>): unknown;
     getInstance(el: HTMLElement): { destroy?: () => void } | undefined;
+  };
+  Dialog: {
+    init(el: Element, opts?: Record<string, unknown>): unknown;
+    getInstance(el: HTMLElement): { open?: () => void; close?: () => void; destroy?: () => void } | undefined;
+  };
+  Menu: {
+    init(
+      el: Element,
+      opts?: {
+        placement?: string;
+        constrainWidth?: boolean;
+        container?: HTMLElement | null;
+        onItemClick?: (item: { id?: string }, menuId: string) => void;
+        onCloseEnd?: () => void;
+      }
+    ): K3MenuInstance | undefined;
+    getInstance(el: HTMLElement): K3MenuInstance | undefined;
+  };
+  ButtonSplit: {
+    init(
+      el: Element,
+      opts?: {
+        label?: string;
+        variant?: string;
+        size?: string;
+        shape?: string;
+        iconType?: string;
+        leadingIcon?: string;
+        onMainClick?: () => void;
+      }
+    ): unknown;
+    getInstance(el: HTMLElement): { closeTrailing?: () => void; destroy?: () => void } | undefined;
+  };
+  IconManager?: {
+    processIconsInContainer?: (el: HTMLElement) => void;
+    forceDisplayIcons?: () => void;
+  };
+  Field?: {
+    init(
+      el: HTMLElement,
+      opts?: { onInput?: (fieldEl: HTMLElement, value: string) => void }
+    ): K3FieldInstance;
+    getInstance(el: HTMLElement): K3FieldInstance | undefined;
+  };
+  ButtonFabMenu?: {
+    init(
+      el: Element,
+      opts?: {
+        position?: string;
+        fabIcon?: string;
+        items?: Array<{ id: string; label: string; icon?: string }>;
+        onItemClick?: (item: { id: string; label: string; icon?: string }) => void;
+      }
+    ): unknown;
+    getInstance(el: HTMLElement): { destroy?: () => void; closeMenu?: () => void } | undefined;
+  };
+  AppBar?: {
+    init(el: Element, opts?: { variant?: string; fixed?: boolean; collapseDistance?: number }): unknown;
+    getInstance(el: HTMLElement): { destroy?: () => void; updateOptions?: (opts: Record<string, unknown>) => void } | undefined;
+    create?: (opts?: Record<string, unknown>) => HTMLElement;
   };
   Toast: K3Toast;
   loadDeferredComponents?: () => Promise<void>;

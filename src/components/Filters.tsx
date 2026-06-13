@@ -1,15 +1,17 @@
 import { useTranslation } from "react-i18next";
-import { CATEGORIES, type Category } from "../data/favorites";
+import type { CategoryDef } from "../data/categories";
+import type { Category } from "../data/favorites";
 
 interface Props {
   active: Category | "all";
+  categories: CategoryDef[];
   available: Category[];
   onChange: (c: Category | "all") => void;
 }
 
-export function Filters({ active, available, onChange }: Props) {
+export function Filters({ active, categories, available, onChange }: Props) {
   const { t } = useTranslation();
-  const cats = CATEGORIES.filter((c) => available.includes(c));
+  const visible = categories.filter((c) => available.includes(c.id));
 
   return (
     <div className="filters" role="group" aria-label="Filtres">
@@ -20,14 +22,14 @@ export function Filters({ active, available, onChange }: Props) {
       >
         {t("filters.all")}
       </button>
-      {cats.map((c) => (
+      {visible.map((c) => (
         <button
-          key={c}
+          key={c.id}
           className="chip"
-          aria-pressed={active === c}
-          onClick={() => onChange(c)}
+          aria-pressed={active === c.id}
+          onClick={() => onChange(c.id)}
         >
-          {t(`filters.${c}`)}
+          {c.label}
         </button>
       ))}
     </div>

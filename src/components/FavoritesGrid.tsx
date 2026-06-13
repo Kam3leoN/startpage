@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import type { Favorite, Category } from "../data/favorites";
 import { initK3UISubtree } from "../utils/k3uiDeferred";
 import { FavoriteCard } from "./FavoriteCard";
+import { AddShortcutCard } from "./AddShortcutCard";
 
 const MASON_OPTIONS = {
   itemsSelector: ".k3ui-mason__item",
@@ -48,9 +49,11 @@ interface Props {
   favorites: Favorite[];
   filter: Category | "all";
   k3ready: boolean;
+  onAddShortcutClick: () => void;
+  onSearchClick: () => void;
 }
 
-export function FavoritesGrid({ favorites, filter, k3ready }: Props) {
+export function FavoritesGrid({ favorites, filter, k3ready, onAddShortcutClick, onSearchClick }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
   // Init / re-layout K3UI Mason (12 cols × 1 span = 12 tiles per row).
@@ -71,6 +74,11 @@ export function FavoritesGrid({ favorites, filter, k3ready }: Props) {
     const root = ref.current;
     const value = filter === "all" ? "all" : filter;
     root.querySelectorAll<HTMLElement>("[data-isofilter-id]").forEach((el) => {
+      const id = el.getAttribute("data-isofilter-id");
+      if (id === "add-shortcut" || id === "search") {
+        el.removeAttribute("data-k3ui-mason-hidden");
+        return;
+      }
       const tags = (el.getAttribute("data-isofilter-tags") || "").split(",");
       const show = value === "all" || tags.includes(value);
       if (show) el.removeAttribute("data-k3ui-mason-hidden");
@@ -91,8 +99,9 @@ export function FavoritesGrid({ favorites, filter, k3ready }: Props) {
         data-isofilter="true"
       >
         {favorites.map((fav, i) => (
-          <FavoriteCard key={fav.id} fav={fav} index={i} />
+          <FavoriteCard key={fav.id} fav={fav} index={i} onSearchClick={onSearchClick} />
         ))}
+        <AddShortcutCard index={favorites.length} onClick={onAddShortcutClick} />
       </k3ui-mason>
     </div>
   );

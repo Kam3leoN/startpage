@@ -1,4 +1,6 @@
-export type Category = "jeux" | "infos" | "boutiques" | "divertissement" | "dev";
+import { DEFAULT_CATEGORIES, type Category } from "./categories";
+
+export type { Category };
 
 export interface Favorite {
   id: string;
@@ -8,10 +10,9 @@ export interface Favorite {
   tags: Category[];
   /** User-defined shortcut appended after built-in favorites. */
   custom?: boolean;
-  /** Optional tile background for custom shortcuts. */
-  color?: string;
+  /** Opens in-app search overlay instead of navigating. */
+  action?: "search";
 }
-
 /** Default M3 accent seed — overridable in settings. */
 export const DEFAULT_SEED = "#6750A4";
 
@@ -19,17 +20,18 @@ const ICON = (name: string) => `${import.meta.env.BASE_URL}icons/${name}`;
 
 export const FAVORITES: Favorite[] = [
   {
+    id: "search",
+    label: "Search",
+    url: "#",
+    icon: ICON("search.svg"),
+    tags: ["infos"],
+    action: "search",
+  },
+  {
     id: "gmail",
     label: "Gmail",
     url: "https://mail.google.com/",
     icon: ICON("gmail.png"),
-    tags: ["infos"],
-  },
-  {
-    id: "google",
-    label: "Google",
-    url: "https://www.google.com/",
-    icon: ICON("google.png"),
     tags: ["infos"],
   },
   {
@@ -83,10 +85,5 @@ export const FAVORITES: Favorite[] = [
   },
 ];
 
-export const CATEGORIES: Category[] = [
-  "jeux",
-  "infos",
-  "boutiques",
-  "divertissement",
-  "dev",
-];
+/** @deprecated Use useCategories() — kept for static tag references. */
+export const CATEGORIES: Category[] = DEFAULT_CATEGORIES.map((c) => c.id);

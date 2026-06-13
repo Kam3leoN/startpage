@@ -54,7 +54,11 @@ export function useK3UI() {
     const boot = async () => {
       try {
         if (!window.K3UI_OPTIONS) {
-          window.K3UI_OPTIONS = { pageLoader: false, hideBodyUntilReady: false };
+          window.K3UI_OPTIONS = {
+            pageLoader: false,
+            hideBodyUntilReady: false,
+            IconManager: { basePath: "./assets/icons/" },
+          };
         }
 
         await loadScript(`${base}k3ui/init.js`, "k3ui-init");

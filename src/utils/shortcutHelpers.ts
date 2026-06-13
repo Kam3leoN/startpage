@@ -36,7 +36,6 @@ export function customShortcutToFavorite(shortcut: CustomShortcut): Favorite {
     icon: shortcut.icon?.trim() || faviconFromUrl(url),
     tags: shortcut.tags.length ? shortcut.tags : (["infos"] as Category[]),
     custom: true,
-    color: shortcut.color,
   };
 }
 

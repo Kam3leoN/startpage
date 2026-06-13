@@ -1,12 +1,14 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import type { K3ThemeMode } from "../types/k3ui";
-import type { CustomShortcut } from "../types/shortcuts";
+import type { SettingsSection } from "../types/settings";
+import type { WeatherLocationMode } from "../types/weather";
+import { K3OutlinedField } from "./K3OutlinedField";
 import { SunIcon, MoonIcon, MonitorIcon, ClockIcon } from "./icons";
-import { CustomShortcutsEditor } from "./CustomShortcutsEditor";
 
 interface Props {
   open: boolean;
+  section: SettingsSection;
   onClose: () => void;
   mode: K3ThemeMode;
   setMode: (m: K3ThemeMode) => void;
@@ -20,12 +22,12 @@ interface Props {
   setShowClock: (value: boolean) => void;
   hourFormat: "12" | "24";
   setHourFormat: (value: "12" | "24") => void;
-  customShortcuts: CustomShortcut[];
-  onAddShortcut: (input: Omit<CustomShortcut, "id">) => boolean;
-  onUpdateShortcut: (id: string, input: Omit<CustomShortcut, "id">) => boolean;
-  onRemoveShortcut: (id: string) => void;
-  onExportShortcuts: () => void;
-  onImportShortcuts: (file: File) => Promise<boolean>;
+  showWeather: boolean;
+  setShowWeather: (value: boolean) => void;
+  weatherLocationMode: WeatherLocationMode;
+  setWeatherLocationMode: (value: WeatherLocationMode) => void;
+  weatherManualAddress: string;
+  setWeatherManualAddress: (value: string) => void;
 }
 
 const MODES: { id: K3ThemeMode; icon: typeof SunIcon; key: string }[] = [
@@ -39,6 +41,7 @@ const SWATCHES = ["#6750A4", "#0B57D0", "#B3261E", "#1E6E3C", "#E8A800", "#00696
 
 export function SettingsSheet({
   open,
+  section,
   onClose,
   mode,
   setMode,
@@ -52,12 +55,12 @@ export function SettingsSheet({
   setShowClock,
   hourFormat,
   setHourFormat,
-  customShortcuts,
-  onAddShortcut,
-  onUpdateShortcut,
-  onRemoveShortcut,
-  onExportShortcuts,
-  onImportShortcuts,
+  showWeather,
+  setShowWeather,
+  weatherLocationMode,
+  setWeatherLocationMode,
+  weatherManualAddress,
+  setWeatherManualAddress,
 }: Props) {
   const { t, i18n } = useTranslation();
 
@@ -70,26 +73,29 @@ export function SettingsSheet({
 
   if (!open) return null;
 
+  const sectionTitle = t(`settingsSections.${section}.title`);
+
   return (
     <div className="sheet-backdrop" onClick={onClose}>
-      <div className="sheet" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+      <div className="sheet" role="dialog" aria-modal="true" aria-label={sectionTitle} onClick={(e) => e.stopPropagation()}>
         <div className="sheet__grab" />
+        <h3 className="sheet__title">{sectionTitle}</h3>
 
+        {section === "profile" && (
         <div className="sheet__group">
-          <div className="sheet__label">{t("profile.title")}</div>
-          <label className="sheet__field">
-            <span className="sheet__field-label">{t("profile.firstName")}</span>
-            <input
-              className="sheet__input"
-              type="text"
-              value={firstName}
-              placeholder={t("profile.firstNamePlaceholder")}
-              autoComplete="given-name"
-              onChange={(e) => setFirstName(e.target.value)}
-            />
-          </label>
+          <K3OutlinedField
+            className="sheet__k3-field"
+            name="profile-first-name"
+            label={t("profile.firstName")}
+            placeholder={t("profile.firstNamePlaceholder")}
+            value={firstName}
+            onChange={setFirstName}
+            autoComplete="given-name"
+          />
         </div>
+        )}
 
+        {section === "clock" && (
         <div className="sheet__group">
           <div className="sheet__label">{t("clock.title")}</div>
           <div className="seg seg--2 sheet__seg-row">
@@ -141,7 +147,10 @@ export function SettingsSheet({
             </button>
           </div>
         </div>
+        )}
 
+        {section === "general" && (
+        <>
         <div className="sheet__group">
           <div className="sheet__label">{t("theme.title")}</div>
           <div className="seg">
@@ -179,18 +188,6 @@ export function SettingsSheet({
         </div>
 
         <div className="sheet__group">
-          <div className="sheet__label">{t("shortcuts.title")}</div>
-          <CustomShortcutsEditor
-            shortcuts={customShortcuts}
-            onAdd={onAddShortcut}
-            onUpdate={onUpdateShortcut}
-            onRemove={onRemoveShortcut}
-            onExport={onExportShortcuts}
-            onImport={onImportShortcuts}
-          />
-        </div>
-
-        <div className="sheet__group">
           <div className="sheet__label">{t("lang.label")}</div>
           <div className="lang">
             <button aria-pressed={i18n.language.startsWith("fr")} onClick={() => i18n.changeLanguage("fr")}>
@@ -201,6 +198,67 @@ export function SettingsSheet({
             </button>
           </div>
         </div>
+        </>
+        )}
+
+        {section === "weather" && (
+        <>
+        <div className="sheet__group">
+          <div className="sheet__label">{t("weather.settings.widget")}</div>
+          <div className="seg seg--2 sheet__seg-row">
+            <button
+              type="button"
+              aria-pressed={showWeather}
+              onClick={() => setShowWeather(true)}
+            >
+              {t("weather.settings.show")}
+            </button>
+            <button
+              type="button"
+              aria-pressed={!showWeather}
+              onClick={() => setShowWeather(false)}
+            >
+              {t("weather.settings.hide")}
+            </button>
+          </div>
+        </div>
+
+        <div className="sheet__group">
+          <div className="sheet__label">{t("weather.settings.location")}</div>
+          <div className="seg seg--2 sheet__seg-row">
+            <button
+              type="button"
+              aria-pressed={weatherLocationMode === "auto"}
+              onClick={() => setWeatherLocationMode("auto")}
+            >
+              {t("weather.settings.autoDetect")}
+            </button>
+            <button
+              type="button"
+              aria-pressed={weatherLocationMode === "manual"}
+              onClick={() => setWeatherLocationMode("manual")}
+            >
+              {t("weather.settings.manualAddress")}
+            </button>
+          </div>
+          {weatherLocationMode === "manual" && (
+            <K3OutlinedField
+              className="sheet__k3-field sheet__k3-field--spaced"
+              name="weather-manual-address"
+              label={t("weather.settings.addressLabel")}
+              placeholder={t("weather.settings.addressPlaceholder")}
+              value={weatherManualAddress}
+              onChange={setWeatherManualAddress}
+            />
+          )}
+          <p className="sheet__hint">{t("weather.settings.locationHint")}</p>
+        </div>
+        </>
+        )}
+
+        {section === "wallpaper" && (
+          <p className="sheet__placeholder">{t("settingsSections.wallpaper.placeholder")}</p>
+        )}
       </div>
     </div>
   );

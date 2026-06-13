@@ -6,7 +6,6 @@ export interface CustomShortcut {
   label: string;
   url: string;
   icon?: string;
-  color?: string;
   tags: Category[];
 }
 

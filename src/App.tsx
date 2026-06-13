@@ -6,48 +6,86 @@ import { useClock } from "./hooks/useClock";
 import { useClockSettings } from "./hooks/useClockSettings";
 import { useProfile } from "./hooks/useProfile";
 import { useCustomShortcuts } from "./hooks/useCustomShortcuts";
+import { useCategories } from "./hooks/useCategories";
+import { useFavoriteOrder } from "./hooks/useFavoriteOrder";
 import { useK3UI } from "./hooks/useK3UI";
-import { SearchBar } from "./components/SearchBar";
+import { useSearchEngine } from "./hooks/useSearchEngine";
+import { useWeatherSettings } from "./hooks/useWeatherSettings";
+import { useWeather } from "./hooks/useWeather";
 import { Filters } from "./components/Filters";
 import { FavoritesGrid } from "./components/FavoritesGrid";
 import { SettingsSheet } from "./components/SettingsSheet";
-import { SettingsIcon } from "./components/icons";
+import { SettingsFabMenu } from "./components/SettingsFabMenu";
 import { Greeting } from "./components/Greeting";
-import { Clock } from "./components/Clock";
-import { PerspectiveShowcase } from "./components/PerspectiveShowcase";
+import { StartPageAppBar } from "./components/StartPageAppBar";
+// import { PerspectiveShowcase } from "./components/PerspectiveShowcase";
+import { SearchOverlay } from "./components/SearchOverlay";
+import { WeatherWidget } from "./components/WeatherWidget";
+import { ShortcutDialog } from "./components/ShortcutDialog";
+import type { SettingsSection } from "./types/settings";
 import { formatTodayDate } from "./utils/formatTodayDate";
 
 export default function App() {
   const { t, i18n } = useTranslation();
-  const { mode, seed, setMode, setSeed } = useTheme();
+  const { mode, seed, setMode, setSeed, isDark } = useTheme();
   const { firstName, setFirstName } = useProfile();
   const { showClock, setShowClock, hourFormat, setHourFormat, showSeconds, setShowSeconds } =
     useClockSettings();
+  const { engine: searchEngine, setEngine: setSearchEngine } = useSearchEngine();
+  const {
+    showWeather,
+    setShowWeather,
+    locationMode: weatherLocationMode,
+    setLocationMode: setWeatherLocationMode,
+    manualAddress: weatherManualAddress,
+    setManualAddress: setWeatherManualAddress,
+  } = useWeatherSettings();
+  const weather = useWeather({
+    enabled: showWeather,
+    locationMode: weatherLocationMode,
+    manualAddress: weatherManualAddress,
+  });
   const k3ready = useK3UI();
   const { hh, mm, ss, date } = useClock();
   const {
-    shortcuts: customShortcuts,
+    shortcuts,
     favorites: customFavorites,
     addShortcut,
-    updateShortcut,
     removeShortcut,
-    exportJson,
-    importJson,
+    reorderShortcut,
   } = useCustomShortcuts();
+  const {
+    categories,
+    addCategory,
+    updateCategory,
+    removeCategory,
+    moveCategory,
+    fallbackCategoryId,
+  } = useCategories();
 
   const [filter, setFilter] = useState<Category | "all">("all");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsSection, setSettingsSection] = useState<SettingsSection>("general");
+  const [shortcutDialogOpen, setShortcutDialogOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
-  const allFavorites = useMemo(
+  const openSettings = (section: SettingsSection) => {
+    setSettingsSection(section);
+    setSettingsOpen(true);
+  };
+
+  const allFavoritesRaw = useMemo(
     () => [...FAVORITES, ...customFavorites],
     [customFavorites]
   );
 
+  const { orderedFavorites, moveFavorite } = useFavoriteOrder(allFavoritesRaw);
+
   const availableCats = useMemo(() => {
     const set = new Set<Category>();
-    allFavorites.forEach((f) => f.tags.forEach((tg) => set.add(tg)));
+    orderedFavorites.forEach((f) => f.tags.forEach((tg) => set.add(tg)));
     return Array.from(set);
-  }, [allFavorites]);
+  }, [orderedFavorites]);
 
   const dateLabel = useMemo(
     () => formatTodayDate(date, i18n.language, t("date.todayPrefix")),
@@ -56,49 +94,61 @@ export default function App() {
 
   return (
     <>
-      <header className="appbar">
-        <span className="appbar__brand">
-          <span className="appbar__brand-dot" />
-          <span className="appbar__brand-text">StartPage</span>
-        </span>
-        {showClock && (
-          <div className="appbar__clock">
-            <Clock
-              hh={hh}
-              mm={mm}
-              ss={ss}
-              showSeconds={showSeconds}
-              hourFormat={hourFormat}
-            />
-          </div>
-        )}
-        <button
-          className="iconbtn"
-          onClick={() => setSettingsOpen(true)}
-          aria-label={t("a11y.settings")}
-        >
-          <SettingsIcon />
-        </button>
-      </header>
+      {showWeather && (
+        <WeatherWidget
+          temperature={weather.snapshot?.temp ?? null}
+          condition={weather.condition}
+          locationLabel={weather.locationLabel}
+          weatherCode={weather.snapshot?.code ?? null}
+          loading={weather.loading}
+          error={weather.error}
+          isDark={isDark}
+          onOpenSettings={() => openSettings("weather")}
+        />
+      )}
+
+      <StartPageAppBar
+        k3ready={k3ready}
+        showClock={showClock}
+        hh={hh}
+        mm={mm}
+        ss={ss}
+        showSeconds={showSeconds}
+        hourFormat={hourFormat}
+      />
 
       <main className="shell">
         <section className="hero">
           <Greeting firstName={firstName} hour={date.getHours()} />
           <p className="clock__date">{dateLabel}</p>
-          <SearchBar />
         </section>
 
-        <Filters active={filter} available={availableCats} onChange={setFilter} />
+        <Filters
+          active={filter}
+          categories={categories}
+          available={availableCats}
+          onChange={setFilter}
+        />
 
-        <FavoritesGrid favorites={allFavorites} filter={filter} k3ready={k3ready} />
+        <FavoritesGrid
+          favorites={orderedFavorites}
+          filter={filter}
+          k3ready={k3ready}
+          onAddShortcutClick={() => setShortcutDialogOpen(true)}
+          onSearchClick={() => setSearchOpen(true)}
+        />
 
         <footer className="footer">© {new Date().getFullYear()} — {t("footer")}</footer>
       </main>
 
-      <PerspectiveShowcase k3ready={k3ready} />
+      {/* PerspectiveShowcase désactivé — composant conservé pour usage futur */}
+      {/* <PerspectiveShowcase k3ready={k3ready} /> */}
+
+      <SettingsFabMenu k3ready={k3ready} onOpenSection={openSettings} />
 
       <SettingsSheet
         open={settingsOpen}
+        section={settingsSection}
         onClose={() => setSettingsOpen(false)}
         mode={mode}
         setMode={setMode}
@@ -112,12 +162,39 @@ export default function App() {
         setHourFormat={setHourFormat}
         showSeconds={showSeconds}
         setShowSeconds={setShowSeconds}
-        customShortcuts={customShortcuts}
-        onAddShortcut={addShortcut}
-        onUpdateShortcut={updateShortcut}
+        showWeather={showWeather}
+        setShowWeather={setShowWeather}
+        weatherLocationMode={weatherLocationMode}
+        setWeatherLocationMode={setWeatherLocationMode}
+        weatherManualAddress={weatherManualAddress}
+        setWeatherManualAddress={setWeatherManualAddress}
+      />
+
+      <SearchOverlay
+        open={searchOpen}
+        engine={searchEngine}
+        onEngineChange={setSearchEngine}
+        onClose={() => setSearchOpen(false)}
+      />
+
+      <ShortcutDialog
+        open={shortcutDialogOpen}
+        k3ready={k3ready}
+        categories={categories}
+        fallbackCategoryId={fallbackCategoryId}
+        shortcuts={shortcuts}
+        onAddCategory={addCategory}
+        onUpdateCategory={updateCategory}
+        onRemoveCategory={removeCategory}
+        onMoveCategory={moveCategory}
+        onMoveShortcut={(id, delta) => {
+          reorderShortcut(id, delta);
+          moveFavorite(id, delta);
+          return true;
+        }}
         onRemoveShortcut={removeShortcut}
-        onExportShortcuts={exportJson}
-        onImportShortcuts={importJson}
+        onClose={() => setShortcutDialogOpen(false)}
+        onAdd={addShortcut}
       />
     </>
   );

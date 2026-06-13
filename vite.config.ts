@@ -8,10 +8,12 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
+      devOptions: { enabled: false },
       includeAssets: [
         "k3ui/k3ui.min.css",
         "k3ui/k3ui.min.js",
         "k3ui/init.js",
+        "assets/icons/**/*.svg",
         "fonts/Digital-7.ttf",
         "icons/*.svg",
         "icons/*.png",

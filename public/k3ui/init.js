@@ -2,4 +2,7 @@
 window.K3UI_OPTIONS = {
   pageLoader: false,
   hideBodyUntilReady: false,
+  IconManager: {
+    basePath: "./assets/icons/",
+  },
 };

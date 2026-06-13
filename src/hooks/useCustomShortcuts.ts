@@ -41,7 +41,6 @@ export function useCustomShortcuts() {
         label: input.label.trim(),
         url: normalizeUrl(input.url),
         icon: input.icon?.trim() || undefined,
-        color: input.color?.trim() || undefined,
         tags,
       };
       persist([...shortcuts, entry]);
@@ -61,7 +60,6 @@ export function useCustomShortcuts() {
               label: input.label.trim(),
               url: normalizeUrl(input.url),
               icon: input.icon?.trim() || undefined,
-              color: input.color?.trim() || undefined,
               tags,
             }
           : s
@@ -75,6 +73,20 @@ export function useCustomShortcuts() {
   const removeShortcut = useCallback(
     (id: string) => {
       persist(shortcuts.filter((s) => s.id !== id));
+    },
+    [persist, shortcuts]
+  );
+
+  const reorderShortcut = useCallback(
+    (id: string, delta: -1 | 1): boolean => {
+      const idx = shortcuts.findIndex((s) => s.id === id);
+      if (idx < 0) return false;
+      const target = idx + delta;
+      if (target < 0 || target >= shortcuts.length) return false;
+      const next = [...shortcuts];
+      [next[idx], next[target]] = [next[target], next[idx]];
+      persist(next);
+      return true;
     },
     [persist, shortcuts]
   );
@@ -105,6 +117,7 @@ export function useCustomShortcuts() {
     addShortcut,
     updateShortcut,
     removeShortcut,
+    reorderShortcut,
     exportJson,
     importJson,
   };
