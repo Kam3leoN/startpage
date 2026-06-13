@@ -116,7 +116,7 @@ body.theme-transitioning * {
   white-space: nowrap;
 }
 .clock__ghost {
-  opacity: 0.5;
+  opacity: 0.2;
   color: var(--md-sys-color-primary);
   pointer-events: none;
 }
@@ -125,8 +125,13 @@ body.theme-transitioning * {
   inset: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
   color: var(--md-sys-color-primary);
+}
+.clock__slot:not(.clock__slot--colon) .clock__face {
+  justify-content: flex-end;
+}
+.clock__slot--colon .clock__face {
+  justify-content: center;
 }
 .clock__colon {
   animation: blink 1s steps(1, end) infinite;
