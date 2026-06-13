@@ -20,15 +20,9 @@ function readSurfaceColor(): string {
   return v || "#1c1b1f";
 }
 
-/** Pixel size of each LED dot — smaller in appbar compact mode. */
+/** Pixel size of each LED dot — compact appbar uses fixed small size, scaled via CSS. */
 function ledSize(compact: boolean): number {
-  if (compact) {
-    const w = window.innerWidth;
-    if (w < 400) return 4;
-    if (w < 640) return 5;
-    if (w < 900) return 6;
-    return 7;
-  }
+  if (compact) return 5;
   const w = window.innerWidth;
   if (w < 400) return 7;
   if (w < 640) return 9;
@@ -46,7 +40,7 @@ function buildConfig(compact: boolean): LedConfig {
     bgcolor: readSurfaceColor(),
     bgvisible: 0.35,
     size: ledSize(compact),
-    rounded: compact ? 1 : 2,
+    rounded: 2,
     pix_between: 1,
     font: "font3",
     compact_colon: true,

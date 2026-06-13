@@ -70,8 +70,9 @@ body.theme-transitioning * {
   grid-column: 2;
   display: flex;
   justify-content: center;
-  max-width: 100%;
+  align-items: center;
   min-width: 0;
+  overflow: visible;
 }
 .appbar .iconbtn {
   justify-self: end;
@@ -94,23 +95,34 @@ body.theme-transitioning * {
   scrollbar-width: none;
   user-select: none;
 }
+.led-clock--compact {
+  overflow: visible;
+}
 .led-clock--compact svg {
   display: block;
-  max-height: 36px;
+  height: 30px;
   width: auto;
+  max-width: none;
+}
+@media (max-width: 480px) {
+  .led-clock--compact svg { height: 24px; }
 }
 .led-clock.autosize::-webkit-scrollbar { display: none; }
-.led-clock svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.led-clock:not(.led-clock--compact) svg {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+}
 .greeting {
-  /* Google I/O 2026 — .stacked-hero-title, scaled to 100px for single line */
   margin: 0 auto;
   max-width: 100%;
   padding: 0 8px;
   font-family: "Google Sans", "Google Sans Flex", system-ui, sans-serif;
   font-weight: 500;
-  font-size: clamp(28px, 8vw, 100px);
+  font-size: clamp(22px, 5.5vw, 64px);
   line-height: 1.05;
-  letter-spacing: clamp(-1px, -0.04em, -4px);
+  letter-spacing: clamp(-0.5px, -0.035em, -2.5px);
   text-align: center;
   white-space: nowrap;
   color: var(--md-sys-color-on-surface);
@@ -119,8 +131,8 @@ body.theme-transitioning * {
 }
 @media (min-width: 1025px) {
   .greeting {
-    font-size: 100px;
-    letter-spacing: -4px;
+    font-size: 64px;
+    letter-spacing: -2.5px;
     line-height: 1.05;
     padding-bottom: 0.1em;
   }
