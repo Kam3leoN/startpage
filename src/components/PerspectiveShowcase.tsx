@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import { useTranslation } from "react-i18next";
 
 const SLIDES = [1, 2, 3, 4, 5] as const;
 
@@ -9,7 +8,6 @@ interface Props {
 
 /** K3UI Perspective slider — 5 placeholder cards below the favorites grid. */
 export function PerspectiveShowcase({ k3ready }: Props) {
-  const { t } = useTranslation();
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,12 +35,7 @@ export function PerspectiveShowcase({ k3ready }: Props) {
   }, [k3ready]);
 
   return (
-    <section className="perspective-section" aria-labelledby="perspective-title">
-      <h2 id="perspective-title" className="perspective-section__title">
-        {t("perspective.title")}
-      </h2>
-      <p className="perspective-section__subtitle">{t("perspective.subtitle")}</p>
-
+    <section className="perspective-section">
       <div ref={rootRef} className="perspective perspective--grid perspective--startpage">
         {SLIDES.map((value) => (
           <section key={value} className="perspective__slide">
