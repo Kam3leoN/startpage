@@ -1,89 +1,33 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { WORD_WHEEL_ITEMS, type WordWheelItem } from "../data/wordWheel";
+import { WORD_WHEEL_ITEMS } from "../data/wordWheel";
 
 const COUNT = WORD_WHEEL_ITEMS.length;
+const ANGLE_STEP = 360 / COUNT;
+const BASE_RADIUS = 320;
 
-/** Circular offset in [-half, half] for carousel positioning. */
-function getOffset(index: number, active: number, total: number): number {
-  let diff = index - active;
-  while (diff > total / 2) diff -= total;
-  while (diff < -total / 2) diff += total;
-  return diff;
-}
+function useRingRadius(): number {
+  const [radius, setRadius] = useState(BASE_RADIUS);
 
-interface CardStyle {
-  transform: string;
-  opacity: number;
-  zIndex: number;
-  pointerEvents: "auto" | "none";
-}
-
-function cardStyle(offset: number): CardStyle {
-  const abs = Math.abs(offset);
-
-  if (abs > 2) {
-    return {
-      transform: "translate(-50%, -50%) translateX(0) translateZ(-220px) rotateY(0deg) scale(0.5)",
-      opacity: 0,
-      zIndex: 0,
-      pointerEvents: "none",
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+      setRadius(w < 520 ? 220 : w < 768 ? 270 : BASE_RADIUS);
     };
-  }
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
-  const translateX = offset * 148;
-  const translateZ = offset === 0 ? 48 : -abs * 72;
-  const rotateY = offset * -42;
-  const scale = offset === 0 ? 1 : abs === 1 ? 0.84 : 0.68;
-
-  return {
-    transform: `translate(-50%, -50%) translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
-    opacity: abs === 2 ? 0.55 : 1,
-    zIndex: 10 - abs,
-    pointerEvents: "auto",
-  };
+  return radius;
 }
 
-interface CardProps {
-  item: WordWheelItem;
-  offset: number;
-  isActive: boolean;
-  playLabel: string;
-  onSelect: () => void;
-}
-
-function WheelCard({ item, offset, isActive, playLabel, onSelect }: CardProps) {
-  const style = cardStyle(offset);
-
-  return (
-    <button
-      type="button"
-      className={`wheel__card${isActive ? " wheel__card--active" : ""}`}
-      style={{
-        transform: style.transform,
-        opacity: style.opacity,
-        zIndex: style.zIndex,
-        pointerEvents: style.pointerEvents,
-        background: item.gradient,
-      }}
-      aria-current={isActive ? "true" : undefined}
-      aria-label={item.label}
-      onClick={onSelect}
-    >
-      <span className="wheel__card-badge" aria-hidden="true">
-        {item.letter}
-      </span>
-      {isActive && (
-        <span className="wheel__card-play">{playLabel}</span>
-      )}
-    </button>
-  );
-}
-
-/** 3D perspective carousel inspired by the I/O 2026 word wheel. */
+/** 3D ring carousel — same cylinder rotation as io.google/2026 puzzle word wheel. */
 export function WordWheelCarousel() {
   const { t } = useTranslation();
+  const sectionRef = useRef<HTMLElement>(null);
   const [active, setActive] = useState(Math.floor(COUNT / 2));
+  const radius = useRingRadius();
 
   const goTo = useCallback((index: number) => {
     setActive(((index % COUNT) + COUNT) % COUNT);
@@ -93,59 +37,98 @@ export function WordWheelCarousel() {
   const goNext = useCallback(() => goTo(active + 1), [active, goTo]);
 
   const activeItem = WORD_WHEEL_ITEMS[active];
+  const ringRotation = -active * ANGLE_STEP;
 
-  const offsets = useMemo(
-    () => WORD_WHEEL_ITEMS.map((_, index) => getOffset(index, active, COUNT)),
-    [active]
+  const handlePlay = useCallback(() => {
+    window.open(activeItem.href, "_blank", "noopener,noreferrer");
+  }, [activeItem.href]);
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLElement>) => {
+      const target = event.target as HTMLElement;
+
+      switch (event.key) {
+        case "ArrowLeft":
+          event.preventDefault();
+          goPrev();
+          break;
+        case "ArrowRight":
+          event.preventDefault();
+          goNext();
+          break;
+        case "Enter":
+        case " ":
+          if (
+            target.classList.contains("wheel__card--active") ||
+            target.classList.contains("wheel")
+          ) {
+            event.preventDefault();
+            handlePlay();
+          }
+          break;
+        case "Home":
+          event.preventDefault();
+          goTo(0);
+          break;
+        case "End":
+          event.preventDefault();
+          goTo(COUNT - 1);
+          break;
+        default:
+          break;
+      }
+    },
+    [goPrev, goNext, goTo, handlePlay]
   );
 
-  const handlePlay = () => {
-    window.open(activeItem.href, "_blank", "noopener,noreferrer");
-  };
-
   return (
-    <section className="wheel" aria-labelledby="wheel-title">
+    <section
+      ref={sectionRef}
+      className="wheel"
+      aria-labelledby="wheel-title"
+      aria-roledescription="carousel"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      onPointerDown={() => sectionRef.current?.focus({ preventScroll: true })}
+    >
       <header className="wheel__header">
         <h2 id="wheel-title" className="wheel__title">
           {t("wheel.title")}
         </h2>
-        <p className="wheel__subtitle">{t("wheel.subtitle")}</p>
+        <p className="wheel__hint">{t("wheel.keyboardHint")}</p>
       </header>
 
-      <div className="wheel__viewport">
-        <button
-          type="button"
-          className="wheel__nav wheel__nav--prev"
-          aria-label={t("wheel.prev")}
-          onClick={goPrev}
+      <div className="wheel__scene" aria-live="polite">
+        <div
+          className="wheel__ring"
+          style={{ transform: `rotateY(${ringRotation}deg)` }}
         >
-          ‹
-        </button>
-
-        <div className="wheel__stage" aria-live="polite">
-          {WORD_WHEEL_ITEMS.map((item, index) => (
-            <WheelCard
-              key={item.id}
-              item={item}
-              offset={offsets[index]}
-              isActive={index === active}
-              playLabel={t("wheel.play")}
-              onSelect={() => {
-                if (index === active) handlePlay();
-                else goTo(index);
-              }}
-            />
-          ))}
+          {WORD_WHEEL_ITEMS.map((item, index) => {
+            const isActive = index === active;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className={`wheel__card${isActive ? " wheel__card--active" : ""}`}
+                style={{
+                  transform: `rotateY(${index * ANGLE_STEP}deg) translateZ(${radius}px)`,
+                  background: item.gradient,
+                }}
+                aria-current={isActive ? "true" : undefined}
+                aria-label={item.label}
+                onClick={() => {
+                  if (isActive) handlePlay();
+                  else goTo(index);
+                }}
+              >
+                <span className="wheel__card-badge" aria-hidden="true">
+                  {item.letter}
+                </span>
+                <span className="wheel__card-play">{t("wheel.play")}</span>
+              </button>
+            );
+          })}
         </div>
-
-        <button
-          type="button"
-          className="wheel__nav wheel__nav--next"
-          aria-label={t("wheel.next")}
-          onClick={goNext}
-        >
-          ›
-        </button>
       </div>
 
       <div className="wheel__progress" role="group" aria-label={t("wheel.progressAria")}>

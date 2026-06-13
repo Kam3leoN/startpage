@@ -52,10 +52,11 @@ const resources = {
       wheel: {
         title: "Word wheel",
         subtitle: "Carousel 3D inspiré du puzzle I/O 2026",
+        keyboardHint: "← → pour naviguer · Entrée sur Play pour lancer",
         play: "Play",
         prev: "Carte précédente",
         next: "Carte suivante",
-        progress: "Progression – {{current}}/{{total}}",
+        progress: "Progress – {{current}}/{{total}}",
         progressAria: "Navigation du carousel",
       },
       footer: "StartPage — Material 3 Expressive",
@@ -111,6 +112,7 @@ const resources = {
       wheel: {
         title: "Word wheel",
         subtitle: "3D carousel inspired by the I/O 2026 puzzle",
+        keyboardHint: "← → to navigate · Enter on Play to launch",
         play: "Play",
         prev: "Previous card",
         next: "Next card",
