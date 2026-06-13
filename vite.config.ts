@@ -11,7 +11,7 @@ export default defineConfig({
       includeAssets: [
         "k3ui/k3ui.min.css",
         "k3ui/k3ui.min.js",
-        "fonts/Digital-7.ttf",
+        "vendor/time_led.js",
         "icons/*.svg",
         "icons/*.png",
       ],

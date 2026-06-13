@@ -1,14 +1,5 @@
 @use "sass:map";
 
-/* ====== Digital-7 clock font (ported from original) ====== */
-@font-face {
-  font-family: "Digital-7";
-  src: url("/fonts/Digital-7.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
   --shell-max: 1100px;
   --gap: 14px;
@@ -70,20 +61,18 @@ body.theme-transitioning * {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-sys-color-primary) 22%, transparent);
 }
 
-/* ====== Hero: clock + search ====== */
+/* ====== Hero: LED clock + search ====== */
 .hero { text-align: center; padding: 18px 0 4px; }
-.clock {
-  font-family: "Digital-7", monospace;
-  font-size: clamp(64px, 22vw, 132px);
-  line-height: 0.9;
-  color: var(--md-sys-color-primary);
+.led-clock.autosize {
+  font-size: 0;
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
   user-select: none;
 }
-.clock__colon {
-  animation: blink 1s steps(1, end) infinite;
-  padding: 0 0.04em;
-}
-@keyframes blink { 50% { opacity: 0.15; } }
+.led-clock.autosize::-webkit-scrollbar { display: none; }
+.led-clock svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
 .clock__date {
   margin-top: 6px;
   color: var(--md-sys-color-on-surface-variant);

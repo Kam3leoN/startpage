@@ -9,12 +9,13 @@ import { Filters } from "./components/Filters";
 import { FavoritesGrid } from "./components/FavoritesGrid";
 import { SettingsSheet } from "./components/SettingsSheet";
 import { SettingsIcon } from "./components/icons";
+import { LedClock } from "./components/LedClock";
 
 export default function App() {
   const { t, i18n } = useTranslation();
   const { mode, seed, setMode, setSeed } = useTheme();
   const k3ready = useK3UI();
-  const { hh, mm } = useClock();
+  const { hh, mm, ss } = useClock();
 
   const [filter, setFilter] = useState<Category | "all">("all");
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -24,6 +25,8 @@ export default function App() {
     FAVORITES.forEach((f) => f.tags.forEach((tg) => set.add(tg)));
     return Array.from(set);
   }, []);
+
+  const timeLabel = `${hh}:${mm}:${ss}`;
 
   const dateLabel = useMemo(
     () =>
@@ -53,11 +56,7 @@ export default function App() {
 
       <main className="shell">
         <section className="hero">
-          <div className="clock" aria-label={`${hh}:${mm}`}>
-            {hh}
-            <span className="clock__colon">:</span>
-            {mm}
-          </div>
+          <LedClock timeLabel={timeLabel} colorKey={`${seed}-${mode}`} />
           <div className="clock__date">{dateLabel}</div>
           <SearchBar />
         </section>
