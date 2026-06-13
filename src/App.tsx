@@ -92,10 +92,10 @@ export default function App() {
 
         <FavoritesGrid favorites={allFavorites} filter={filter} k3ready={k3ready} />
 
-        <PerspectiveShowcase k3ready={k3ready} />
-
         <footer className="footer">© {new Date().getFullYear()} — {t("footer")}</footer>
       </main>
+
+      <PerspectiveShowcase k3ready={k3ready} />
 
       <SettingsSheet
         open={settingsOpen}

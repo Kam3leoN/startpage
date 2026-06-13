@@ -19,7 +19,7 @@ interface Props {
 }
 
 /**
- * K3UI Perspective — markup aligned with k3ui-docs/perspective.php (grid demo).
+ * K3UI Perspective — markup aligned with k3ui-docs/perspective.php (fullwidth demo).
  * Init via initComponents(subtree) after deferred load, with Perspective.init fallback.
  */
 export function PerspectiveShowcase({ k3ready }: Props) {
@@ -52,11 +52,11 @@ export function PerspectiveShowcase({ k3ready }: Props) {
   }, [k3ready]);
 
   return (
-    <section className="perspective-section" aria-label="Perspective">
+    <section className="perspective-section-fullwidth" aria-label="Perspective">
       <div
         ref={rootRef}
         id="startpage-perspective"
-        className="perspective perspective--grid"
+        className="perspective perspective--fullwidth"
       >
         {SLIDES.map((value) => (
           <section key={value} className="perspective__slide">

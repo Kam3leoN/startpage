@@ -1,10 +1,10 @@
-/* Wrapper — height comes from k3ui `.perspective--grid` (600px / 400px mobile). */
-.perspective-section {
-  margin-top: 8px;
-  padding: 8px 0 4px;
+/* Full-width Perspective — outside .shell, same pattern as k3ui-docs/perspective.php */
+.perspective-section-fullwidth {
   width: 100%;
+  margin-top: 8px;
 }
 
-.perspective-section .perspective--grid {
-  max-width: 100%;
+.perspective-section-fullwidth .perspective--fullwidth {
+  width: 100%;
+  max-width: none;
 }
