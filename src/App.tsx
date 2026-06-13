@@ -11,6 +11,7 @@ import { FavoritesGrid } from "./components/FavoritesGrid";
 import { SettingsSheet } from "./components/SettingsSheet";
 import { SettingsIcon } from "./components/icons";
 import { Greeting } from "./components/Greeting";
+import { Clock } from "./components/Clock";
 import { formatTodayDate } from "./utils/formatTodayDate";
 
 export default function App() {
@@ -52,13 +53,7 @@ export default function App() {
 
       <main className="shell">
         <section className="hero">
-          <div className="clock" aria-label={`${hh}:${mm}:${ss}`}>
-            {hh}
-            <span className="clock__colon">:</span>
-            {mm}
-            <span className="clock__colon">:</span>
-            {ss}
-          </div>
+          <Clock hh={hh} mm={mm} ss={ss} />
           <Greeting firstName={firstName} hour={date.getHours()} />
           <p className="clock__date">{dateLabel}</p>
           <SearchBar />

@@ -92,15 +92,44 @@ body.theme-transitioning * {
 /* ====== Hero: clock + greeting + search ====== */
 .hero { text-align: center; padding: 18px 0 4px; }
 .clock {
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
   font-family: "Digital-7", monospace;
   font-size: clamp(36px, 12vw, 72px);
-  line-height: 0.9;
+  line-height: 1;
   color: var(--md-sys-color-primary);
   user-select: none;
 }
+.clock__slot {
+  position: relative;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+.clock__slot--colon {
+  padding: 0 0.04em;
+}
+.clock__ghost,
+.clock__face {
+  display: block;
+  line-height: 0.92;
+  white-space: nowrap;
+}
+.clock__ghost {
+  opacity: 0.5;
+  color: var(--md-sys-color-primary);
+  pointer-events: none;
+}
+.clock__face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--md-sys-color-primary);
+}
 .clock__colon {
   animation: blink 1s steps(1, end) infinite;
-  padding: 0 0.04em;
 }
 @keyframes blink { 50% { opacity: 0.15; } }
 .greeting {
