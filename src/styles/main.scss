@@ -93,7 +93,7 @@ body.theme-transitioning * {
 .hero { text-align: center; padding: 18px 0 4px; }
 .clock {
   font-family: "Digital-7", monospace;
-  font-size: clamp(64px, 22vw, 132px);
+  font-size: clamp(36px, 12vw, 72px);
   line-height: 0.9;
   color: var(--md-sys-color-primary);
   user-select: none;

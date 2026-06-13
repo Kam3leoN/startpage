@@ -18,7 +18,7 @@ export default function App() {
   const { mode, seed, setMode, setSeed } = useTheme();
   const { firstName, setFirstName } = useProfile();
   const k3ready = useK3UI();
-  const { hh, mm, date } = useClock();
+  const { hh, mm, ss, date } = useClock();
 
   const [filter, setFilter] = useState<Category | "all">("all");
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -52,10 +52,12 @@ export default function App() {
 
       <main className="shell">
         <section className="hero">
-          <div className="clock" aria-label={`${hh}:${mm}`}>
+          <div className="clock" aria-label={`${hh}:${mm}:${ss}`}>
             {hh}
             <span className="clock__colon">:</span>
             {mm}
+            <span className="clock__colon">:</span>
+            {ss}
           </div>
           <Greeting firstName={firstName} hour={date.getHours()} />
           <p className="clock__date">{dateLabel}</p>
