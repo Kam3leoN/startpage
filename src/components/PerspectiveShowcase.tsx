@@ -1,14 +1,13 @@
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { FAVORITES } from "../data/favorites";
 
-const SLIDES = FAVORITES.slice(0, 9);
+const SLIDES = [1, 2, 3, 4, 5] as const;
 
 interface Props {
   k3ready: boolean;
 }
 
-/** K3UI Perspective slider below the favorites grid. */
+/** K3UI Perspective slider — 5 placeholder cards below the favorites grid. */
 export function PerspectiveShowcase({ k3ready }: Props) {
   const { t } = useTranslation();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -17,23 +16,23 @@ export function PerspectiveShowcase({ k3ready }: Props) {
     if (!k3ready || !rootRef.current) return;
     const el = rootRef.current;
 
-    try {
-      window.K?.Perspective?.init(el, {
-        effect: "wave",
-        autoplay: { enabled: true, speed: 2500 },
-        loop: { enabled: true },
-        navigation: { enabled: true },
-        indicators: true,
-      });
-    } catch {
-      window.K?.initComponents?.(el);
-    }
+    const timer = window.setTimeout(() => {
+      try {
+        window.K?.Perspective?.init(el, {
+          effect: "wave",
+          autoplay: { enabled: true, speed: 2500 },
+          loop: { enabled: true },
+          navigation: { enabled: true },
+          indicators: true,
+        });
+      } catch {
+        window.K?.initComponents?.(el);
+      }
+    }, 0);
 
     return () => {
-      const K = window.K as typeof window.K & {
-        Perspective?: { getInstance(node: HTMLElement): { destroy?: () => void } | undefined };
-      };
-      K?.Perspective?.getInstance(el)?.destroy?.();
+      window.clearTimeout(timer);
+      window.K?.Perspective?.getInstance(el)?.destroy?.();
     };
   }, [k3ready]);
 
@@ -44,23 +43,12 @@ export function PerspectiveShowcase({ k3ready }: Props) {
       </h2>
       <p className="perspective-section__subtitle">{t("perspective.subtitle")}</p>
 
-      <div
-        ref={rootRef}
-        className="perspective perspective--grid perspective--startpage"
-        data-effect="wave"
-      >
-        {SLIDES.map((fav) => (
-          <section key={fav.id} className="perspective__slide">
-            <a
-              className="perspective__slide-inner perspective__slide-link"
-              href={fav.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-tile={fav.id}
-            >
-              <img className="perspective__slide-icon" src={fav.icon} alt="" loading="lazy" />
-              <span className="perspective__slide-label">{fav.label}</span>
-            </a>
+      <div ref={rootRef} className="perspective perspective--grid perspective--startpage">
+        {SLIDES.map((value) => (
+          <section key={value} className="perspective__slide">
+            <div className="perspective__slide-inner">
+              <p className="perspective-demo-text">{value}</p>
+            </div>
           </section>
         ))}
         <span className="perspective__nav perspective__nav--prev" aria-hidden="true" />

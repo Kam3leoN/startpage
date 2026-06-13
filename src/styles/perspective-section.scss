@@ -25,25 +25,10 @@
   max-width: 100%;
 }
 
-.perspective--startpage .perspective__slide-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
-  height: 100%;
-  text-decoration: none;
-  color: inherit;
-}
-
-.perspective--startpage .perspective__slide-icon {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-}
-
-.perspective--startpage .perspective__slide-label {
-  font-weight: 500;
-  font-size: 0.95rem;
+.perspective--startpage .perspective-demo-text {
+  margin: 0;
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
 }
