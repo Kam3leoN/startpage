@@ -38,31 +38,54 @@ body.theme-transitioning * {
   position: sticky;
   top: 0;
   z-index: 50;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
+  padding: 8px 14px;
   background: color-mix(in srgb, var(--md-sys-color-surface) 78%, transparent);
   backdrop-filter: saturate(160%) blur(14px);
   border-bottom: 1px solid var(--md-sys-color-outline-variant, transparent);
 }
 .appbar__brand {
+  justify-self: start;
   font-weight: 600;
   letter-spacing: 0.2px;
-  margin-right: auto;
   color: var(--md-sys-color-primary);
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+}
+.appbar__brand-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .appbar__brand-text { display: none; }
+}
+.appbar__clock {
+  justify-self: center;
+  grid-column: 2;
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
+  min-width: 0;
+}
+.appbar .iconbtn {
+  justify-self: end;
+  grid-column: 3;
 }
 .appbar__brand-dot {
   width: 10px; height: 10px; border-radius: 999px;
+  flex-shrink: 0;
   background: var(--md-sys-color-primary);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-sys-color-primary) 22%, transparent);
 }
 
-/* ====== Hero: LED clock + search ====== */
-.hero { text-align: center; padding: 18px 0 4px; }
+/* ====== Hero: greeting + search ====== */
+.hero { text-align: center; padding: 24px 0 4px; }
 .led-clock.autosize {
   font-size: 0;
   display: inline-block;
@@ -71,37 +94,34 @@ body.theme-transitioning * {
   scrollbar-width: none;
   user-select: none;
 }
+.led-clock--compact svg {
+  display: block;
+  max-height: 36px;
+  width: auto;
+}
 .led-clock.autosize::-webkit-scrollbar { display: none; }
 .led-clock svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
 .greeting {
-  /* Google I/O 2026 — .stacked-hero-title (https://io.google/2026/) */
-  margin: 12px auto 0;
-  max-width: 89%;
+  /* Google I/O 2026 — .stacked-hero-title, scaled to 100px for single line */
+  margin: 0 auto;
+  max-width: 100%;
+  padding: 0 8px;
   font-family: "Google Sans", "Google Sans Flex", system-ui, sans-serif;
   font-weight: 500;
-  font-size: 40px;
-  line-height: 1.1;
-  letter-spacing: -1px;
+  font-size: clamp(28px, 8vw, 100px);
+  line-height: 1.05;
+  letter-spacing: clamp(-1px, -0.04em, -4px);
   text-align: center;
-  text-wrap: pretty;
+  white-space: nowrap;
   color: var(--md-sys-color-on-surface);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-@media (min-width: 576px) {
-  .greeting {
-    max-width: 90%;
-    font-size: 72px;
-    line-height: 1.1;
-    letter-spacing: -2.16px;
-  }
-}
 @media (min-width: 1025px) {
   .greeting {
-    max-width: 89%;
-    font-size: 120px;
+    font-size: 100px;
+    letter-spacing: -4px;
     line-height: 1.05;
-    letter-spacing: -4.8px;
     padding-bottom: 0.1em;
   }
 }

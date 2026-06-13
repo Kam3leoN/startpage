@@ -46,8 +46,11 @@ export default function App() {
       <header className="appbar">
         <span className="appbar__brand">
           <span className="appbar__brand-dot" />
-          StartPage
+          <span className="appbar__brand-text">StartPage</span>
         </span>
+        <div className="appbar__clock">
+          <LedClock timeLabel={timeLabel} colorKey={`${seed}-${mode}`} compact />
+        </div>
         <button
           className="iconbtn"
           onClick={() => setSettingsOpen(true)}
@@ -59,7 +62,6 @@ export default function App() {
 
       <main className="shell">
         <section className="hero">
-          <LedClock timeLabel={timeLabel} colorKey={`${seed}-${mode}`} />
           <Greeting firstName={firstName} hour={date.getHours()} />
           <div className="clock__date">{dateLabel}</div>
           <SearchBar />

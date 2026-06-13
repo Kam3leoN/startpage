@@ -20,8 +20,15 @@ function readSurfaceColor(): string {
   return v || "#1c1b1f";
 }
 
-/** Pixel size of each LED dot — scales with viewport width. */
-function ledSize(): number {
+/** Pixel size of each LED dot — smaller in appbar compact mode. */
+function ledSize(compact: boolean): number {
+  if (compact) {
+    const w = window.innerWidth;
+    if (w < 400) return 4;
+    if (w < 640) return 5;
+    if (w < 900) return 6;
+    return 7;
+  }
   const w = window.innerWidth;
   if (w < 400) return 7;
   if (w < 640) return 9;
@@ -29,7 +36,7 @@ function ledSize(): number {
   return 12;
 }
 
-function buildConfig(): LedConfig {
+function buildConfig(compact: boolean): LedConfig {
   return {
     id: LED_ID,
     type: "time",
@@ -38,8 +45,8 @@ function buildConfig(): LedConfig {
     color: readPrimaryColor(),
     bgcolor: readSurfaceColor(),
     bgvisible: 0.35,
-    size: ledSize(),
-    rounded: 2,
+    size: ledSize(compact),
+    rounded: compact ? 1 : 2,
     pix_between: 1,
     font: "font3",
     compact_colon: true,
@@ -50,10 +57,13 @@ function buildConfig(): LedConfig {
 export function LedClock({
   timeLabel,
   colorKey,
+  compact = false,
 }: {
   timeLabel: string;
   /** Changes when theme seed/mode updates — triggers LED color refresh. */
   colorKey: string;
+  /** Smaller size for appbar placement. */
+  compact?: boolean;
 }) {
   const mounted = useRef(false);
 
@@ -64,7 +74,7 @@ export function LedClock({
       const el = document.getElementById(LED_ID);
       if (!el || !window.Led) return;
       el.innerHTML = "";
-      new window.Led!(buildConfig());
+      new window.Led!(buildConfig(compact));
       mounted.current = true;
     };
 
@@ -103,12 +113,12 @@ export function LedClock({
       window.clearTimeout(resizeTimer);
       document.getElementById(LED_ID)?.replaceChildren();
     };
-  }, [colorKey]);
+  }, [colorKey, compact]);
 
   return (
     <div
       id={LED_ID}
-      className="led-clock autosize"
+      className={`led-clock autosize${compact ? " led-clock--compact" : ""}`}
       role="timer"
       aria-live="polite"
       aria-label={timeLabel}
