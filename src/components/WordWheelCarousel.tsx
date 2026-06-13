@@ -1,33 +1,55 @@
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useState, type KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { WORD_WHEEL_ITEMS } from "../data/wordWheel";
+import { WordWheelIcon } from "./WordWheelIcon";
 
 const COUNT = WORD_WHEEL_ITEMS.length;
-const ANGLE_STEP = 360 / COUNT;
-const BASE_RADIUS = 320;
 
-function useRingRadius(): number {
-  const [radius, setRadius] = useState(BASE_RADIUS);
-
-  useEffect(() => {
-    const update = () => {
-      const w = window.innerWidth;
-      setRadius(w < 520 ? 220 : w < 768 ? 270 : BASE_RADIUS);
-    };
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
-
-  return radius;
+/** Circular offset in [-2, 2] for a 5-card arc. */
+function getOffset(index: number, active: number): number {
+  let diff = index - active;
+  while (diff > COUNT / 2) diff -= COUNT;
+  while (diff < -COUNT / 2) diff += COUNT;
+  return diff;
 }
 
-/** 3D ring carousel — same cylinder rotation as io.google/2026 puzzle word wheel. */
+interface CardPose {
+  transform: string;
+  opacity: number;
+  zIndex: number;
+  pointerEvents: "auto" | "none";
+}
+
+/** Per-card 3D pose tuned to match io.google/2026 word-wheel arc. */
+function getCardPose(offset: number): CardPose {
+  const abs = Math.abs(offset);
+
+  if (abs > 2) {
+    return {
+      transform: "translate3d(-50%, -50%, -420px) rotateY(0deg) scale(0.5)",
+      opacity: 0,
+      zIndex: 0,
+      pointerEvents: "none",
+    };
+  }
+
+  const rotateY = offset * -36;
+  const translateX = offset * 142;
+  const translateZ = offset === 0 ? 80 : -abs * 52;
+  const scale = offset === 0 ? 1 : abs === 1 ? 0.91 : 0.79;
+
+  return {
+    transform: `translate3d(calc(-50% + ${translateX}px), -50%, ${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
+    opacity: abs === 2 ? 0.72 : 1,
+    zIndex: 20 - abs,
+    pointerEvents: "auto",
+  };
+}
+
+/** 3D arc carousel — 5 visible cards like the I/O 2026 word wheel. */
 export function WordWheelCarousel() {
   const { t } = useTranslation();
-  const sectionRef = useRef<HTMLElement>(null);
-  const [active, setActive] = useState(Math.floor(COUNT / 2));
-  const radius = useRingRadius();
+  const [active, setActive] = useState(0);
 
   const goTo = useCallback((index: number) => {
     setActive(((index % COUNT) + COUNT) % COUNT);
@@ -37,7 +59,6 @@ export function WordWheelCarousel() {
   const goNext = useCallback(() => goTo(active + 1), [active, goTo]);
 
   const activeItem = WORD_WHEEL_ITEMS[active];
-  const ringRotation = -active * ANGLE_STEP;
 
   const handlePlay = useCallback(() => {
     window.open(activeItem.href, "_blank", "noopener,noreferrer");
@@ -83,13 +104,15 @@ export function WordWheelCarousel() {
 
   return (
     <section
-      ref={sectionRef}
       className="wheel"
       aria-labelledby="wheel-title"
       aria-roledescription="carousel"
       tabIndex={0}
       onKeyDown={handleKeyDown}
-      onPointerDown={() => sectionRef.current?.focus({ preventScroll: true })}
+      onPointerDown={(event) => {
+        if ((event.target as HTMLElement).closest(".wheel__dot")) return;
+        (event.currentTarget as HTMLElement).focus({ preventScroll: true });
+      }}
     >
       <header className="wheel__header">
         <h2 id="wheel-title" className="wheel__title">
@@ -99,20 +122,24 @@ export function WordWheelCarousel() {
       </header>
 
       <div className="wheel__scene" aria-live="polite">
-        <div
-          className="wheel__ring"
-          style={{ transform: `rotateY(${ringRotation}deg)` }}
-        >
+        <div className="wheel__stage">
           {WORD_WHEEL_ITEMS.map((item, index) => {
-            const isActive = index === active;
+            const offset = getOffset(index, active);
+            const pose = getCardPose(offset);
+            const isActive = offset === 0;
+            const sideClass =
+              offset < 0 ? " wheel__card--left" : offset > 0 ? " wheel__card--right" : "";
+
             return (
               <button
                 key={item.id}
                 type="button"
-                className={`wheel__card${isActive ? " wheel__card--active" : ""}`}
+                className={`wheel__card${isActive ? " wheel__card--active" : ""}${sideClass}`}
                 style={{
-                  transform: `rotateY(${index * ANGLE_STEP}deg) translateZ(${radius}px)`,
-                  background: item.gradient,
+                  transform: pose.transform,
+                  opacity: pose.opacity,
+                  zIndex: pose.zIndex,
+                  pointerEvents: pose.pointerEvents,
                 }}
                 aria-current={isActive ? "true" : undefined}
                 aria-label={item.label}
@@ -121,10 +148,15 @@ export function WordWheelCarousel() {
                   else goTo(index);
                 }}
               >
-                <span className="wheel__card-badge" aria-hidden="true">
-                  {item.letter}
+                <span
+                  className="wheel__card-face"
+                  style={{ background: item.gradient }}
+                >
+                  <span className="wheel__card-badge">
+                    <WordWheelIcon id={item.id} />
+                  </span>
+                  <span className="wheel__card-play">{t("wheel.play")}</span>
                 </span>
-                <span className="wheel__card-play">{t("wheel.play")}</span>
               </button>
             );
           })}
