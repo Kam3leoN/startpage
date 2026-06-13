@@ -1,14 +1,37 @@
+export interface FormatDateOptions {
+  compact?: boolean;
+}
+
 /**
- * Formats today's date for the hero line.
- * FR: « Aujourd'hui, nous sommes le, samedi 13 juin 2026 »
+ * Formate la partie date seule (sans éphéméride).
+ * Long : « Samedi, 13 juin 2026 » — Compact : « Sam, 13 juin 2026 »
  */
-export function formatTodayDate(date: Date, locale: string, prefix: string): string {
-  const lang = locale.startsWith("en") ? "en-US" : "fr-FR";
-  const formatted = date.toLocaleDateString(lang, {
-    weekday: "long",
+export function formatDateLine(
+  date: Date,
+  locale: string,
+  options: FormatDateOptions = {}
+): string {
+  const { compact = false } = options;
+
+  if (!locale.startsWith("fr")) {
+    const lang = locale.startsWith("en") ? "en-US" : locale;
+    const formatted = date.toLocaleDateString(lang, {
+      weekday: compact ? "short" : "long",
+      day: "numeric",
+      month: compact ? "short" : "long",
+      year: "numeric",
+    });
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+  }
+
+  const weekday = date.toLocaleDateString("fr-FR", {
+    weekday: compact ? "short" : "long",
+  });
+  const rest = date.toLocaleDateString("fr-FR", {
     day: "numeric",
-    month: "long",
+    month: compact ? "short" : "long",
     year: "numeric",
   });
-  return `${prefix} ${formatted}`;
+  const w = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+  return `${w}, ${rest}`;
 }

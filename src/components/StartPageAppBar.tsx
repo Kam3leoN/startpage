@@ -1,29 +1,37 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Clock } from "./Clock";
+import { AppBarThemeSwitch } from "./AppBarThemeSwitch";
 import { initK3UISubtree } from "../utils/k3uiDeferred";
+import type { K3ThemeMode } from "../types/k3ui";
 
 const APPBAR_ID = "startpage-appbar";
 
 interface Props {
   k3ready: boolean;
   showClock: boolean;
+  clockStyle: "digital" | "analog";
   hh: string;
   mm: string;
   ss: string;
   showSeconds: boolean;
   hourFormat: "12" | "24";
+  themeMode: K3ThemeMode;
+  onThemeModeChange: (mode: K3ThemeMode) => void;
 }
 
-/** Top app bar M3 (`k3ui-appbar`) — marque à gauche, horloge centrée. */
+/** Top app bar M3 (`k3ui-appbar`) — marque, horloge, thème à droite. */
 export function StartPageAppBar({
   k3ready,
   showClock,
+  clockStyle,
   hh,
   mm,
   ss,
   showSeconds,
   hourFormat,
+  themeMode,
+  onThemeModeChange,
 }: Props) {
   const { t } = useTranslation();
 
@@ -64,7 +72,7 @@ export function StartPageAppBar({
           <span className="startpage-appbar__brand-text">StartPage</span>
         </div>
 
-        {showClock ? (
+        {showClock && clockStyle === "digital" ? (
           <div className="startpage-appbar__clock">
             <Clock
               hh={hh}
@@ -78,7 +86,13 @@ export function StartPageAppBar({
           <div className="startpage-appbar__clock startpage-appbar__clock--empty" aria-hidden="true" />
         )}
 
-        <div className="appbar__actions startpage-appbar__actions" aria-hidden="true" />
+        <div className="appbar__actions startpage-appbar__actions">
+          <AppBarThemeSwitch
+            k3ready={k3ready}
+            mode={themeMode}
+            onModeChange={onThemeModeChange}
+          />
+        </div>
       </div>
     </k3ui-appbar>
   );

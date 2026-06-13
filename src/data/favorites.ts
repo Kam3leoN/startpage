@@ -28,20 +28,6 @@ export const FAVORITES: Favorite[] = [
     action: "search",
   },
   {
-    id: "gmail",
-    label: "Gmail",
-    url: "https://mail.google.com/",
-    icon: ICON("gmail.png"),
-    tags: ["infos"],
-  },
-  {
-    id: "outlook",
-    label: "Outlook",
-    url: "https://outlook.live.com/",
-    icon: ICON("outlook.png"),
-    tags: ["infos"],
-  },
-  {
     id: "github",
     label: "GitHub",
     url: "https://github.com/",

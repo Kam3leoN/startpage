@@ -1,8 +1,12 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import type { Favorite, Category } from "../data/favorites";
 import { initK3UISubtree } from "../utils/k3uiDeferred";
 import { FavoriteCard } from "./FavoriteCard";
 import { AddShortcutCard } from "./AddShortcutCard";
+
+const ADD_TILE_ID = "add-shortcut";
+/** Tuiles toujours visibles, quel que soit le filtre actif. */
+const PINNED_TILE_IDS = new Set([ADD_TILE_ID, "search"]);
 
 const MASON_OPTIONS = {
   itemsSelector: ".k3ui-mason__item",
@@ -45,6 +49,33 @@ function layoutMason(masonEl: HTMLElement): void {
   });
 }
 
+/** Garantit que la tuile « + » est le dernier enfant Mason (ordre layout + filtre). */
+function ensureAddTileLast(masonEl: HTMLElement): void {
+  const addEl = masonEl.querySelector<HTMLElement>(`[data-isofilter-id="${ADD_TILE_ID}"]`);
+  if (addEl && addEl.parentElement === masonEl) {
+    masonEl.appendChild(addEl);
+  }
+}
+
+/** Applique le filtre IsoFilter manuel sur les tuiles Mason. */
+function applyFavoriteFilter(root: HTMLElement, filter: Category | "all"): void {
+  const value = filter === "all" ? "all" : filter;
+  root.querySelectorAll<HTMLElement>("[data-isofilter-id]").forEach((el) => {
+    const id = el.getAttribute("data-isofilter-id");
+    if (id && PINNED_TILE_IDS.has(id)) {
+      el.removeAttribute("data-k3ui-mason-hidden");
+      return;
+    }
+    const tags = (el.getAttribute("data-isofilter-tags") || "")
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    const show = value === "all" || tags.includes(value);
+    if (show) el.removeAttribute("data-k3ui-mason-hidden");
+    else el.setAttribute("data-k3ui-mason-hidden", "true");
+  });
+}
+
 interface Props {
   favorites: Favorite[];
   filter: Category | "all";
@@ -56,6 +87,13 @@ interface Props {
 export function FavoritesGrid({ favorites, filter, k3ready, onAddShortcutClick, onSearchClick }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
+  // Pin « + » en dernier dans le DOM avant paint (évite un ordre Mason figé).
+  useLayoutEffect(() => {
+    const masonEl = ref.current?.querySelector("k3ui-mason") as HTMLElement | null;
+    if (!masonEl) return;
+    ensureAddTileLast(masonEl);
+  }, [favorites, filter]);
+
   // Init / re-layout K3UI Mason (12 cols × 1 span = 12 tiles per row).
   useEffect(() => {
     if (!k3ready || !ref.current) return;
@@ -63,32 +101,12 @@ export function FavoritesGrid({ favorites, filter, k3ready, onAddShortcutClick, 
     const masonEl = ref.current.querySelector("k3ui-mason") as HTMLElement | null;
     if (!masonEl) return;
 
+    applyFavoriteFilter(ref.current, filter);
+    ensureAddTileLast(masonEl);
     masonEl.classList.remove("k3ui-mason--ready");
     layoutMason(masonEl);
     void initK3UISubtree(ref.current);
-  }, [k3ready, favorites]);
-
-  // Drive k3ui's native IsoFilter when the active filter changes.
-  useEffect(() => {
-    if (!k3ready || !ref.current) return;
-    const root = ref.current;
-    const value = filter === "all" ? "all" : filter;
-    root.querySelectorAll<HTMLElement>("[data-isofilter-id]").forEach((el) => {
-      const id = el.getAttribute("data-isofilter-id");
-      if (id === "add-shortcut" || id === "search") {
-        el.removeAttribute("data-k3ui-mason-hidden");
-        return;
-      }
-      const tags = (el.getAttribute("data-isofilter-tags") || "").split(",");
-      const show = value === "all" || tags.includes(value);
-      if (show) el.removeAttribute("data-k3ui-mason-hidden");
-      else el.setAttribute("data-k3ui-mason-hidden", "true");
-    });
-    const masonEl = root.querySelector("k3ui-mason") as HTMLElement | null;
-    if (!masonEl) return;
-    syncSquareTileHeights(masonEl);
-    window.K?.Mason?.getInstance(masonEl)?.refresh?.();
-  }, [filter, k3ready, favorites]);
+  }, [k3ready, favorites, filter]);
 
   return (
     <div ref={ref}>

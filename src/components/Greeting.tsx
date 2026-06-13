@@ -7,14 +7,15 @@ interface Props {
   hour: number;
 }
 
-/** Time-based greeting below the LED clock. */
+/** Salutation « Bonjour » / « Bonsoir » + prénom optionnel. */
 export function Greeting({ firstName, hour }: Props) {
   const { t } = useTranslation();
   const period = greetingPeriod(hour);
 
   const text = useMemo(() => {
-    if (firstName) {
-      return t(`greeting.withName.${period}`, { name: firstName });
+    const trimmed = firstName.trim();
+    if (trimmed) {
+      return t(`greeting.withName.${period}`, { name: trimmed });
     }
     return t(`greeting.generic.${period}`);
   }, [firstName, period, t]);

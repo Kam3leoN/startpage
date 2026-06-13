@@ -63,3 +63,49 @@ export const LOCATION_NAME_CACHE_KEY = "k3-weather-place";
 
 /** localStorage key for cached weather snapshot. */
 export const WEATHER_CACHE_KEY = "k3-weather-data";
+
+/** Editable personal message under the greeting. */
+export const DEFAULT_PERSONAL_MESSAGE = "";
+
+/** localStorage key for personal message. */
+export const PERSONAL_MESSAGE_KEY = "k3-personal-message";
+
+/** Clock display: digital (app bar) or analog (hero). */
+export const DEFAULT_CLOCK_STYLE = "digital" as const;
+
+/** localStorage key for clock style. */
+export const CLOCK_STYLE_KEY = "k3-clock-style";
+
+/** Compact date line (e.g. « Sam, 13 juin 2026 »). */
+export const DEFAULT_COMPACT_DATE = false;
+
+/** localStorage key for compact date preference. */
+export const COMPACT_DATE_KEY = "k3-compact-date";
+
+/** Show favorites / shortcuts grid. */
+export const DEFAULT_SHOW_FAVORITES = true;
+export const SHOW_FAVORITES_KEY = "k3-show-favorites";
+
+/** Show category filter chips. */
+export const DEFAULT_SHOW_FILTERS = true;
+export const SHOW_FILTERS_KEY = "k3-show-filters";
+
+/** Show saint ephemeris under the date. */
+export const DEFAULT_SHOW_EPHEMERIS = true;
+export const SHOW_EPHEMERIS_KEY = "k3-show-ephemeris";
+
+/** Show editable personal message. */
+export const DEFAULT_SHOW_PERSONAL_MESSAGE = true;
+export const SHOW_PERSONAL_MESSAGE_KEY = "k3-show-personal-message";
+
+/** Show AI tools expandable bar. */
+export const DEFAULT_SHOW_AI_TOOLS = true;
+export const SHOW_AI_TOOLS_KEY = "k3-show-ai-tools";
+
+/** Show macOS-style dock at the bottom. */
+export const DEFAULT_SHOW_DOCK = true;
+export const SHOW_DOCK_KEY = "k3-show-dock";
+
+/** Project links (settings footer). */
+export const PROJECT_GITHUB_URL = "https://github.com/Kam3leoN/startpage";
+export const PROJECT_FEEDBACK_URL = "mailto:feedback@example.com";

@@ -3,7 +3,10 @@ import { useTranslation } from "react-i18next";
 import type { K3ThemeMode } from "../types/k3ui";
 import type { SettingsSection } from "../types/settings";
 import type { WeatherLocationMode } from "../types/weather";
+import type { ClockStyle } from "../hooks/useDisplaySettings";
+import { PROJECT_FEEDBACK_URL, PROJECT_GITHUB_URL } from "../config/defaults";
 import { K3OutlinedField } from "./K3OutlinedField";
+import { SettingsSwitch } from "./SettingsSwitch";
 import { SunIcon, MoonIcon, MonitorIcon, ClockIcon } from "./icons";
 
 interface Props {
@@ -28,6 +31,22 @@ interface Props {
   setWeatherLocationMode: (value: WeatherLocationMode) => void;
   weatherManualAddress: string;
   setWeatherManualAddress: (value: string) => void;
+  clockStyle: ClockStyle;
+  setClockStyle: (value: ClockStyle) => void;
+  showFavorites: boolean;
+  setShowFavorites: (value: boolean) => void;
+  showFilters: boolean;
+  setShowFilters: (value: boolean) => void;
+  showEphemeris: boolean;
+  setShowEphemeris: (value: boolean) => void;
+  showPersonalMessage: boolean;
+  setShowPersonalMessage: (value: boolean) => void;
+  showAiTools: boolean;
+  setShowAiTools: (value: boolean) => void;
+  showDock: boolean;
+  setShowDock: (value: boolean) => void;
+  compactDate: boolean;
+  setCompactDate: (value: boolean) => void;
 }
 
 const MODES: { id: K3ThemeMode; icon: typeof SunIcon; key: string }[] = [
@@ -37,7 +56,17 @@ const MODES: { id: K3ThemeMode; icon: typeof SunIcon; key: string }[] = [
   { id: "auto", icon: ClockIcon, key: "theme.auto" },
 ];
 
-const SWATCHES = ["#6750A4", "#0B57D0", "#B3261E", "#1E6E3C", "#E8A800", "#00696F"];
+const SWATCHES = [
+  "#6750A4",
+  "#4382EC",
+  "#EC4343",
+  "#f4d837",
+  "#5CBA5C",
+  "#00CED1",
+  "#EC5E78",
+  "#EC844D",
+  "#9563B5",
+];
 
 export function SettingsSheet({
   open,
@@ -61,6 +90,22 @@ export function SettingsSheet({
   setWeatherLocationMode,
   weatherManualAddress,
   setWeatherManualAddress,
+  clockStyle,
+  setClockStyle,
+  showFavorites,
+  setShowFavorites,
+  showFilters,
+  setShowFilters,
+  showEphemeris,
+  setShowEphemeris,
+  showPersonalMessage,
+  setShowPersonalMessage,
+  showAiTools,
+  setShowAiTools,
+  showDock,
+  setShowDock,
+  compactDate,
+  setCompactDate,
 }: Props) {
   const { t, i18n } = useTranslation();
 
@@ -146,6 +191,23 @@ export function SettingsSheet({
               {t("clock.withSeconds")}
             </button>
           </div>
+          <div className="sheet__label sheet__label--spaced">{t("clock.style")}</div>
+          <div className="seg seg--2 sheet__seg-row">
+            <button
+              type="button"
+              aria-pressed={clockStyle === "digital"}
+              onClick={() => setClockStyle("digital")}
+            >
+              {t("clock.digital")}
+            </button>
+            <button
+              type="button"
+              aria-pressed={clockStyle === "analog"}
+              onClick={() => setClockStyle("analog")}
+            >
+              {t("clock.analog")}
+            </button>
+          </div>
         </div>
         )}
 
@@ -197,6 +259,60 @@ export function SettingsSheet({
               {t("lang.en")}
             </button>
           </div>
+        </div>
+
+        <div className="sheet__group">
+          <div className="sheet__label">{t("display.title")}</div>
+          <SettingsSwitch
+            id="show-favorites"
+            label={t("display.favorites")}
+            checked={showFavorites}
+            onChange={setShowFavorites}
+          />
+          <SettingsSwitch
+            id="show-filters"
+            label={t("display.filters")}
+            checked={showFilters}
+            onChange={setShowFilters}
+          />
+          <SettingsSwitch
+            id="show-ephemeris"
+            label={t("display.ephemeris")}
+            checked={showEphemeris}
+            onChange={setShowEphemeris}
+          />
+          <SettingsSwitch
+            id="show-personal-message"
+            label={t("display.personalMessage")}
+            checked={showPersonalMessage}
+            onChange={setShowPersonalMessage}
+          />
+          <SettingsSwitch
+            id="show-ai-tools"
+            label={t("display.aiTools")}
+            checked={showAiTools}
+            onChange={setShowAiTools}
+          />
+          <SettingsSwitch
+            id="show-dock"
+            label={t("display.dock")}
+            checked={showDock}
+            onChange={setShowDock}
+          />
+          <SettingsSwitch
+            id="compact-date"
+            label={t("display.compactDate")}
+            hint={t("display.compactDateHint")}
+            checked={compactDate}
+            onChange={setCompactDate}
+          />
+        </div>
+
+        <div className="sheet__links">
+          <a href={PROJECT_GITHUB_URL} target="_blank" rel="noopener noreferrer">
+            {t("links.github")}
+          </a>
+          <a href={PROJECT_FEEDBACK_URL}>{t("links.feedback")}</a>
         </div>
         </>
         )}

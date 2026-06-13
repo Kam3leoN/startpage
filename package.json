@@ -4,8 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build:boot": "vite build --config vite.boot.config.ts",
+    "dev": "npm run build:boot && vite",
+    "build": "npm run build:boot && tsc -b && vite build",
     "preview": "vite preview",
     "deploy": "vercel --prod",
     "deploy:preview": "vercel"

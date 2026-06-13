@@ -91,6 +91,10 @@ export interface K3API {
     ): unknown;
     getInstance(el: HTMLElement): { closeTrailing?: () => void; destroy?: () => void } | undefined;
   };
+  Select?: {
+    init(el: HTMLSelectElement | Element, opts?: { onOptionSelect?: (selectEl: HTMLElement, value: string) => void }): unknown;
+    getInstance(el: HTMLElement): { destroy?: () => void; forceSyncAll?: () => void } | undefined;
+  };
   IconManager?: {
     processIconsInContainer?: (el: HTMLElement) => void;
     forceDisplayIcons?: () => void;

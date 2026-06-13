@@ -96,6 +96,48 @@ k3ui-appbar.startpage-appbar {
   grid-column: 3;
   justify-self: end;
   min-inline-size: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: visible;
+}
+
+.startpage-appbar__theme.navbar-select-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: visible;
+  flex-shrink: 0;
+}
+.startpage-appbar__theme .button-split,
+.startpage-appbar__theme .split-btn,
+.startpage-appbar__theme .split-button {
+  flex-shrink: 0;
+}
+.startpage-appbar__theme .button-split__leading,
+.startpage-appbar__theme .button-split__trailing {
+  pointer-events: auto;
+}
+
+.startpage-appbar__theme .select-hidden,
+.startpage-appbar__theme k3ui-select.select-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.startpage-appbar__theme .select-menu,
+.startpage-appbar__theme .select-wrapper .select-menu {
+  position: absolute;
+  z-index: 1500;
+  inset-inline-end: 0;
+  inset-block-start: calc(100% + 4px);
 }
 
 .startpage-appbar__brand-text {
@@ -124,10 +166,11 @@ k3ui-appbar.startpage-appbar {
   left: calc(14px + env(safe-area-inset-left, 0px));
   z-index: 45;
   display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  max-width: min(calc(100vw - 24px), 320px);
-  padding: 8px 14px 8px 10px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  max-width: min(calc(100vw - 24px), 340px);
+  padding: 10px 14px 12px;
   border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 55%, transparent);
   border-radius: 20px;
   background: color-mix(in srgb, var(--md-sys-color-surface-container) 82%, transparent);
@@ -137,6 +180,11 @@ k3ui-appbar.startpage-appbar {
   text-align: left;
   cursor: default;
   font: inherit;
+}
+.weather-widget__top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 button.weather-widget {
   cursor: pointer;
@@ -151,8 +199,8 @@ button.weather-widget:active {
 }
 .weather-widget__icon-wrap {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: 56px;
+  height: 56px;
   border-radius: 999px;
   display: grid;
   place-items: center;
@@ -161,8 +209,8 @@ button.weather-widget:active {
   overflow: hidden;
 }
 .weather-widget__icon-img {
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
   display: block;
 }
@@ -182,10 +230,16 @@ button.weather-widget:active {
   min-width: 0;
 }
 .weather-widget__temp {
-  font-size: 1.05rem;
-  font-weight: 600;
+  font-size: 1.35rem;
+  font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.02em;
+  color: var(--md-sys-color-primary);
+}
+.weather-widget__feel {
+  font-size: 0.72rem;
+  line-height: 1.2;
+  color: var(--md-sys-color-on-surface-variant);
 }
 .weather-widget__desc {
   font-size: 0.58rem;
@@ -206,9 +260,181 @@ button.weather-widget:active {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.weather-widget__humidity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.weather-widget__humidity-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--md-sys-color-on-primary);
+  position: relative;
+  z-index: 1;
+  padding-left: 2px;
+}
+.weather-widget__humidity-track {
+  position: relative;
+  height: 28px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--md-sys-color-surface) 88%, transparent);
+  overflow: hidden;
+}
+.weather-widget__humidity-fill {
+  height: 100%;
+  min-width: 42%;
+  border-radius: 999px;
+  background: var(--md-sys-color-primary);
+  transition: width 1s ease;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+}
 
-/* ====== Hero: greeting + search ====== */
+/* ====== Hero: greeting ====== */
 .hero { text-align: center; padding: 26px 0 4px; }
+.hero-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.hero__text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+@media (min-width: 1024px) {
+  .hero-layout--analog {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 48px;
+    text-align: left;
+  }
+  .hero-layout--analog .hero__text {
+    align-items: flex-start;
+    text-align: left;
+  }
+  .hero-layout--analog .clock__date {
+    text-align: left;
+  }
+  .hero-layout--analog .clock__ephemeris {
+    justify-content: flex-start;
+  }
+}
+.hero__clock {
+  flex-shrink: 0;
+}
+
+/* ====== Analog clock ====== */
+.analog-clock {
+  position: relative;
+  width: clamp(200px, 28vw, 280px);
+  height: clamp(200px, 28vw, 280px);
+  animation: analog-enter 0.8s cubic-bezier(0.2, 0, 0, 1);
+}
+@keyframes analog-enter {
+  from { transform: rotate(18deg); opacity: 0.6; }
+  to { transform: rotate(0deg); opacity: 1; }
+}
+.analog-clock__face {
+  width: 100%;
+  height: 100%;
+}
+.analog-clock__ring {
+  fill: color-mix(in srgb, var(--md-sys-color-primary-container) 65%, transparent);
+  stroke: var(--md-sys-color-primary);
+  stroke-width: 4;
+}
+.analog-clock__tick {
+  stroke: var(--md-sys-color-primary);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.analog-clock__hands {
+  position: absolute;
+  inset: 0;
+}
+.analog-clock__hand {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  transform-origin: bottom center;
+  border-radius: 10px;
+  margin-left: -4px;
+}
+.analog-clock__hand--hour {
+  width: 8px;
+  height: 26%;
+  background: color-mix(in srgb, var(--md-sys-color-primary) 85%, black);
+  z-index: 2;
+}
+.analog-clock__hand--minute {
+  width: 6px;
+  height: 34%;
+  background: var(--md-sys-color-primary);
+  z-index: 3;
+}
+.analog-clock__hand--second {
+  width: 4px;
+  height: 38%;
+  background: var(--md-sys-color-tertiary, var(--md-sys-color-secondary));
+  z-index: 4;
+}
+.analog-clock__hand--second::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: inherit;
+}
+.analog-clock__center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: var(--md-sys-color-primary);
+  z-index: 5;
+}
+
+/* ====== Personal message ====== */
+.personal-message {
+  margin: 4px 0 0;
+  max-width: min(100%, 640px);
+  font-family: "Google Sans", "Google Sans Flex", system-ui, sans-serif;
+  font-size: clamp(1rem, 2.5vw, 1.35rem);
+  line-height: 1.35;
+  color: var(--md-sys-color-on-surface-variant);
+}
+.personal-message--empty {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  color: var(--md-sys-color-outline);
+  padding: 0;
+}
+.personal-message--empty:hover {
+  color: var(--md-sys-color-primary);
+}
+.personal-message--editing {
+  outline: 2px solid var(--md-sys-color-primary);
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+
 .clock {
   display: inline-flex;
   align-items: flex-end;
@@ -300,6 +526,65 @@ button.weather-widget:active {
   line-height: 1.45;
   color: var(--md-sys-color-on-surface-variant);
   text-wrap: pretty;
+  text-align: center;
+}
+
+.clock__date-line {
+  margin: 0;
+}
+
+.clock__ephemeris {
+  margin: 6px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35em 0.5em;
+  font-size: 0.92em;
+}
+
+.clock__ephemeris-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+}
+
+.clock__ephemeris-entry--male {
+  color: #1a73e8;
+}
+
+.clock__ephemeris-entry--female {
+  color: #e91e8c;
+}
+
+[data-theme="dark"] .clock__ephemeris-entry--male {
+  color: #8ab4f8;
+}
+
+[data-theme="dark"] .clock__ephemeris-entry--female {
+  color: #f48fb1;
+}
+
+.clock__ephemeris-entry .clock__ephemeris-icon {
+  width: 1.15em;
+  height: 1.15em;
+  flex-shrink: 0;
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.clock__ephemeris-name {
+  white-space: nowrap;
+}
+
+.clock__ephemeris-sep {
+  color: var(--md-sys-color-outline);
 }
 
 /* ====== Search overlay (full page) ====== */
@@ -557,6 +842,13 @@ k3ui-mason:not(.k3ui-mason--ready) .fav {
   pointer-events: none;
 }
 
+/* Tuiles masquées par filtre — hors layout visuel */
+k3ui-mason .fav[data-k3ui-mason-hidden="true"] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .fav {
   /* Mason owns position + transform + width on this node — height synced in JS. */
   position: relative;
@@ -569,13 +861,16 @@ k3ui-mason:not(.k3ui-mason--ready) .fav {
   box-shadow: var(--md-sys-elevation-level1);
   animation: fav-pop 0.5s both;
   contain: layout style;
+  transition: transform 0.34s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.34s, border-radius 0.34s;
 }
 .fav:hover {
+  transform: translateY(-10px) scale(1.06);
   box-shadow: var(--md-sys-elevation-level3);
   border-radius: 28px;
+  z-index: 2;
 }
 .fav:hover .fav__inner {
-  transform: translateY(-4px) scale(1.02);
+  transform: none;
 }
 .fav:active .fav__inner {
   transform: scale(0.95);
@@ -647,7 +942,9 @@ button.fav {
 
 .sheet-backdrop {
   position: fixed; inset: 0; z-index: 200;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(15px) saturate(170%);
+  -webkit-backdrop-filter: blur(15px) saturate(170%);
   display: grid; align-items: end;
   animation: fade 0.25s ease;
 }
@@ -703,6 +1000,80 @@ button.fav {
   letter-spacing: 0.6px;
   color: var(--md-sys-color-on-surface-variant);
   margin-bottom: 8px;
+}
+.sheet__label--spaced {
+  margin-top: 14px;
+}
+.sheet__switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  margin-bottom: 4px;
+}
+.sheet__switch-label {
+  font-size: 0.95rem;
+  color: var(--md-sys-color-on-surface);
+  cursor: pointer;
+}
+.sheet__switch-hint {
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  color: var(--md-sys-color-on-surface-variant);
+}
+.sheet__switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 30px;
+  flex-shrink: 0;
+}
+.sheet__switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.sheet__switch-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--md-sys-color-surface-container-highest);
+  cursor: pointer;
+  transition: background 0.25s;
+}
+.sheet__switch-track::before {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  left: 4px;
+  bottom: 4px;
+  border-radius: 50%;
+  background: var(--md-sys-color-on-primary);
+  transition: transform 0.25s;
+}
+.sheet__switch input:checked + .sheet__switch-track {
+  background: var(--md-sys-color-primary);
+}
+.sheet__switch input:checked + .sheet__switch-track::before {
+  transform: translateX(22px);
+}
+.sheet__links {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+.sheet__links a {
+  color: var(--md-sys-color-primary);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+.sheet__links a:hover {
+  text-decoration: underline;
 }
 .seg {
   display: grid;

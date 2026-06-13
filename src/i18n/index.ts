@@ -35,6 +35,8 @@ const resources = {
       },
       theme: {
         title: "Thème",
+        current: "Thème actuel",
+        choose: "Choisir le thème",
         light: "Clair",
         dark: "Sombre",
         system: "Système",
@@ -49,18 +51,13 @@ const resources = {
       },
       greeting: {
         withName: {
-          morning: "Bonjour, {{name}} !",
-          afternoon: "Bonne après-midi, {{name}} !",
-          evening: "Bonne soirée, {{name}} !",
+          morning: "Bonjour, {{name}}",
+          evening: "Bonsoir, {{name}}",
         },
         generic: {
-          morning: "Bienvenue",
-          afternoon: "Bonne après-midi",
-          evening: "Bonne soirée",
+          morning: "Bonjour",
+          evening: "Bonsoir",
         },
-      },
-      date: {
-        todayPrefix: "Aujourd'hui, nous sommes le,",
       },
       clock: {
         title: "Horloge",
@@ -70,6 +67,34 @@ const resources = {
         format12: "12 h",
         withoutSeconds: "HH:MM",
         withSeconds: "HH:MM:SS",
+        style: "Style d'horloge",
+        digital: "Digitale",
+        analog: "Analogique",
+      },
+      display: {
+        title: "Affichage",
+        favorites: "Raccourcis / favoris",
+        filters: "Filtres catégories",
+        ephemeris: "Éphéméride du jour",
+        personalMessage: "Message personnel",
+        aiTools: "Barre AI-Tools",
+        dock: "Dock macOS",
+        compactDate: "Date compacte",
+        compactDateHint: "Ex. Sam, 13 juin 2026",
+      },
+      personalMessage: {
+        placeholder: "Double-cliquez pour ajouter un message…",
+        editHint: "Double-cliquez pour modifier",
+      },
+      aiTools: {
+        title: "AI-Tools",
+      },
+      dock: {
+        label: "Dock des raccourcis",
+      },
+      links: {
+        github: "GitHub",
+        feedback: "Feedback",
       },
       settingsFab: {
         title: "Réglages",
@@ -96,6 +121,8 @@ const resources = {
         locating: "Localisation…",
         locationUnknown: "Position inconnue",
         openSettings: "Ouvrir les réglages météo",
+        feelsLike: "Ressenti {{value}}°",
+        humidity: "Humidité {{value}}%",
         errors: {
           location: "Impossible de déterminer la position",
           unavailable: "Météo indisponible",
@@ -218,6 +245,8 @@ const resources = {
       },
       theme: {
         title: "Theme",
+        current: "Current theme",
+        choose: "Choose theme",
         light: "Light",
         dark: "Dark",
         system: "System",
@@ -232,18 +261,13 @@ const resources = {
       },
       greeting: {
         withName: {
-          morning: "Good morning, {{name}}!",
-          afternoon: "Good afternoon, {{name}}!",
-          evening: "Good evening, {{name}}!",
+          morning: "Good morning, {{name}}",
+          evening: "Good evening, {{name}}",
         },
         generic: {
-          morning: "Welcome",
-          afternoon: "Good afternoon",
+          morning: "Good morning",
           evening: "Good evening",
         },
-      },
-      date: {
-        todayPrefix: "Today, we are",
       },
       clock: {
         title: "Clock",
@@ -253,6 +277,34 @@ const resources = {
         format12: "12 h",
         withoutSeconds: "HH:MM",
         withSeconds: "HH:MM:SS",
+        style: "Clock style",
+        digital: "Digital",
+        analog: "Analog",
+      },
+      display: {
+        title: "Display",
+        favorites: "Shortcuts / favorites",
+        filters: "Category filters",
+        ephemeris: "Saint of the day",
+        personalMessage: "Personal message",
+        aiTools: "AI-Tools bar",
+        dock: "macOS dock",
+        compactDate: "Compact date",
+        compactDateHint: "e.g. Sat, Jun 13, 2026",
+      },
+      personalMessage: {
+        placeholder: "Double-click to add a message…",
+        editHint: "Double-click to edit",
+      },
+      aiTools: {
+        title: "AI-Tools",
+      },
+      dock: {
+        label: "Shortcuts dock",
+      },
+      links: {
+        github: "GitHub",
+        feedback: "Feedback",
       },
       settingsFab: {
         title: "Settings",
@@ -279,6 +331,8 @@ const resources = {
         locating: "Locating…",
         locationUnknown: "Unknown location",
         openSettings: "Open weather settings",
+        feelsLike: "Feels {{value}}°",
+        humidity: "Humidity {{value}}%",
         errors: {
           location: "Could not determine location",
           unavailable: "Weather unavailable",

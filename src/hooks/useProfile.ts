@@ -16,11 +16,9 @@ export function useProfile() {
   return { firstName, setFirstName };
 }
 
-export type GreetingPeriod = "morning" | "afternoon" | "evening";
+export type GreetingPeriod = "morning" | "evening";
 
-/** Returns the greeting period for the given hour (0–23). */
+/** Bonjour (5h–17h59) ou Bonsoir (18h–4h59). */
 export function greetingPeriod(hour: number): GreetingPeriod {
-  if (hour >= 5 && hour < 12) return "morning";
-  if (hour >= 12 && hour < 18) return "afternoon";
-  return "evening";
+  return hour >= 5 && hour < 18 ? "morning" : "evening";
 }

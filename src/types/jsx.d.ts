@@ -9,6 +9,11 @@ type WC = DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> & {
 declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
+      i: DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> & {
+        name?: string;
+        type?: string;
+        size?: string;
+      };
       "k3ui-appbar": WC & {
         variant?: "small" | "center" | "search" | "medium" | "large";
         fixed?: string;
@@ -43,6 +48,7 @@ declare module "react" {
         "icon-type"?: string;
         "leading-icon"?: string;
       };
+      "k3ui-select": WC & { id?: string };
       "menu-item": WC & {
         "data-id"?: string;
         "data-label"?: string;

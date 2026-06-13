@@ -2,13 +2,11 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { initK3UISubtree } from "../utils/k3uiDeferred";
+import { FAB_MENU_LAYER_ID, SETTINGS_FAB_MENU_ID } from "../config/fabMenu";
 import {
   SETTINGS_FAB_ITEM_IDS,
   type SettingsSection,
 } from "../types/settings";
-
-const FAB_MENU_ID = "startpage-settings-fab-menu";
-const FAB_LAYER_ID = "fab-menu-layer";
 
 interface Props {
   k3ready: boolean;
@@ -37,7 +35,7 @@ export function SettingsFabMenu({ k3ready, onOpenSection }: Props) {
     ];
 
     const boot = async () => {
-      const menuEl = document.getElementById(FAB_MENU_ID);
+      const menuEl = document.getElementById(SETTINGS_FAB_MENU_ID);
       if (!menuEl) return;
 
       document.body.classList.add("has-fab-menu");
@@ -61,7 +59,7 @@ export function SettingsFabMenu({ k3ready, onOpenSection }: Props) {
         onItemClick: handleItem,
       });
 
-      K?.initComponents?.(document.getElementById(FAB_LAYER_ID) ?? menuEl);
+      K?.initComponents?.(document.getElementById(FAB_MENU_LAYER_ID) ?? menuEl);
 
       K?.IconManager?.processIconsInContainer?.(menuEl);
       K?.IconManager?.forceDisplayIcons?.();
@@ -71,17 +69,18 @@ export function SettingsFabMenu({ k3ready, onOpenSection }: Props) {
 
     return () => {
       cancelled = true;
-      document.body.classList.remove("has-fab-menu");
-      const menuEl = document.getElementById(FAB_MENU_ID);
+      const menuEl = document.getElementById(SETTINGS_FAB_MENU_ID);
       window.K?.ButtonFabMenu?.getInstance(menuEl as HTMLElement)?.destroy?.();
+      const aiFab = document.getElementById("startpage-ai-tools-fab-menu");
+      if (!aiFab) document.body.classList.remove("has-fab-menu");
     };
   }, [k3ready, t, i18n.language]);
 
   return createPortal(
-    <div className="fab-menu-layer" id={FAB_LAYER_ID}>
+    <div className="fab-menu-layer" id={FAB_MENU_LAYER_ID}>
       <div className="fab-menu-layer__slot fab-menu-layer__slot--bottom-left">
         <div
-          id={FAB_MENU_ID}
+          id={SETTINGS_FAB_MENU_ID}
           className="button-fab-menu no-autoinit startpage-settings-fab"
           data-position="bottom-left"
           data-fab-icon="gear"
