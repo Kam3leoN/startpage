@@ -1,0 +1,196 @@
+/* ====== Word wheel — 3D carousel (I/O 2026 inspired) ====== */
+.wheel {
+  margin-top: 8px;
+  padding: 28px 0 12px;
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-low) 88%, transparent);
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.wheel__header {
+  text-align: center;
+  margin-bottom: 18px;
+  padding: 0 16px;
+}
+
+.wheel__title {
+  margin: 0;
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--md-sys-color-on-surface);
+}
+
+.wheel__subtitle {
+  margin: 6px 0 0;
+  font-size: inherit;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.wheel__viewport {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+}
+
+.wheel__stage {
+  position: relative;
+  height: clamp(220px, 42vw, 280px);
+  perspective: 1100px;
+  perspective-origin: 50% 42%;
+  overflow: visible;
+  transform-style: preserve-3d;
+}
+
+.wheel__card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(148px, 28vw, 196px);
+  height: clamp(188px, 34vw, 236px);
+  border: none;
+  border-radius: 22px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 20px 16px 16px;
+  box-shadow:
+    0 18px 40px color-mix(in srgb, #000 22%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, #fff 28%, transparent);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  transition:
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.45s ease,
+    box-shadow 0.35s ease;
+  will-change: transform, opacity;
+}
+
+.wheel__card--active {
+  box-shadow:
+    0 28px 56px color-mix(in srgb, #000 28%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, #fff 36%, transparent);
+}
+
+.wheel__card-badge {
+  width: clamp(72px, 14vw, 92px);
+  height: clamp(72px, 14vw, 92px);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: clamp(2rem, 5vw, 2.6rem);
+  font-weight: 700;
+  color: #111;
+  background: color-mix(in srgb, #fff 88%, transparent);
+  box-shadow: 0 8px 24px color-mix(in srgb, #000 18%, transparent);
+}
+
+.wheel__card-play {
+  min-width: 88px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 14px color-mix(in srgb, #000 16%, transparent);
+}
+
+.wheel__nav {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container);
+  color: var(--md-sys-color-on-surface);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.wheel__nav:hover {
+  background: var(--md-sys-color-surface-container-high);
+}
+
+.wheel__nav:active {
+  transform: scale(0.92);
+}
+
+@media (max-width: 520px) {
+  .wheel__nav {
+    width: 30px;
+    height: 30px;
+    font-size: 1.25rem;
+  }
+}
+
+.wheel__progress {
+  margin: 22px auto 8px;
+  width: min(100%, 420px);
+  padding: 10px 16px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--md-sys-color-surface);
+  border: 2px solid transparent;
+  background-image:
+    linear-gradient(var(--md-sys-color-surface), var(--md-sys-color-surface)),
+    linear-gradient(90deg, #4285f4, #ea4335, #fbbc04, #34a853, #a855f7);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.wheel__progress-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+}
+
+.wheel__dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wheel__dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--md-sys-color-outline);
+  cursor: pointer;
+  transition: transform 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.wheel__dot--active {
+  transform: scale(1.15);
+  background: var(--md-sys-color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--md-sys-color-primary) 28%, transparent);
+}
+
+.wheel__dot:focus-visible,
+.wheel__card:focus-visible,
+.wheel__nav:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wheel__card {
+    transition-duration: 0.01ms;
+  }
+}

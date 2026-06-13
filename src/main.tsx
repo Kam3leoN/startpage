@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./i18n";
 import "./styles/tailwind.css";
 import "./styles/main.scss";
-import "./styles/tiles.scss";
+import "./styles/wordWheel.scss";
 import App from "./App";
 
 createRoot(document.getElementById("root")!).render(

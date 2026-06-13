@@ -13,6 +13,7 @@ import { SettingsSheet } from "./components/SettingsSheet";
 import { SettingsIcon } from "./components/icons";
 import { Greeting } from "./components/Greeting";
 import { Clock } from "./components/Clock";
+import { WordWheelCarousel } from "./components/WordWheelCarousel";
 import { formatTodayDate } from "./utils/formatTodayDate";
 
 export default function App() {
@@ -66,6 +67,8 @@ export default function App() {
         <Filters active={filter} available={availableCats} onChange={setFilter} />
 
         <FavoritesGrid favorites={FAVORITES} filter={filter} k3ready={k3ready} />
+
+        <WordWheelCarousel />
 
         <footer className="footer">© {new Date().getFullYear()} — {t("footer")}</footer>
       </main>
