@@ -41,6 +41,9 @@ const resources = {
           evening: "Bonne soirée",
         },
       },
+      date: {
+        todayPrefix: "Aujourd'hui, nous sommes le,",
+      },
       footer: "StartPage — Material 3 Expressive",
       a11y: { openMenu: "Ouvrir le menu", settings: "Réglages" },
     },
@@ -82,6 +85,9 @@ const resources = {
           afternoon: "Good afternoon",
           evening: "Good evening",
         },
+      },
+      date: {
+        todayPrefix: "Today, we are",
       },
       footer: "StartPage — Material 3 Expressive",
       a11y: { openMenu: "Open menu", settings: "Settings" },

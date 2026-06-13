@@ -12,6 +12,7 @@ import { SettingsSheet } from "./components/SettingsSheet";
 import { SettingsIcon } from "./components/icons";
 import { LedClock } from "./components/LedClock";
 import { Greeting } from "./components/Greeting";
+import { formatTodayDate } from "./utils/formatTodayDate";
 
 export default function App() {
   const { t, i18n } = useTranslation();
@@ -32,13 +33,8 @@ export default function App() {
   const timeLabel = `${hh}:${mm}:${ss}`;
 
   const dateLabel = useMemo(
-    () =>
-      date.toLocaleDateString(i18n.language, {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-      }),
-    [i18n.language, date, hh]
+    () => formatTodayDate(date, i18n.language, t("date.todayPrefix")),
+    [i18n.language, date, hh, t]
   );
 
   return (

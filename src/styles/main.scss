@@ -144,10 +144,11 @@ body.theme-transitioning * {
   }
 }
 .clock__date {
-  margin-top: 4px;
+  margin-top: 8px;
   color: var(--md-sys-color-on-surface-variant);
   font-size: 0.95rem;
-  text-transform: capitalize;
+  line-height: 1.45;
+  text-wrap: pretty;
 }
 
 .search {
