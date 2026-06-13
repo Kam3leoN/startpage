@@ -12,6 +12,8 @@ interface Props {
   setSeed: (s: string) => void;
   firstName: string;
   setFirstName: (name: string) => void;
+  showSeconds: boolean;
+  setShowSeconds: (value: boolean) => void;
 }
 
 const MODES: { id: K3ThemeMode; icon: typeof SunIcon; key: string }[] = [
@@ -32,6 +34,8 @@ export function SettingsSheet({
   setSeed,
   firstName,
   setFirstName,
+  showSeconds,
+  setShowSeconds,
 }: Props) {
   const { t, i18n } = useTranslation();
 
@@ -62,6 +66,26 @@ export function SettingsSheet({
               onChange={(e) => setFirstName(e.target.value)}
             />
           </label>
+        </div>
+
+        <div className="sheet__group">
+          <div className="sheet__label">{t("clock.title")}</div>
+          <div className="seg seg--2">
+            <button
+              type="button"
+              aria-pressed={!showSeconds}
+              onClick={() => setShowSeconds(false)}
+            >
+              {t("clock.withoutSeconds")}
+            </button>
+            <button
+              type="button"
+              aria-pressed={showSeconds}
+              onClick={() => setShowSeconds(true)}
+            >
+              {t("clock.withSeconds")}
+            </button>
+          </div>
         </div>
 
         <div className="sheet__group">

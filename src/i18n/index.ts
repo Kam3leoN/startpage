@@ -44,6 +44,11 @@ const resources = {
       date: {
         todayPrefix: "Aujourd'hui, nous sommes le,",
       },
+      clock: {
+        title: "Horloge",
+        withoutSeconds: "HH:MM",
+        withSeconds: "HH:MM:SS",
+      },
       footer: "StartPage — Material 3 Expressive",
       a11y: { openMenu: "Ouvrir le menu", settings: "Réglages" },
     },
@@ -88,6 +93,11 @@ const resources = {
       },
       date: {
         todayPrefix: "Today, we are",
+      },
+      clock: {
+        title: "Clock",
+        withoutSeconds: "HH:MM",
+        withSeconds: "HH:MM:SS",
       },
       footer: "StartPage — Material 3 Expressive",
       a11y: { openMenu: "Open menu", settings: "Settings" },

@@ -356,7 +356,8 @@ k3ui-mason { display: block; width: 100%; }
   grid-template-columns: repeat(2, 1fr);
   gap: 6px;
 }
-@media (min-width: 420px) { .seg { grid-template-columns: repeat(4, 1fr); } }
+.seg--2 { grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 420px) { .seg:not(.seg--2) { grid-template-columns: repeat(4, 1fr); } }
 .seg button {
   border: 1px solid var(--md-sys-color-outline-variant);
   background: transparent;
