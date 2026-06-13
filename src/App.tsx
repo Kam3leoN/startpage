@@ -59,7 +59,7 @@ export default function App() {
       <main className="shell">
         <section className="hero">
           <Greeting firstName={firstName} hour={date.getHours()} />
-          <div className="clock__date">{dateLabel}</div>
+          <p className="clock__date">{dateLabel}</p>
           <SearchBar />
         </section>
 

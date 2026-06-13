@@ -3,6 +3,7 @@
 :root {
   --shell-max: 1100px;
   --gap: 14px;
+  --text-base: 18px;
 }
 
 * { box-sizing: border-box; }
@@ -12,10 +13,18 @@ html, body, #root { height: 100%; }
 body {
   margin: 0;
   font-family: "Google Sans Flex", system-ui, sans-serif;
+  font-size: var(--text-base);
+  line-height: 1.45;
   background: var(--md-sys-color-surface, #fff);
   color: var(--md-sys-color-on-surface, #111);
   transition: background-color 0.4s ease, color 0.4s ease;
   -webkit-tap-highlight-color: transparent;
+}
+
+p {
+  margin: 0;
+  font-size: var(--text-base);
+  line-height: 1.45;
 }
 
 /* Smooth theme cross-fade driven by k3ui's .theme-transitioning hook too. */
@@ -146,7 +155,7 @@ body.theme-transitioning * {
 .clock__date {
   margin-top: 8px;
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 18px;
+  font-size: var(--text-base);
   font-weight: 400;
   line-height: 1.45;
   color: var(--md-sys-color-on-surface-variant);
@@ -176,7 +185,7 @@ body.theme-transitioning * {
   background: transparent;
   color: inherit;
   font: inherit;
-  font-size: 1.05rem;
+  font-size: inherit;
   padding: 10px 0;
 }
 .search input::placeholder { color: var(--md-sys-color-on-surface-variant); }
@@ -207,7 +216,7 @@ body.theme-transitioning * {
   padding: 7px 15px;
   border-radius: 10px;
   font: inherit;
-  font-size: 0.9rem;
+  font-size: inherit;
   font-weight: 500;
   color: var(--md-sys-color-on-surface-variant);
   background: transparent;
@@ -265,7 +274,7 @@ k3ui-mason { display: block; width: 100%; }
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
 }
 .fav__label {
-  font-size: 0.82rem;
+  font-size: var(--text-base);
   font-weight: 500;
   text-align: center;
   color: #fff;
@@ -306,10 +315,10 @@ k3ui-mason { display: block; width: 100%; }
   background: var(--md-sys-color-outline);
   margin: 4px auto 14px;
 }
-.sheet h3 { margin: 0 0 10px; font-size: 1.1rem; }
+.sheet h3 { margin: 0 0 10px; font-size: var(--text-base); }
 .sheet__group { margin-bottom: 20px; }
 .sheet__label {
-  font-size: 0.8rem;
+  font-size: var(--text-base);
   text-transform: uppercase;
   letter-spacing: 0.6px;
   color: var(--md-sys-color-on-surface-variant);
@@ -329,7 +338,7 @@ k3ui-mason { display: block; width: 100%; }
   padding: 12px 8px;
   cursor: pointer;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: inherit;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
   transition: transform 0.24s, background-color 0.24s, color 0.24s, border-color 0.24s;
 }
@@ -370,7 +379,7 @@ k3ui-mason { display: block; width: 100%; }
 
 .sheet__field { display: flex; flex-direction: column; gap: 6px; }
 .sheet__field-label {
-  font-size: 0.85rem;
+  font-size: inherit;
   color: var(--md-sys-color-on-surface-variant);
 }
 .sheet__input {
@@ -381,7 +390,7 @@ k3ui-mason { display: block; width: 100%; }
   border-radius: 12px;
   padding: 12px 14px;
   font: inherit;
-  font-size: 1rem;
+  font-size: inherit;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -409,7 +418,7 @@ k3ui-mason { display: block; width: 100%; }
 
 .footer {
   text-align: center;
-  font-size: 0.78rem;
+  font-size: var(--text-base);
   color: var(--md-sys-color-on-surface-variant);
   padding-top: 8px;
 }
