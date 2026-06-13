@@ -118,6 +118,10 @@ body.theme-transitioning * {
 .clock__slot--colon {
   padding: 0 0.04em;
 }
+.clock__slot--digit .clock__face {
+  justify-content: flex-end;
+  text-align: right;
+}
 .clock__ghost,
 .clock__face {
   display: block;
@@ -135,9 +139,6 @@ body.theme-transitioning * {
   display: flex;
   align-items: center;
   color: var(--md-sys-color-primary);
-}
-.clock__slot:not(.clock__slot--colon) .clock__face {
-  justify-content: flex-end;
 }
 .clock__slot--colon .clock__face {
   justify-content: center;
