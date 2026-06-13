@@ -1,0 +1,67 @@
+/* Brand color tiles — ported from the original style.css (#id -> [data-tile]). */
+.fav[data-tile="amazon"] { background: #232f3e; }
+.fav[data-tile="apple"] { background: #999; }
+.fav[data-tile="behance"] { background: #1769ff; }
+.fav[data-tile="bootstrap"] { background: #563d7c; }
+.fav[data-tile="caisse_epargne"] { background: #e10125; }
+.fav[data-tile="chromestore"] { background: #e3e4e5; }
+.fav[data-tile="codepen"] { background: #181818; }
+.fav[data-tile="deezer"] { background: #e3e4e5; }
+.fav[data-tile="dribbble"] { background: #e84c88; }
+.fav[data-tile="dropbox"] { background: #007ee5; }
+.fav[data-tile="facebook"] { background: #3b5998; }
+.fav[data-tile="feedly"] { background: #6cc655; }
+.fav[data-tile="flickr"] { background: #0063dc; }
+.fav[data-tile="flipboard"] { background: #df272e; }
+.fav[data-tile="firefox"] { background: #c13832; }
+.fav[data-tile="gmail"] { background: #ea4335; }
+.fav[data-tile="gitHub"] { background: #25292e; }
+.fav[data-tile="google"] { background: #4285f4; }
+.fav[data-tile="googlemusic"] { background: #ff5722; }
+.fav[data-tile="googleplay"] { background: #607d8b; }
+.fav[data-tile="hangouts"] { background: #0c9d58; }
+.fav[data-tile="heroku"] { background: #430098; }
+.fav[data-tile="hulu"] { background: #66aa33; }
+.fav[data-tile="imgur"] { background: #34373c; }
+.fav[data-tile="inbox"] { background: #4285f4; }
+.fav[data-tile="instapaper"] { background: #1f1f1f; }
+.fav[data-tile="instagram"] {
+  background: radial-gradient(circle farthest-corner at 35% 90%, #fec564, transparent 50%),
+    radial-gradient(circle farthest-corner at 0 140%, #fec564, transparent 50%),
+    radial-gradient(ellipse farthest-corner at 0 -25%, #5258cf, transparent 50%),
+    radial-gradient(ellipse farthest-corner at 20% -50%, #5258cf, transparent 50%),
+    radial-gradient(ellipse farthest-corner at 100% 0, #893dc2, transparent 50%),
+    radial-gradient(ellipse farthest-corner at 60% -20%, #893dc2, transparent 50%),
+    radial-gradient(ellipse farthest-corner at 100% 100%, #d9317a, transparent),
+    linear-gradient(#6559ca, #bc318f 30%, #e33f5f 50%, #f77638 70%, #fec66d 100%);
+}
+.fav[data-tile="jsfiddle"] { background: #3fa1f5; }
+.fav[data-tile="keep"] { background: #ffbb00; }
+.fav[data-tile="linkedin"] { background: #0077b5; }
+.fav[data-tile="medium"] { background: #00ab6c; }
+.fav[data-tile="messenger"] { background: #0084ff; }
+.fav[data-tile="netflix"] { background: #000000; }
+.fav[data-tile="operaaddons"] { background: #ff1b2d; }
+.fav[data-tile="pinterest"] { background: #bd081c; }
+.fav[data-tile="pocket"] { background: #ef3f56; }
+.fav[data-tile="producthunt"] { background: #da552f; }
+.fav[data-tile="quora"] { background: #a82400; }
+.fav[data-tile="reddit"] { background: #ff4500; }
+.fav[data-tile="rss"] { background: orange; }
+.fav[data-tile="slack"] { background: #6ecadc; }
+.fav[data-tile="spotify"] { background: #2ebd59; }
+.fav[data-tile="tele_loisirs"] { background: #171717; }
+.fav[data-tile="twitch"] { background: #6441a5; }
+.fav[data-tile="twitter"] { background: #1da1f2; }
+.fav[data-tile="vimeo"] { background: #1ab7ea; }
+.fav[data-tile="wikipedia"] { background: #ffffff; }
+.fav[data-tile="youtube"] { background: #fd0016; }
+.fav[data-tile="youtubemusic"] { background: #191919; }
+
+/* Light-background tiles need dark label text for contrast. */
+.fav[data-tile="deezer"] .fav__label,
+.fav[data-tile="chromestore"] .fav__label,
+.fav[data-tile="wikipedia"] .fav__label {
+  color: #1b1b1b;
+  text-shadow: none;
+}
