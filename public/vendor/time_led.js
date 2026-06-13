@@ -71,6 +71,17 @@ ident.Led = function(conf) {
         }
     }
 
+    /** Sets SVG dimensions + viewBox for lossless CSS scaling. */
+    function setSvgSize() {
+        const svgW = totalLedCols * (h_w + pix_between) - (h_w + 2 * pix_between);
+        const svgH = 7 * (h_w + pix_between) - pix_between;
+        svg.setAttribute("width", String(svgW));
+        svg.setAttribute("height", String(svgH));
+        svg.setAttribute("viewBox", "0 0 " + svgW + " " + svgH);
+        svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+        svg.setAttribute("overflow", "visible");
+    }
+
     function initLedGrid(colCount) {
         for (i = 0; i < colCount; i++) {
             dig[i] = [];
@@ -170,8 +181,7 @@ ident.Led = function(conf) {
         updateLedRandom();
     } else {
         buildSlotLayout(format);
-        svg.setAttribute('width', totalLedCols * (h_w + pix_between) - (h_w + 2 * pix_between));
-        svg.setAttribute('height', 7 * (h_w + pix_between) - pix_between);
+        setSvgSize();
     }
 
     // Initialize countdown display
@@ -329,6 +339,7 @@ ident.Led = function(conf) {
             for (i = 0; i < spec.cols; i++) {
                 for (let y = 0; y < 7; y++) {
                     const segment = dig[base + i][y];
+                    if (!segment) continue;
                     if (font[y].charAt(razd * 6 + spec.skip + i) === "0") {
                         segment.setAttribute('fill', color);
                         segment.setAttribute('opacity', 1);
@@ -336,6 +347,18 @@ ident.Led = function(conf) {
                         segment.setAttribute('fill', bgcolor);
                         segment.setAttribute('opacity', bgvisible);
                     }
+                }
+            }
+            // Clear trailing columns in this character slot (safety for variable-width slots).
+            const slotCols = formatSlotCols(
+                num.charAt(l) === ":" || num.charAt(l) === " " ? ":" : "0"
+            );
+            for (i = spec.cols; i < slotCols; i++) {
+                for (let y = 0; y < 7; y++) {
+                    const segment = dig[base + i][y];
+                    if (!segment) continue;
+                    segment.setAttribute('fill', bgcolor);
+                    segment.setAttribute('opacity', bgvisible);
                 }
             }
         }

@@ -39,10 +39,12 @@ body.theme-transitioning * {
   top: 0;
   z-index: 50;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(max-content, auto) minmax(0, 1fr);
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
+  padding: 10px 14px;
+  min-height: 52px;
+  overflow: visible;
   background: color-mix(in srgb, var(--md-sys-color-surface) 78%, transparent);
   backdrop-filter: saturate(160%) blur(14px);
   border-bottom: 1px solid var(--md-sys-color-outline-variant, transparent);
@@ -71,7 +73,7 @@ body.theme-transitioning * {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-width: 0;
+  min-width: max-content;
   overflow: visible;
 }
 .appbar .iconbtn {
@@ -95,17 +97,21 @@ body.theme-transitioning * {
   scrollbar-width: none;
   user-select: none;
 }
-.led-clock--compact {
+.led-clock--compact.autosize {
+  max-width: none;
   overflow: visible;
 }
 .led-clock--compact svg {
   display: block;
-  height: 30px;
+  height: var(--led-display-height, 32px);
   width: auto;
   max-width: none;
+  overflow: visible;
 }
 @media (max-width: 480px) {
-  .led-clock--compact svg { height: 24px; }
+  .led-clock--compact svg {
+    height: 28px;
+  }
 }
 .led-clock.autosize::-webkit-scrollbar { display: none; }
 .led-clock:not(.led-clock--compact) svg {

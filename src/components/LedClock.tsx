@@ -4,6 +4,10 @@ import type { LedConfig } from "../types/time_led";
 const LED_ID = "led-clock";
 const SCRIPT_ID = "time-led-js";
 
+/** Native LED dot size — compact appbar uses smaller dots, scaled via viewBox + CSS. */
+const COMPACT_LED_SIZE = 4;
+const COMPACT_DISPLAY_HEIGHT = 32;
+
 /** Reads the current M3 primary token for LED segment color. */
 function readPrimaryColor(): string {
   const v = getComputedStyle(document.documentElement)
@@ -20,9 +24,8 @@ function readSurfaceColor(): string {
   return v || "#1c1b1f";
 }
 
-/** Pixel size of each LED dot — compact appbar uses fixed small size, scaled via CSS. */
-function ledSize(compact: boolean): number {
-  if (compact) return 5;
+/** Pixel size of each LED dot for full-size hero clock. */
+function ledSize(): number {
   const w = window.innerWidth;
   if (w < 400) return 7;
   if (w < 640) return 9;
@@ -31,6 +34,22 @@ function ledSize(compact: boolean): number {
 }
 
 function buildConfig(compact: boolean): LedConfig {
+  if (compact) {
+    return {
+      id: LED_ID,
+      type: "time",
+      format: "hh:mm:ss",
+      hourformat: 24,
+      color: readPrimaryColor(),
+      bgcolor: readSurfaceColor(),
+      bgvisible: 0.35,
+      size: COMPACT_LED_SIZE,
+      rounded: 1,
+      pix_between: 0,
+      font: "font3",
+      compact_colon: true,
+    };
+  }
   return {
     id: LED_ID,
     type: "time",
@@ -39,7 +58,7 @@ function buildConfig(compact: boolean): LedConfig {
     color: readPrimaryColor(),
     bgcolor: readSurfaceColor(),
     bgvisible: 0.35,
-    size: ledSize(compact),
+    size: ledSize(),
     rounded: 2,
     pix_between: 1,
     font: "font3",
@@ -68,15 +87,22 @@ export function LedClock({
       const el = document.getElementById(LED_ID);
       if (!el || !window.Led) return;
       el.innerHTML = "";
+      if (compact) {
+        el.style.setProperty("--led-display-height", `${COMPACT_DISPLAY_HEIGHT}px`);
+      } else {
+        el.style.removeProperty("--led-display-height");
+      }
       new window.Led!(buildConfig(compact));
       mounted.current = true;
     };
 
     const onResize = () => {
-      window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(() => {
-        if (mounted.current) mount();
-      }, 200);
+      if (!compact) {
+        window.clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(() => {
+          if (mounted.current) mount();
+        }, 200);
+      }
     };
 
     const boot = () => {
