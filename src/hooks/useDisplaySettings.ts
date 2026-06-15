@@ -5,13 +5,11 @@ import {
   DEFAULT_CLOCK_STYLE,
   DEFAULT_COMPACT_DATE,
   DEFAULT_SHOW_AI_TOOLS,
-  DEFAULT_SHOW_DOCK,
   DEFAULT_SHOW_EPHEMERIS,
   DEFAULT_SHOW_FILTERS,
   DEFAULT_SHOW_FAVORITES,
   DEFAULT_SHOW_PERSONAL_MESSAGE,
   SHOW_AI_TOOLS_KEY,
-  SHOW_DOCK_KEY,
   SHOW_EPHEMERIS_KEY,
   SHOW_FILTERS_KEY,
   SHOW_FAVORITES_KEY,
@@ -48,9 +46,6 @@ export function useDisplaySettings() {
   const [showAiTools, setShowAiToolsState] = useState(() =>
     readBool(SHOW_AI_TOOLS_KEY, DEFAULT_SHOW_AI_TOOLS)
   );
-  const [showDock, setShowDockState] = useState(() =>
-    readBool(SHOW_DOCK_KEY, DEFAULT_SHOW_DOCK)
-  );
   const [compactDate, setCompactDateState] = useState(() =>
     readBool(COMPACT_DATE_KEY, DEFAULT_COMPACT_DATE)
   );
@@ -81,11 +76,6 @@ export function useDisplaySettings() {
     localStorage.setItem(SHOW_AI_TOOLS_KEY, String(value));
   }, []);
 
-  const setShowDock = useCallback((value: boolean) => {
-    setShowDockState(value);
-    localStorage.setItem(SHOW_DOCK_KEY, String(value));
-  }, []);
-
   const setCompactDate = useCallback((value: boolean) => {
     setCompactDateState(value);
     localStorage.setItem(COMPACT_DATE_KEY, String(value));
@@ -107,8 +97,6 @@ export function useDisplaySettings() {
     setShowPersonalMessage,
     showAiTools,
     setShowAiTools,
-    showDock,
-    setShowDock,
     compactDate,
     setCompactDate,
     clockStyle,

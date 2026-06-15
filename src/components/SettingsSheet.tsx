@@ -43,8 +43,6 @@ interface Props {
   setShowPersonalMessage: (value: boolean) => void;
   showAiTools: boolean;
   setShowAiTools: (value: boolean) => void;
-  showDock: boolean;
-  setShowDock: (value: boolean) => void;
   compactDate: boolean;
   setCompactDate: (value: boolean) => void;
 }
@@ -102,8 +100,6 @@ export function SettingsSheet({
   setShowPersonalMessage,
   showAiTools,
   setShowAiTools,
-  showDock,
-  setShowDock,
   compactDate,
   setCompactDate,
 }: Props) {
@@ -292,12 +288,6 @@ export function SettingsSheet({
             label={t("display.aiTools")}
             checked={showAiTools}
             onChange={setShowAiTools}
-          />
-          <SettingsSwitch
-            id="show-dock"
-            label={t("display.dock")}
-            checked={showDock}
-            onChange={setShowDock}
           />
           <SettingsSwitch
             id="compact-date"

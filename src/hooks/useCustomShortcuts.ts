@@ -33,8 +33,8 @@ export function useCustomShortcuts() {
   }, []);
 
   const addShortcut = useCallback(
-    (input: Omit<CustomShortcut, "id">) => {
-      if (!isValidShortcutInput(input.label, input.url)) return false;
+    (input: Omit<CustomShortcut, "id">): CustomShortcut | null => {
+      if (!isValidShortcutInput(input.label, input.url)) return null;
       const tags: Category[] = input.tags.length ? input.tags : ["infos"];
       const entry: CustomShortcut = {
         id: createShortcutId(),
@@ -44,7 +44,7 @@ export function useCustomShortcuts() {
         tags,
       };
       persist([...shortcuts, entry]);
-      return true;
+      return entry;
     },
     [persist, shortcuts]
   );

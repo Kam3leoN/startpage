@@ -124,6 +124,33 @@ export interface K3API {
     create?: (opts?: Record<string, unknown>) => HTMLElement;
   };
   Toast: K3Toast;
+  ButtonIcon?: {
+    init(
+      el: Element,
+      opts?: { ripple?: boolean }
+    ):
+      | { destroy?: () => void; disable?: () => void; enable?: () => void }
+      | Array<{ destroy?: () => void; disable?: () => void; enable?: () => void }>;
+    getInstance(el: HTMLElement): { destroy?: () => void; disable?: () => void; enable?: () => void } | null;
+  };
+  Chip?: {
+    init(
+      el: Element,
+      opts?: {
+        variant?: string;
+        selectable?: boolean;
+        removable?: boolean;
+        data?: Array<{
+          id?: string;
+          text: string;
+          type?: string;
+          selected?: boolean;
+          disabled?: boolean;
+        }>;
+      }
+    ): { destroy?: () => void; setData?: (data: Array<{ id?: string; text: string; type?: string; selected?: boolean }>) => void } | Array<{ destroy?: () => void }>;
+    getInstance(el: HTMLElement): { destroy?: () => void; setData?: (data: Array<{ id?: string; text: string; type?: string; selected?: boolean }>) => void } | undefined;
+  };
   loadDeferredComponents?: () => Promise<void>;
   initManagers?: (opts?: Record<string, unknown>) => void;
   initComponents?: (root?: Element) => void;

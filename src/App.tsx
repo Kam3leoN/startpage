@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FAVORITES, type Category } from "./data/favorites";
+import { FAVORITES } from "./data/favorites";
 import { useTheme } from "./hooks/useTheme";
 import { useClock } from "./hooks/useClock";
 import { useClockSettings } from "./hooks/useClockSettings";
@@ -9,13 +9,13 @@ import { usePersonalMessage } from "./hooks/usePersonalMessage";
 import { useProfile } from "./hooks/useProfile";
 import { useCustomShortcuts } from "./hooks/useCustomShortcuts";
 import { useCategories } from "./hooks/useCategories";
-import { useFavoriteOrder } from "./hooks/useFavoriteOrder";
+import { useDeckGrid } from "./hooks/useDeckGrid";
 import { useK3UI } from "./hooks/useK3UI";
 import { useSearchEngine } from "./hooks/useSearchEngine";
 import { useWeatherSettings } from "./hooks/useWeatherSettings";
 import { useWeather } from "./hooks/useWeather";
-import { Filters } from "./components/Filters";
-import { FavoritesGrid } from "./components/FavoritesGrid";
+import { StreamDeckGrid } from "./components/StreamDeckGrid";
+import { DeckSlotEditorDialog, type DeckEditorMode } from "./components/DeckSlotEditorDialog";
 import { SettingsSheet } from "./components/SettingsSheet";
 import { SettingsFabMenu } from "./components/SettingsFabMenu";
 import { Greeting } from "./components/Greeting";
@@ -28,8 +28,9 @@ import { SearchOverlay } from "./components/SearchOverlay";
 import { WeatherWidget } from "./components/WeatherWidget";
 import { ShortcutDialog } from "./components/ShortcutDialog";
 import { BootScreen } from "./components/BootScreen";
-import { MacDock } from "./components/MacDock";
 import type { SettingsSection } from "./types/settings";
+import type { DeckCategoryEditorValues, DeckSlot, DeckSlotEditorValues } from "./types/deck";
+import { registerDeckCallback, resolveSlotAction } from "./utils/deckCallbacks";
 
 export default function App() {
   const { t } = useTranslation();
@@ -47,8 +48,6 @@ export default function App() {
     setShowPersonalMessage,
     showAiTools,
     setShowAiTools,
-    showDock,
-    setShowDock,
     compactDate,
     setCompactDate,
     clockStyle,
@@ -88,31 +87,129 @@ export default function App() {
     fallbackCategoryId,
   } = useCategories();
 
-  const [filter, setFilter] = useState<Category | "all">("all");
+  const allFavoritesRaw = useMemo(
+    () => [...FAVORITES, ...customFavorites],
+    [customFavorites]
+  );
+
+  const {
+    currentPage,
+    bankPagination,
+    isOnHome,
+    canGoPrevBank,
+    navigateToPage,
+    navigateToLinkedPage,
+    navigateHome,
+    navigatePrevBank,
+    navigateNextBank,
+    executeSlot,
+    assignShortcutAt,
+    assignCategoryAt,
+    clearSlotAt,
+    addShortcutToCurrentPage,
+    reorderSlotsAt,
+  } = useDeckGrid({ favorites: allFavoritesRaw, categories });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsSection, setSettingsSection] = useState<SettingsSection>("general");
   const [shortcutDialogOpen, setShortcutDialogOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [deckEditor, setDeckEditor] = useState<{
+    open: boolean;
+    mode: DeckEditorMode;
+    slotIndex: number;
+    slot?: DeckSlot;
+  }>({ open: false, mode: "add-shortcut", slotIndex: 0 });
+
+  useEffect(() => {
+    registerDeckCallback("open-search", () => setSearchOpen(true));
+    registerDeckCallback("open-settings", () => {
+      setSettingsSection("general");
+      setSettingsOpen(true);
+    });
+  }, []);
 
   const openSettings = (section: SettingsSection) => {
     setSettingsSection(section);
     setSettingsOpen(true);
   };
 
-  const allFavoritesRaw = useMemo(
-    () => [...FAVORITES, ...customFavorites],
-    [customFavorites]
-  );
-
-  const { orderedFavorites, moveFavorite } = useFavoriteOrder(allFavoritesRaw);
-
-  const availableCats = useMemo(() => {
-    const set = new Set<Category>();
-    orderedFavorites.forEach((f) => f.tags.forEach((tg) => set.add(tg)));
-    return Array.from(set);
-  }, [orderedFavorites]);
-
   const showAnalogInHero = showClock && clockStyle === "analog";
+
+  const handleAddShortcut = (input: Parameters<typeof addShortcut>[0]) => {
+    const created = addShortcut(input);
+    if (!created) return false;
+    addShortcutToCurrentPage(created);
+    return true;
+  };
+
+  const editorInitial = useMemo(() => {
+    const slot = deckEditor.slot;
+    if (!slot) return undefined;
+    if (deckEditor.mode === "add-category" || deckEditor.mode === "edit-category") {
+      return {
+        label: slot.label ?? "",
+        icon: slot.icon,
+        monogram: slot.monogram,
+        slotVisual: slot.slotVisual,
+        backgroundColor: slot.backgroundColor,
+      } satisfies Partial<DeckCategoryEditorValues>;
+    }
+    const action = resolveSlotAction(slot) ?? { type: "url" as const, url: "https://" };
+    return {
+      label: slot.label ?? "",
+      icon: slot.icon,
+      monogram: slot.monogram,
+      slotVisual: slot.slotVisual,
+      backgroundColor: slot.backgroundColor,
+      action,
+    } satisfies Partial<DeckSlotEditorValues>;
+  }, [deckEditor.mode, deckEditor.slot]);
+
+  const handleDeckMenuAction = (actionId: string, slotIndex: number, slot: DeckSlot) => {
+    switch (actionId) {
+      case "add-category":
+        setDeckEditor({ open: true, mode: "add-category", slotIndex, slot });
+        break;
+      case "add-shortcut":
+        setDeckEditor({ open: true, mode: "add-shortcut", slotIndex, slot });
+        break;
+      case "edit-category":
+        setDeckEditor({ open: true, mode: "edit-category", slotIndex, slot });
+        break;
+      case "edit-shortcut":
+        setDeckEditor({ open: true, mode: "edit-shortcut", slotIndex, slot });
+        break;
+      case "delete-category":
+        if (slot.categoryId) removeCategory(slot.categoryId);
+        clearSlotAt(slotIndex);
+        break;
+      case "delete-shortcut":
+        clearSlotAt(slotIndex);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleSaveCategory = (values: DeckCategoryEditorValues) => {
+    const { slotIndex, mode, slot } = deckEditor;
+
+    if (mode === "edit-category" && slot?.categoryId) {
+      updateCategory(slot.categoryId, values.label);
+      assignCategoryAt(slotIndex, values, { id: slot.categoryId, label: values.label }, slot.targetPageId);
+    } else {
+      const created = addCategory(values.label);
+      if (created) assignCategoryAt(slotIndex, values, created);
+    }
+
+    setDeckEditor((prev) => ({ ...prev, open: false }));
+  };
+
+  const handleSaveShortcut = (values: DeckSlotEditorValues) => {
+    const { slotIndex, mode, slot } = deckEditor;
+    assignShortcutAt(slotIndex, values, mode === "edit-shortcut" ? slot?.id : undefined);
+    setDeckEditor((prev) => ({ ...prev, open: false }));
+  };
 
   return (
     <>
@@ -167,27 +264,30 @@ export default function App() {
           </div>
         </section>
 
-        {showFilters && (
-          <Filters
-            active={filter}
-            categories={categories}
-            available={availableCats}
-            onChange={setFilter}
-          />
-        )}
-
         {showFavorites && (
-          <FavoritesGrid
-            favorites={orderedFavorites}
-            filter={filter}
+          <StreamDeckGrid
+            page={currentPage}
+            bankPagination={bankPagination}
+            isOnHome={isOnHome}
+            canGoPrevBank={canGoPrevBank}
             k3ready={k3ready}
-            onAddShortcutClick={() => setShortcutDialogOpen(true)}
             onSearchClick={() => setSearchOpen(true)}
+            onNavigatePage={navigateToPage}
+            onNavigateLinkedPage={navigateToLinkedPage}
+            onNavigateHome={navigateHome}
+            onNavigatePrevBank={navigatePrevBank}
+            onNavigateNextBank={navigateNextBank}
+            onExecuteSlot={executeSlot}
+            onMenuAction={handleDeckMenuAction}
+            onReorderSlots={reorderSlotsAt}
           />
         )}
 
-        <footer className="footer">© {new Date().getFullYear()} — {t("footer")}</footer>
       </main>
+
+      <footer className="footer footer--sticky">
+        © {new Date().getFullYear()} — {t("footer")}
+      </footer>
 
       <SettingsSheet
         open={settingsOpen}
@@ -223,19 +323,9 @@ export default function App() {
         setShowPersonalMessage={setShowPersonalMessage}
         showAiTools={showAiTools}
         setShowAiTools={setShowAiTools}
-        showDock={showDock}
-        setShowDock={setShowDock}
         compactDate={compactDate}
         setCompactDate={setCompactDate}
       />
-
-      {showDock && (
-        <MacDock
-          favorites={orderedFavorites}
-          onSearchClick={() => setSearchOpen(true)}
-          onAddShortcutClick={() => setShortcutDialogOpen(true)}
-        />
-      )}
 
       <SearchOverlay
         open={searchOpen}
@@ -254,14 +344,19 @@ export default function App() {
         onUpdateCategory={updateCategory}
         onRemoveCategory={removeCategory}
         onMoveCategory={moveCategory}
-        onMoveShortcut={(id, delta) => {
-          reorderShortcut(id, delta);
-          moveFavorite(id, delta);
-          return true;
-        }}
+        onMoveShortcut={reorderShortcut}
         onRemoveShortcut={removeShortcut}
         onClose={() => setShortcutDialogOpen(false)}
-        onAdd={addShortcut}
+        onAdd={handleAddShortcut}
+      />
+
+      <DeckSlotEditorDialog
+        open={deckEditor.open}
+        mode={deckEditor.mode}
+        initial={editorInitial}
+        onClose={() => setDeckEditor((prev) => ({ ...prev, open: false }))}
+        onSaveCategory={handleSaveCategory}
+        onSaveShortcut={handleSaveShortcut}
       />
     </>
   );

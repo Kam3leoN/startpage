@@ -102,10 +102,6 @@ export const SHOW_PERSONAL_MESSAGE_KEY = "k3-show-personal-message";
 export const DEFAULT_SHOW_AI_TOOLS = true;
 export const SHOW_AI_TOOLS_KEY = "k3-show-ai-tools";
 
-/** Show macOS-style dock at the bottom. */
-export const DEFAULT_SHOW_DOCK = true;
-export const SHOW_DOCK_KEY = "k3-show-dock";
-
 /** Project links (settings footer). */
 export const PROJECT_GITHUB_URL = "https://github.com/Kam3leoN/startpage";
 export const PROJECT_FEEDBACK_URL = "mailto:feedback@example.com";
