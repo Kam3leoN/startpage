@@ -37,12 +37,12 @@ interface Props {
   setShowFavorites: (value: boolean) => void;
   showFilters: boolean;
   setShowFilters: (value: boolean) => void;
-  showEphemeris: boolean;
-  setShowEphemeris: (value: boolean) => void;
   showPersonalMessage: boolean;
   setShowPersonalMessage: (value: boolean) => void;
   showAiTools: boolean;
   setShowAiTools: (value: boolean) => void;
+  showWeekCelebrations: boolean;
+  setShowWeekCelebrations: (value: boolean) => void;
   compactDate: boolean;
   setCompactDate: (value: boolean) => void;
 }
@@ -94,12 +94,12 @@ export function SettingsSheet({
   setShowFavorites,
   showFilters,
   setShowFilters,
-  showEphemeris,
-  setShowEphemeris,
   showPersonalMessage,
   setShowPersonalMessage,
   showAiTools,
   setShowAiTools,
+  showWeekCelebrations,
+  setShowWeekCelebrations,
   compactDate,
   setCompactDate,
 }: Props) {
@@ -272,12 +272,6 @@ export function SettingsSheet({
             onChange={setShowFilters}
           />
           <SettingsSwitch
-            id="show-ephemeris"
-            label={t("display.ephemeris")}
-            checked={showEphemeris}
-            onChange={setShowEphemeris}
-          />
-          <SettingsSwitch
             id="show-personal-message"
             label={t("display.personalMessage")}
             checked={showPersonalMessage}
@@ -288,6 +282,13 @@ export function SettingsSheet({
             label={t("display.aiTools")}
             checked={showAiTools}
             onChange={setShowAiTools}
+          />
+          <SettingsSwitch
+            id="show-week-celebrations"
+            label={t("display.weekCelebrations")}
+            hint={t("display.weekCelebrationsHint")}
+            checked={showWeekCelebrations}
+            onChange={setShowWeekCelebrations}
           />
           <SettingsSwitch
             id="compact-date"

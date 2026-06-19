@@ -1,5 +1,5 @@
 import type { DeckPage, DeckStore } from "../types/deck";
-import { DRAFT_BANK_PAGE_ID } from "../config/deck";
+import { DRAFT_BANK_PAGE_ID, DRAFT_CATEGORY_PAGE_ID } from "../config/deck";
 import { findPageNavLinks, isNavSystemSlot } from "./deckGridCells";
 import {
   createDraftBankPage,
@@ -7,11 +7,13 @@ import {
   getPopulatedBankPageIds,
   isPopulatedBankPage,
 } from "./deckPageBanks";
+import { createDraftCategorySubPage } from "./deckCategoryPages";
 
 export interface DeckNavView {
   bankPageId: string;
   draftPage: DeckPage | null;
   subPageStack: string[];
+  draftCategoryPage: DeckPage | null;
 }
 
 /** Page avec au moins un raccourci, catégorie ou switch (hors navigation système). */
@@ -95,9 +97,13 @@ export function getNavigationSequence(store: DeckStore, nav: DeckNavView): strin
   const isDraftBank = nav.draftPage !== null && nav.subPageStack.length === 0;
 
   if (nav.subPageStack.length > 0) {
-    const currentId = nav.subPageStack[nav.subPageStack.length - 1]!;
+    const currentId = nav.draftCategoryPage
+      ? nav.subPageStack[nav.subPageStack.length - 1] ?? nav.bankPageId
+      : nav.subPageStack[nav.subPageStack.length - 1]!;
     const rootId = getCategoryRootId(store, currentId);
-    return getCategoryPageSequence(store, rootId);
+    const sequence = getCategoryPageSequence(store, rootId);
+    if (nav.draftCategoryPage) return [...sequence, DRAFT_CATEGORY_PAGE_ID];
+    return sequence;
   }
 
   const populated = getPopulatedBankPageIds(store);
@@ -108,6 +114,7 @@ export function getNavigationSequence(store: DeckStore, nav: DeckNavView): strin
 
 export function resolveCurrentNavPageId(nav: DeckNavView): string {
   if (nav.subPageStack.length > 0) {
+    if (nav.draftCategoryPage) return DRAFT_CATEGORY_PAGE_ID;
     return nav.subPageStack[nav.subPageStack.length - 1] ?? nav.bankPageId;
   }
   if (nav.draftPage) return DRAFT_BANK_PAGE_ID;
@@ -131,14 +138,14 @@ export function canNavigatePrev(store: DeckStore, nav: DeckNavView): boolean {
 }
 
 export function canNavigateNext(store: DeckStore, nav: DeckNavView): boolean {
-  if (nav.draftPage) return false;
+  if (nav.draftPage || nav.draftCategoryPage) return false;
 
   const sequence = getNavigationSequence(store, nav);
   const currentId = resolveCurrentNavPageId(nav);
   const index = sequence.indexOf(currentId);
 
   if (index >= 0 && index < sequence.length - 1) return true;
-  if (nav.subPageStack.length > 0) return false;
+  if (nav.subPageStack.length > 0) return true;
 
   const populated = getPopulatedBankPageIds(store);
   const bankIndex = populated.indexOf(nav.bankPageId);
@@ -149,12 +156,17 @@ export interface DeckNavStep {
   bankPageId: string;
   draftPage: DeckPage | null;
   subPageStack: string[];
+  draftCategoryPage: DeckPage | null;
 }
 
 /** Calcule l'état nav après « page précédente ». */
 export function resolvePrevNavStep(store: DeckStore, nav: DeckNavView): DeckNavStep | null {
   if (nav.draftPage) {
     return { ...nav, draftPage: null };
+  }
+
+  if (nav.draftCategoryPage) {
+    return { ...nav, draftCategoryPage: null };
   }
 
   const sequence = getNavigationSequence(store, nav);
@@ -166,14 +178,15 @@ export function resolvePrevNavStep(store: DeckStore, nav: DeckNavView): DeckNavS
       return {
         ...nav,
         subPageStack: [...nav.subPageStack.slice(0, -1), sequence[index - 1]!],
+        draftCategoryPage: null,
       };
     }
-    return { ...nav, subPageStack: nav.subPageStack.slice(0, -1) };
+    return { ...nav, subPageStack: nav.subPageStack.slice(0, -1), draftCategoryPage: null };
   }
 
   if (index > 0) {
     const bankPageId = sequence[index - 1]!;
-    return { bankPageId, draftPage: null, subPageStack: [] };
+    return { bankPageId, draftPage: null, subPageStack: [], draftCategoryPage: null };
   }
 
   return null;
@@ -181,7 +194,7 @@ export function resolvePrevNavStep(store: DeckStore, nav: DeckNavView): DeckNavS
 
 /** Calcule l'état nav après « page suivante ». */
 export function resolveNextNavStep(store: DeckStore, nav: DeckNavView): DeckNavStep | null {
-  if (nav.draftPage) return null;
+  if (nav.draftPage || nav.draftCategoryPage) return null;
 
   const sequence = getNavigationSequence(store, nav);
   const currentId = resolveCurrentNavPageId(nav);
@@ -192,16 +205,28 @@ export function resolveNextNavStep(store: DeckStore, nav: DeckNavView): DeckNavS
       return {
         ...nav,
         subPageStack: [...nav.subPageStack.slice(0, -1), sequence[index + 1]!],
+        draftCategoryPage: null,
       };
     }
-    return null;
+
+    const anchorId = nav.subPageStack[nav.subPageStack.length - 1]!;
+    const rootId = getCategoryRootId(store, anchorId);
+    return {
+      ...nav,
+      draftCategoryPage: createDraftCategorySubPage(store, rootId),
+    };
   }
 
   if (index >= 0 && index < sequence.length - 1) {
-    return { bankPageId: sequence[index + 1]!, draftPage: null, subPageStack: [] };
+    return {
+      bankPageId: sequence[index + 1]!,
+      draftPage: null,
+      subPageStack: [],
+      draftCategoryPage: null,
+    };
   }
 
-  return { ...nav, draftPage: createDraftBankPage(store) };
+  return { ...nav, draftPage: createDraftBankPage(store), draftCategoryPage: null };
 }
 
 /** Navigue vers une page liée (prev-page / next-page) dans une catégorie. */
@@ -210,12 +235,19 @@ export function resolveLinkedCategoryNav(
   linkedPageId: string
 ): DeckNavStep {
   if (nav.subPageStack.length === 0) {
-    return { ...nav, subPageStack: [linkedPageId] };
+    return { ...nav, subPageStack: [linkedPageId], draftCategoryPage: null };
   }
   return {
     ...nav,
     subPageStack: [...nav.subPageStack.slice(0, -1), linkedPageId],
+    draftCategoryPage: null,
   };
+}
+
+/** Page courante dans une catégorie (hors brouillon). */
+export function resolveCategoryAnchorPageId(nav: DeckNavView): string | null {
+  if (nav.subPageStack.length === 0) return null;
+  return nav.subPageStack[nav.subPageStack.length - 1] ?? null;
 }
 
 export { isPopulatedBankPage, getPopulatedBankPageIds };

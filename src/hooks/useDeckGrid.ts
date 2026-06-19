@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { CategoryDef } from "../data/categories";
 import type { Favorite } from "../data/favorites";
-import { DRAFT_BANK_PAGE_ID, ROOT_PAGE_ID } from "../config/deck";
+import { DRAFT_BANK_PAGE_ID, DRAFT_CATEGORY_PAGE_ID, ROOT_PAGE_ID } from "../config/deck";
 import type { DeckCategoryEditorValues, DeckPage, DeckSlot, DeckSlotEditorValues, DeckStore } from "../types/deck";
 import {
   fillPageWithFavorites,
@@ -25,8 +25,14 @@ import {
   pruneEmptyBankPages,
 } from "../utils/deckPageBanks";
 import {
+  commitDraftCategorySubPage,
+  isPopulatedCategorySubPage,
+} from "../utils/deckCategoryPages";
+import {
   canNavigatePrev,
+  getCategoryRootId,
   getDeckPageIndicator,
+  resolveCategoryAnchorPageId,
   resolveLinkedCategoryNav,
   resolveNextNavStep,
   resolvePrevNavStep,
@@ -47,6 +53,7 @@ const INITIAL_NAV: DeckNavState = {
   bankPageId: ROOT_PAGE_ID,
   draftPage: null,
   subPageStack: [],
+  draftCategoryPage: null,
 };
 
 function setPageSlot(pageId: string, store: DeckStore, slotIndex: number, slot: DeckSlot | null): DeckStore {
@@ -73,6 +80,7 @@ function applyPageSlot(page: DeckPage, slotIndex: number, slot: DeckSlot | null)
 
 function resolveCurrentPageId(nav: DeckNavState): string {
   if (nav.subPageStack.length > 0) {
+    if (nav.draftCategoryPage) return DRAFT_CATEGORY_PAGE_ID;
     return nav.subPageStack[nav.subPageStack.length - 1] ?? nav.bankPageId;
   }
   if (nav.draftPage) return DRAFT_BANK_PAGE_ID;
@@ -109,16 +117,19 @@ export function useDeckGrid({ favorites, categories }: InitOptions) {
 
   const currentPageId = resolveCurrentPageId(nav);
   const isDraftBank = nav.draftPage !== null && nav.subPageStack.length === 0;
+  const isDraftCategory = nav.draftCategoryPage !== null && nav.subPageStack.length > 0;
   const currentPage =
-    isDraftBank && nav.draftPage
-      ? nav.draftPage
-      : store.pages[currentPageId] ?? store.pages[store.rootPageId]!;
+    isDraftCategory && nav.draftCategoryPage
+      ? nav.draftCategoryPage
+      : isDraftBank && nav.draftPage
+        ? nav.draftPage
+        : store.pages[currentPageId] ?? store.pages[store.rootPageId]!;
   const bankPagination = getDeckPageIndicator(store, nav);
   const isOnHome =
     nav.bankPageId === store.rootPageId && !isDraftBank && nav.subPageStack.length === 0;
 
   const navigateToPage = useCallback((pageId: string) => {
-    setNav((prev) => ({ ...prev, subPageStack: [pageId] }));
+    setNav((prev) => ({ ...prev, subPageStack: [pageId], draftCategoryPage: null }));
   }, []);
 
   const navigateToLinkedPage = useCallback((linkedPageId: string) => {
@@ -126,19 +137,32 @@ export function useDeckGrid({ favorites, categories }: InitOptions) {
   }, []);
 
   const navigateHome = useCallback(() => {
-    setNav({ bankPageId: store.rootPageId, draftPage: null, subPageStack: [] });
+    setNav({
+      bankPageId: store.rootPageId,
+      draftPage: null,
+      subPageStack: [],
+      draftCategoryPage: null,
+    });
   }, [store.rootPageId]);
 
   const navigateBack = useCallback(() => {
-    setNav((prev) =>
-      prev.subPageStack.length > 0
-        ? { ...prev, subPageStack: prev.subPageStack.slice(0, -1) }
-        : prev
-    );
+    setNav((prev) => {
+      if (prev.draftCategoryPage) {
+        return { ...prev, draftCategoryPage: null };
+      }
+      if (prev.subPageStack.length > 0) {
+        return {
+          ...prev,
+          subPageStack: prev.subPageStack.slice(0, -1),
+          draftCategoryPage: null,
+        };
+      }
+      return prev;
+    });
   }, []);
 
   const navigateToBank = useCallback((bankPageId: string) => {
-    setNav({ bankPageId, draftPage: null, subPageStack: [] });
+    setNav({ bankPageId, draftPage: null, subPageStack: [], draftCategoryPage: null });
   }, []);
 
   const navigatePrevBank = useCallback(() => {
@@ -149,6 +173,34 @@ export function useDeckGrid({ favorites, categories }: InitOptions) {
     setNav((prev) => resolveNextNavStep(store, prev) ?? prev);
   }, [store]);
 
+  const commitDraftCategoryUpdate = useCallback(
+    (updatedPage: DeckPage): string => {
+      const anchorId = resolveCategoryAnchorPageId(nav);
+      if (!anchorId || !nav.draftCategoryPage) return DRAFT_CATEGORY_PAGE_ID;
+
+      if (!isPopulatedCategorySubPage(updatedPage)) {
+        setNav((prev) => (prev.draftCategoryPage ? { ...prev, draftCategoryPage: updatedPage } : prev));
+        return DRAFT_CATEGORY_PAGE_ID;
+      }
+
+      const rootId = getCategoryRootId(store, anchorId);
+      const { store: nextStore, pageId } = commitDraftCategorySubPage(
+        store,
+        updatedPage,
+        rootId,
+        anchorId
+      );
+      setStore(nextStore);
+      setNav((prev) => ({
+        ...prev,
+        draftCategoryPage: null,
+        subPageStack: [...prev.subPageStack.slice(0, -1), pageId],
+      }));
+      return pageId;
+    },
+    [nav, store]
+  );
+
   const commitDraftPageUpdate = useCallback(
     (updatedPage: DeckPage): string => {
       if (!isPopulatedBankPage(updatedPage)) {
@@ -158,7 +210,7 @@ export function useDeckGrid({ favorites, categories }: InitOptions) {
 
       const { store: nextStore, pageId } = commitDraftBankPage(store, updatedPage);
       setStore(pruneEmptyBankPages(nextStore));
-      setNav({ bankPageId: pageId, draftPage: null, subPageStack: [] });
+      setNav({ bankPageId: pageId, draftPage: null, subPageStack: [], draftCategoryPage: null });
       return pageId;
     },
     [store]
@@ -245,6 +297,11 @@ export function useDeckGrid({ favorites, categories }: InitOptions) {
       const id = existingId ?? `slot-${Date.now()}`;
       const slot = slotFromEditorValues(id, values);
 
+      if (isDraftCategory && nav.draftCategoryPage) {
+        commitDraftCategoryUpdate(applyPageSlot(nav.draftCategoryPage, slotIndex, slot));
+        return;
+      }
+
       if (isDraftBank && nav.draftPage) {
         commitDraftPageUpdate(applyPageSlot(nav.draftPage, slotIndex, slot));
         return;
@@ -252,7 +309,17 @@ export function useDeckGrid({ favorites, categories }: InitOptions) {
 
       updateStore(setPageSlot(currentPageId, store, slotIndex, slot));
     },
-    [isDraftBank, nav.draftPage, commitDraftPageUpdate, currentPageId, store, updateStore]
+    [
+      isDraftBank,
+      isDraftCategory,
+      nav.draftPage,
+      nav.draftCategoryPage,
+      commitDraftPageUpdate,
+      commitDraftCategoryUpdate,
+      currentPageId,
+      store,
+      updateStore,
+    ]
   );
 
   const assignCategoryAt = useCallback(
@@ -294,7 +361,7 @@ export function useDeckGrid({ favorites, categories }: InitOptions) {
           });
         }
         setStore(pruneEmptyBankPages(next));
-        setNav({ bankPageId, draftPage: null, subPageStack: [] });
+        setNav({ bankPageId, draftPage: null, subPageStack: [], draftCategoryPage: null });
         return;
       }
 
@@ -318,6 +385,15 @@ export function useDeckGrid({ favorites, categories }: InitOptions) {
     (slotIndex: number) => {
       const slot = currentPage.slots[slotIndex];
 
+      if (isDraftCategory && nav.draftCategoryPage) {
+        setNav((prev) =>
+          prev.draftCategoryPage
+            ? { ...prev, draftCategoryPage: applyPageSlot(prev.draftCategoryPage, slotIndex, null) }
+            : prev
+        );
+        return;
+      }
+
       if (isDraftBank && nav.draftPage) {
         setNav((prev) =>
           prev.draftPage
@@ -336,16 +412,26 @@ export function useDeckGrid({ favorites, categories }: InitOptions) {
 
       updateStore(next);
     },
-    [currentPage, isDraftBank, nav.draftPage, currentPageId, store, updateStore]
+    [currentPage, isDraftBank, isDraftCategory, nav.draftPage, nav.draftCategoryPage, currentPageId, store, updateStore]
   );
 
   const addShortcutToCurrentPage = useCallback(
     (shortcut: CustomShortcut) => {
       const slot = slotFromShortcut(shortcut);
-      const page = isDraftBank && nav.draftPage ? nav.draftPage : store.pages[currentPageId];
+      const page =
+        isDraftCategory && nav.draftCategoryPage
+          ? nav.draftCategoryPage
+          : isDraftBank && nav.draftPage
+            ? nav.draftPage
+            : store.pages[currentPageId];
       if (!page || findFirstEmptySlotIndex(page, 0) < 0) return false;
 
       const index = findFirstEmptySlotIndex(page, 0)!;
+
+      if (isDraftCategory && nav.draftCategoryPage) {
+        commitDraftCategoryUpdate(applyPageSlot(nav.draftCategoryPage, index, slot));
+        return true;
+      }
 
       if (isDraftBank && nav.draftPage) {
         commitDraftPageUpdate(applyPageSlot(nav.draftPage, index, slot));
@@ -355,12 +441,25 @@ export function useDeckGrid({ favorites, categories }: InitOptions) {
       updateStore(setPageSlot(currentPageId, store, index, slot));
       return true;
     },
-    [isDraftBank, nav.draftPage, commitDraftPageUpdate, store, currentPageId, updateStore]
+    [isDraftBank, isDraftCategory, nav.draftPage, nav.draftCategoryPage, commitDraftPageUpdate, commitDraftCategoryUpdate, store, currentPageId, updateStore]
   );
 
   const reorderSlotsAt = useCallback(
     (fromIndex: number, toIndex: number) => {
       if (fromIndex === toIndex) return;
+
+      if (isDraftCategory && nav.draftCategoryPage) {
+        const page = nav.draftCategoryPage;
+        const fromSlot = page.slots[fromIndex];
+        if (!fromSlot || fromSlot.kind === "empty") return;
+
+        const slots = [...page.slots];
+        const toSlot = slots[toIndex] ?? null;
+        slots[toIndex] = fromSlot;
+        slots[fromIndex] = toSlot;
+        commitDraftCategoryUpdate({ ...page, slots });
+        return;
+      }
 
       if (isDraftBank && nav.draftPage) {
         const page = nav.draftPage;
@@ -387,7 +486,17 @@ export function useDeckGrid({ favorites, categories }: InitOptions) {
       slots[fromIndex] = toSlot;
       updateStore(upsertPage(store, { ...page, slots }));
     },
-    [isDraftBank, nav.draftPage, commitDraftPageUpdate, currentPageId, store, updateStore]
+    [
+      isDraftBank,
+      isDraftCategory,
+      nav.draftPage,
+      nav.draftCategoryPage,
+      commitDraftPageUpdate,
+      commitDraftCategoryUpdate,
+      currentPageId,
+      store,
+      updateStore,
+    ]
   );
 
   const pageStack = isDraftBank

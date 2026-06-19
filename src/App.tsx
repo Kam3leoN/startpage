@@ -14,6 +14,7 @@ import { useK3UI } from "./hooks/useK3UI";
 import { useSearchEngine } from "./hooks/useSearchEngine";
 import { useWeatherSettings } from "./hooks/useWeatherSettings";
 import { useWeather } from "./hooks/useWeather";
+import { useBirthdays } from "./hooks/useBirthdays";
 import { StreamDeckGrid } from "./components/StreamDeckGrid";
 import { DeckSlotEditorDialog, type DeckEditorMode } from "./components/DeckSlotEditorDialog";
 import { SettingsSheet } from "./components/SettingsSheet";
@@ -25,9 +26,11 @@ import { AnalogClock } from "./components/AnalogClock";
 import { AiToolsBar } from "./components/AiToolsBar";
 import { StartPageAppBar } from "./components/StartPageAppBar";
 import { SearchOverlay } from "./components/SearchOverlay";
-import { WeatherWidget } from "./components/WeatherWidget";
 import { ShortcutDialog } from "./components/ShortcutDialog";
 import { BootScreen } from "./components/BootScreen";
+import { WeekCelebrationsCard } from "./components/WeekCelebrationsCard";
+import { StartPageNavigationBar } from "./components/StartPageNavigationBar";
+import { WeatherDialog } from "./components/WeatherDialog";
 import type { SettingsSection } from "./types/settings";
 import type { DeckCategoryEditorValues, DeckSlot, DeckSlotEditorValues } from "./types/deck";
 import { registerDeckCallback, resolveSlotAction } from "./utils/deckCallbacks";
@@ -42,12 +45,12 @@ export default function App() {
     setShowFavorites,
     showFilters,
     setShowFilters,
-    showEphemeris,
-    setShowEphemeris,
     showPersonalMessage,
     setShowPersonalMessage,
     showAiTools,
     setShowAiTools,
+    showWeekCelebrations,
+    setShowWeekCelebrations,
     compactDate,
     setCompactDate,
     clockStyle,
@@ -86,6 +89,7 @@ export default function App() {
     moveCategory,
     fallbackCategoryId,
   } = useCategories();
+  const { birthdays, addBirthday, removeBirthday, updateBirthday } = useBirthdays();
 
   const allFavoritesRaw = useMemo(
     () => [...FAVORITES, ...customFavorites],
@@ -112,6 +116,7 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsSection, setSettingsSection] = useState<SettingsSection>("general");
   const [shortcutDialogOpen, setShortcutDialogOpen] = useState(false);
+  const [weatherDialogOpen, setWeatherDialogOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [deckEditor, setDeckEditor] = useState<{
     open: boolean;
@@ -211,22 +216,32 @@ export default function App() {
     setDeckEditor((prev) => ({ ...prev, open: false }));
   };
 
+  const handleToggleWeekCelebrations = () => {
+    setShowWeekCelebrations(!showWeekCelebrations);
+  };
+
+  const handleWeatherNavClick = () => {
+    const next = !weatherDialogOpen;
+    setWeatherDialogOpen(next);
+    setShowWeather(next);
+  };
+
+  const handleWeatherDialogClose = () => {
+    setWeatherDialogOpen(false);
+    setShowWeather(false);
+  };
+
   return (
     <>
       <BootScreen appReady={k3ready} />
 
-      {showWeather && (
-        <WeatherWidget
-          temperature={weather.snapshot?.temp ?? null}
-          feelsLike={weather.snapshot?.feel ?? null}
-          humidity={weather.snapshot?.humidity ?? null}
-          condition={weather.condition}
-          locationLabel={weather.locationLabel}
-          weatherCode={weather.snapshot?.code ?? null}
-          loading={weather.loading}
-          error={weather.error}
-          isDark={isDark}
-          onOpenSettings={() => openSettings("weather")}
+      {showWeekCelebrations && (
+        <WeekCelebrationsCard
+          date={date}
+          birthdays={birthdays}
+          onAddBirthday={addBirthday}
+          onRemoveBirthday={removeBirthday}
+          onUpdateBirthday={updateBirthday}
         />
       )}
 
@@ -260,7 +275,7 @@ export default function App() {
             {showPersonalMessage && (
               <PersonalMessage message={personalMessage} onChange={setPersonalMessage} />
             )}
-            <TodayDate date={date} compactDate={compactDate} showEphemeris={showEphemeris} />
+            <TodayDate date={date} compactDate={compactDate} />
           </div>
         </section>
 
@@ -288,6 +303,30 @@ export default function App() {
       <footer className="footer footer--sticky">
         © {new Date().getFullYear()} — {t("footer")}
       </footer>
+
+      <StartPageNavigationBar
+        k3ready={k3ready}
+        showWeekCelebrations={showWeekCelebrations}
+        showWeather={weatherDialogOpen}
+        onToggleWeekCelebrations={handleToggleWeekCelebrations}
+        onWeatherNavClick={handleWeatherNavClick}
+      />
+
+      <WeatherDialog
+        open={weatherDialogOpen}
+        k3ready={k3ready}
+        temperature={weather.snapshot?.temp ?? null}
+        feelsLike={weather.snapshot?.feel ?? null}
+        humidity={weather.snapshot?.humidity ?? null}
+        condition={weather.condition}
+        locationLabel={weather.locationLabel}
+        weatherCode={weather.snapshot?.code ?? null}
+        loading={weather.loading}
+        error={weather.error}
+        isDark={isDark}
+        onClose={handleWeatherDialogClose}
+        onOpenSettings={() => openSettings("weather")}
+      />
 
       <SettingsSheet
         open={settingsOpen}
@@ -317,12 +356,12 @@ export default function App() {
         setShowFavorites={setShowFavorites}
         showFilters={showFilters}
         setShowFilters={setShowFilters}
-        showEphemeris={showEphemeris}
-        setShowEphemeris={setShowEphemeris}
         showPersonalMessage={showPersonalMessage}
         setShowPersonalMessage={setShowPersonalMessage}
         showAiTools={showAiTools}
         setShowAiTools={setShowAiTools}
+        showWeekCelebrations={showWeekCelebrations}
+        setShowWeekCelebrations={setShowWeekCelebrations}
         compactDate={compactDate}
         setCompactDate={setCompactDate}
       />

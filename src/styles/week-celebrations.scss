@@ -1,0 +1,439 @@
+/* ====== Week celebrations card (draggable) ====== */
+.week-card {
+  position: fixed;
+  z-index: 44;
+  width: min(calc(100vw - 24px), 300px);
+  max-height: min(70vh, 520px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 55%, transparent);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--md-sys-color-surface-container) 88%, transparent);
+  backdrop-filter: saturate(160%) blur(16px);
+  box-shadow: var(--md-sys-elevation-level2, 0 4px 12px rgba(0, 0, 0, 0.12));
+  color: var(--md-sys-color-on-surface);
+  overflow: hidden;
+  touch-action: none;
+  transition: box-shadow 0.15s ease;
+}
+
+.week-card--dragging {
+  box-shadow: var(--md-sys-elevation-level4, 0 8px 24px rgba(0, 0, 0, 0.18));
+  cursor: grabbing;
+}
+
+.week-card__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px 8px 4px;
+  border-bottom: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 35%, transparent);
+  flex-shrink: 0;
+}
+
+.week-card__drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: grab;
+  flex-shrink: 0;
+  touch-action: none;
+}
+
+.week-card__drag-handle:active {
+  cursor: grabbing;
+}
+
+.week-card__grip {
+  width: 14px;
+  height: 14px;
+  background-image: radial-gradient(
+    circle,
+    currentColor 1.5px,
+    transparent 1.5px
+  );
+  background-size: 5px 5px;
+  opacity: 0.7;
+}
+
+.week-card__title {
+  flex: 1;
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--md-sys-color-on-surface);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.week-card__add {
+  flex-shrink: 0;
+}
+
+.week-card__toggle--close {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.week-card__add-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+  font-weight: 600;
+}
+
+.week-card__form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 35%, transparent);
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-high) 40%, transparent);
+}
+
+.week-card__form-title {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--md-sys-color-tertiary, var(--md-sys-color-primary));
+}
+
+.week-card__form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.week-card__form-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.week-card__form-sep {
+  color: var(--md-sys-color-on-surface-variant);
+  font-weight: 600;
+}
+
+.week-card__input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-outline) 50%, transparent);
+  border-radius: 12px;
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.week-card__input--num {
+  width: 3.2rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.week-card__input--year {
+  flex: 1;
+  min-width: 0;
+}
+
+.week-card__body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 0 10px;
+}
+
+.week-card__section-title {
+  margin: 0 0 6px;
+  padding: 0 14px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--md-sys-color-primary);
+}
+
+.week-card__days {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.week-card__day {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 8px;
+  padding: 7px 12px;
+  border-inline-start: 3px solid transparent;
+  transition: background-color 0.15s;
+}
+
+.week-card__day--today {
+  background: color-mix(in srgb, var(--md-sys-color-primary-container) 55%, transparent);
+  border-inline-start-color: var(--md-sys-color-primary);
+}
+
+.week-card__day--empty {
+  opacity: 0.55;
+}
+
+.week-card__day-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding-top: 2px;
+}
+
+.week-card__weekday {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--md-sys-color-on-surface-variant);
+  line-height: 1.1;
+}
+
+.week-card__date-num {
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--md-sys-color-on-surface);
+}
+
+.week-card__day--today .week-card__date-num {
+  color: var(--md-sys-color-primary);
+}
+
+.week-card__day-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 2px;
+}
+
+.week-card__saints {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--md-sys-color-on-surface);
+}
+
+.week-card__names {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.week-card__name-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.week-card__gender-icon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+}
+
+.week-card__name-entry--male .week-card__name {
+  color: var(--md-sys-color-primary);
+}
+
+.week-card__name-entry--female .week-card__name {
+  color: var(--md-sys-color-tertiary, var(--md-sys-color-secondary));
+}
+
+.week-card__name {
+  font-size: 0.78rem;
+  line-height: 1.3;
+  font-weight: 500;
+}
+
+.week-card__field,
+.week-card__datepicker {
+  width: 100%;
+}
+
+.week-card__datepicker .datepicker {
+  width: 100%;
+}
+
+.week-card__section-title--birthdays {
+  color: var(--md-sys-color-tertiary, var(--md-sys-color-secondary));
+}
+
+.week-card__section--birthdays {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 35%, transparent);
+}
+
+.week-card__birthdays-empty {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 0.72rem;
+  font-style: italic;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.week-card__birthdays-saved-hint {
+  font-style: normal;
+  font-weight: 500;
+}
+
+.week-card__birthdays-all-toggle {
+  display: block;
+  width: 100%;
+  margin: 6px 0 0;
+  padding: 6px 12px 8px;
+  text-align: left;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--md-sys-color-primary);
+}
+
+.week-card__birthdays-list--all {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px dashed color-mix(in srgb, var(--md-sys-color-outline-variant) 45%, transparent);
+  max-height: min(40vh, 220px);
+  overflow-y: auto;
+}
+
+.week-card__birthdays-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.week-card__birthday-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-inline-start: 3px solid transparent;
+}
+
+.week-card__birthday-item--week {
+  background: color-mix(in srgb, var(--md-sys-color-tertiary-container, var(--md-sys-color-secondary-container)) 40%, transparent);
+  border-inline-start-color: var(--md-sys-color-tertiary, var(--md-sys-color-secondary));
+}
+
+.week-card__birthday-item--today {
+  background: color-mix(in srgb, var(--md-sys-color-tertiary-container, var(--md-sys-color-primary-container)) 65%, transparent);
+  border-inline-start-color: var(--md-sys-color-tertiary, var(--md-sys-color-primary));
+}
+
+.week-card__birthday-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.week-card__birthday-date {
+  font-size: 0.7rem;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.week-card__birthday-badge {
+  margin-inline-start: 4px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--md-sys-color-tertiary, var(--md-sys-color-primary));
+}
+
+.week-card__birthday {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+
+.week-card__birthday-cake {
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+.week-card__birthday-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  color: var(--md-sys-color-tertiary, var(--md-sys-color-primary));
+}
+
+.week-card__birthday-age {
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.week-card__birthday-item--editing {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.week-card__birthday-edit {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.week-card__birthday-edit-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+.week-card__birthday-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 2px;
+}
+
+.week-card__birthday-edit-btn,
+.week-card__birthday-remove {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.week-card__birthday-edit-btn:hover,
+.week-card__birthday-remove:hover {
+  opacity: 1;
+}
+
+.week-card__empty-day {
+  font-size: 0.72rem;
+  font-style: italic;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+@media (max-width: 640px) {
+  .week-card {
+    width: min(calc(100vw - 20px), 280px);
+    max-height: min(55vh, 400px);
+  }
+}

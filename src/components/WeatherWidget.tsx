@@ -16,6 +16,8 @@ interface Props {
   loading: boolean;
   error: string | null;
   isDark?: boolean;
+  /** `fixed` = coin haut-gauche ; `dialog` = contenu dans un dialog centré. */
+  variant?: "fixed" | "dialog";
   onOpenSettings?: () => void;
 }
 
@@ -30,6 +32,7 @@ export function WeatherWidget({
   loading,
   error,
   isDark = false,
+  variant = "fixed",
   onOpenSettings,
 }: Props) {
   const { t } = useTranslation();
@@ -101,11 +104,14 @@ export function WeatherWidget({
     </>
   );
 
+  const className =
+    variant === "dialog" ? "weather-widget weather-widget--dialog" : "weather-widget";
+
   if (onOpenSettings) {
     return (
       <button
         type="button"
-        className="weather-widget"
+        className={className}
         onClick={onOpenSettings}
         aria-label={t("weather.openSettings")}
       >
@@ -115,7 +121,7 @@ export function WeatherWidget({
   }
 
   return (
-    <div className="weather-widget" aria-live="polite">
+    <div className={className} aria-live="polite">
       {inner}
     </div>
   );

@@ -1,0 +1,15 @@
+<!--
+  K3UI Icons - Premium Icon Library
+  Icon: Calendar
+  Version: 1.0.0
+  Created by @Kam3leoN
+  Website: https://k3ui.com
+  License: Commercial License - https://k3ui.com/license
+  Copyright © 2025 K3UI, Inc. All rights reserved.
+
+  This icon is part of the K3UI icon library.
+  Unauthorized use, distribution, or modification is prohibited.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+  <path fill="currentColor" d="M128 128C92.7 128 64 156.7 64 192V512C64 547.3 92.7 576 128 576H512C547.3 576 576 547.3 576 512V192C576 156.7 547.3 128 512 128H480V160C480 177.7 466.7 192 448 192C429.3 192 416 177.7 416 160V128H224V160C224 177.7 210.7 192 192 192C173.3 192 160 177.7 160 160V128H128zM160 288H480V512H160V288z"/>
+</svg>

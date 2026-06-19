@@ -102,6 +102,16 @@ export const SHOW_PERSONAL_MESSAGE_KEY = "k3-show-personal-message";
 export const DEFAULT_SHOW_AI_TOOLS = true;
 export const SHOW_AI_TOOLS_KEY = "k3-show-ai-tools";
 
+/** Show draggable week celebrations / birthdays card. */
+export const DEFAULT_SHOW_WEEK_CELEBRATIONS = true;
+export const SHOW_WEEK_CELEBRATIONS_KEY = "k3-show-week-celebrations";
+
+/** localStorage key for week card drag position. */
+export const WEEK_CELEBRATIONS_POSITION_KEY = "k3-week-celebrations-position";
+
+/** localStorage key for user birthdays. */
+export const BIRTHDAYS_STORAGE_KEY = "k3-birthdays";
+
 /** Project links (settings footer). */
 export const PROJECT_GITHUB_URL = "https://github.com/Kam3leoN/startpage";
 export const PROJECT_FEEDBACK_URL = "mailto:feedback@example.com";

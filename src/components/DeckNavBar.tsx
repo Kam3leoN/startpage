@@ -18,7 +18,7 @@ interface Props {
 }
 
 /**
- * Barre sous la grille — une case par colonne active, chip centré sur la colonne 10.
+ * Barre sous la grille — prev (3) | home (4) | search (5) | next (6) | chip (8).
  */
 export function DeckNavBar({
   isOnHome,
@@ -36,10 +36,10 @@ export function DeckNavBar({
 
   useEffect(() => {
     const root = navRef.current;
-    if (!root) return;
+    if (!root || !k3ready) return;
     window.K?.IconManager?.processIconsInContainer?.(root);
     window.K?.IconManager?.forceDisplayIcons?.();
-  }, []);
+  }, [k3ready]);
 
   return (
     <nav ref={navRef} className="deck-nav" aria-label={t("deck.navLabel")}>
@@ -85,7 +85,7 @@ export function DeckNavBar({
           <ChevronRightIcon aria-hidden />
         </K3IconButton>
 
-        <DeckPageChip current={pageCurrent} total={pageTotal} k3ready={k3ready} />
+        <DeckPageChip current={pageCurrent} total={pageTotal} />
       </div>
     </nav>
   );

@@ -47,6 +47,12 @@ export interface K3FieldInstance {
   destroy?: () => void;
 }
 
+export interface K3DatepickerInstance {
+  getDate?: () => Date | null;
+  setDate?: (date: Date | null) => void;
+  destroy?: () => void;
+}
+
 export interface K3API {
   ThemeManager: K3ThemeManager;
   DynamicColorManager: K3DynamicColorManager;
@@ -150,6 +156,38 @@ export interface K3API {
       }
     ): { destroy?: () => void; setData?: (data: Array<{ id?: string; text: string; type?: string; selected?: boolean }>) => void } | Array<{ destroy?: () => void }>;
     getInstance(el: HTMLElement): { destroy?: () => void; setData?: (data: Array<{ id?: string; text: string; type?: string; selected?: boolean }>) => void } | undefined;
+  };
+  NavigationBar?: {
+    init(
+      el: Element,
+      opts?: {
+        displayMode?: "portable" | "desktop" | "always";
+        compact?: boolean;
+        activeIndex?: number;
+        onClick?: (destination: string | number, index: number) => void;
+        onChange?: (destination: string | number, index: number) => void;
+      }
+    ): unknown;
+    getInstance(el: HTMLElement): { destroy?: () => void; setActiveIndex?: (index: number) => void } | undefined;
+  };
+  Datepicker?: {
+    init(
+      el: HTMLElement,
+      opts?: {
+        label?: string;
+        locale?: string;
+        inputVariant?: "filled" | "outlined";
+        placeholder?: string;
+        icon?: string;
+        selectedDate?: Date | null;
+        maxDate?: Date;
+        showTodayButton?: boolean;
+        showClearButton?: boolean;
+        onOpenEnd?: () => void;
+        onChange?: (date: Date | null | { start: Date; end: Date }, instance?: K3DatepickerInstance) => void;
+      }
+    ): K3DatepickerInstance;
+    getInstance(el: HTMLElement): K3DatepickerInstance | undefined;
   };
   loadDeferredComponents?: () => Promise<void>;
   initManagers?: (opts?: Record<string, unknown>) => void;

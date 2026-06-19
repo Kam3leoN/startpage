@@ -4,6 +4,7 @@ import type { DeckCategoryEditorValues, DeckSlotAction, DeckSlotEditorValues, De
 import { listDeckCallbackIds } from "../utils/deckCallbacks";
 import { defaultMonogramFromLabel, sanitizeMonogram } from "../utils/deckMonogram";
 import { readImageAsDataUrl } from "../utils/imageUpload";
+import { CloseIcon } from "./icons";
 import { K3IconButton } from "./K3IconButton";
 import { K3OutlinedField } from "./K3OutlinedField";
 
@@ -156,7 +157,9 @@ export function DeckSlotEditorDialog({
       >
         <header className="deck-editor__header">
           <h2 className="deck-editor__title">{title}</h2>
-          <K3IconButton variant="standard" size="md" label={t("deck.editor.close")} iconName="xmark" onClick={onClose} />
+          <K3IconButton variant="standard" size="md" label={t("deck.editor.close")} onClick={onClose}>
+            <CloseIcon width={20} height={20} />
+          </K3IconButton>
         </header>
 
         <div className="deck-editor__body">
@@ -278,14 +281,15 @@ export function DeckSlotEditorDialog({
                   variant="standard"
                   size="md"
                   label={t("deck.editor.removeIcon")}
-                  iconName="xmark"
                   onClick={() => {
                     setIcon(undefined);
                     setSlotVisual("monogram");
                     setUseDefaultMonogram(true);
                     setMonogram(defaultMonogramFromLabel(label));
                   }}
-                />
+                >
+                  <CloseIcon width={20} height={20} />
+                </K3IconButton>
               </>
             )}
           </div>

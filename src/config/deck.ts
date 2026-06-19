@@ -21,6 +21,13 @@ export const ROOT_PAGE_ID = "deck-root";
 /** Identifiant éphémère — page bank brouillon (non persistée tant qu'elle est vide). */
 export const DRAFT_BANK_PAGE_ID = "__deck-draft-bank__";
 
+/** Identifiant éphémère — sous-page catégorie brouillon. */
+export const DRAFT_CATEGORY_PAGE_ID = "__deck-draft-category__";
+
+/** Cases réservées prev/next dans une page catégorie (ligne 4). */
+export const DECK_CATEGORY_NAV_PREV_SLOT = 30;
+export const DECK_CATEGORY_NAV_NEXT_SLOT = 31;
+
 /** localStorage key — deck Stream Deck. */
 export const DECK_STORAGE_KEY = "k3-deck-store";
 

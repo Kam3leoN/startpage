@@ -5,15 +5,15 @@ import {
   DEFAULT_CLOCK_STYLE,
   DEFAULT_COMPACT_DATE,
   DEFAULT_SHOW_AI_TOOLS,
-  DEFAULT_SHOW_EPHEMERIS,
   DEFAULT_SHOW_FILTERS,
   DEFAULT_SHOW_FAVORITES,
   DEFAULT_SHOW_PERSONAL_MESSAGE,
+  DEFAULT_SHOW_WEEK_CELEBRATIONS,
   SHOW_AI_TOOLS_KEY,
-  SHOW_EPHEMERIS_KEY,
   SHOW_FILTERS_KEY,
   SHOW_FAVORITES_KEY,
   SHOW_PERSONAL_MESSAGE_KEY,
+  SHOW_WEEK_CELEBRATIONS_KEY,
 } from "../config/defaults";
 
 export type ClockStyle = "digital" | "analog";
@@ -37,14 +37,14 @@ export function useDisplaySettings() {
   const [showFilters, setShowFiltersState] = useState(() =>
     readBool(SHOW_FILTERS_KEY, DEFAULT_SHOW_FILTERS)
   );
-  const [showEphemeris, setShowEphemerisState] = useState(() =>
-    readBool(SHOW_EPHEMERIS_KEY, DEFAULT_SHOW_EPHEMERIS)
-  );
   const [showPersonalMessage, setShowPersonalMessageState] = useState(() =>
     readBool(SHOW_PERSONAL_MESSAGE_KEY, DEFAULT_SHOW_PERSONAL_MESSAGE)
   );
   const [showAiTools, setShowAiToolsState] = useState(() =>
     readBool(SHOW_AI_TOOLS_KEY, DEFAULT_SHOW_AI_TOOLS)
+  );
+  const [showWeekCelebrations, setShowWeekCelebrationsState] = useState(() =>
+    readBool(SHOW_WEEK_CELEBRATIONS_KEY, DEFAULT_SHOW_WEEK_CELEBRATIONS)
   );
   const [compactDate, setCompactDateState] = useState(() =>
     readBool(COMPACT_DATE_KEY, DEFAULT_COMPACT_DATE)
@@ -61,11 +61,6 @@ export function useDisplaySettings() {
     localStorage.setItem(SHOW_FILTERS_KEY, String(value));
   }, []);
 
-  const setShowEphemeris = useCallback((value: boolean) => {
-    setShowEphemerisState(value);
-    localStorage.setItem(SHOW_EPHEMERIS_KEY, String(value));
-  }, []);
-
   const setShowPersonalMessage = useCallback((value: boolean) => {
     setShowPersonalMessageState(value);
     localStorage.setItem(SHOW_PERSONAL_MESSAGE_KEY, String(value));
@@ -74,6 +69,11 @@ export function useDisplaySettings() {
   const setShowAiTools = useCallback((value: boolean) => {
     setShowAiToolsState(value);
     localStorage.setItem(SHOW_AI_TOOLS_KEY, String(value));
+  }, []);
+
+  const setShowWeekCelebrations = useCallback((value: boolean) => {
+    setShowWeekCelebrationsState(value);
+    localStorage.setItem(SHOW_WEEK_CELEBRATIONS_KEY, String(value));
   }, []);
 
   const setCompactDate = useCallback((value: boolean) => {
@@ -91,12 +91,12 @@ export function useDisplaySettings() {
     setShowFavorites,
     showFilters,
     setShowFilters,
-    showEphemeris,
-    setShowEphemeris,
     showPersonalMessage,
     setShowPersonalMessage,
     showAiTools,
     setShowAiTools,
+    showWeekCelebrations,
+    setShowWeekCelebrations,
     compactDate,
     setCompactDate,
     clockStyle,

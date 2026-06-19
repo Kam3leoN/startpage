@@ -1,0 +1,61 @@
+/* Barre de navigation StartPage (K3UI NavigationBar) */
+
+.startpage-navigation-bar-wrap {
+  position: relative;
+  z-index: 50;
+}
+
+.startpage-navigation-bar.navigation-bar--items-80 {
+  left: 0;
+  right: 0;
+  width: 100%;
+  transform: none;
+  justify-content: center;
+  gap: 0;
+}
+
+.startpage-navigation-bar.navigation-bar--items-80 .navigation-bar__item {
+  flex: 0 0 80px;
+  width: 80px;
+  min-width: 80px;
+  max-width: 80px;
+}
+
+.startpage-navigation-bar .navigation-bar__item[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Footer au-dessus de la barre de navigation (80px) */
+body:has(.startpage-navigation-bar) .footer--sticky {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Dialog météo */
+.weather-dialog__content {
+  padding: 8px 4px 4px;
+  min-width: min(92vw, 360px);
+}
+
+.weather-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.weather-widget--dialog {
+  position: static;
+  top: auto;
+  left: auto;
+  z-index: auto;
+  max-width: 100%;
+  width: 100%;
+  box-shadow: none;
+  border: none;
+  background: transparent;
+  backdrop-filter: none;
+  padding: 0;
+  cursor: default;
+}

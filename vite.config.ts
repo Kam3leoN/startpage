@@ -4,6 +4,15 @@ import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   base: "./",
+  server: {
+    port: 5180,
+    strictPort: true,
+    open: "/",
+  },
+  preview: {
+    port: 5180,
+    strictPort: true,
+  },
   plugins: [
     react(),
     VitePWA({
@@ -19,7 +28,7 @@ export default defineConfig({
         "icons/*.png",
       ],
       manifest: {
-        name: "K3 Start Page",
+        name: "StartPage",
         short_name: "StartPage",
         description: "Page de démarrage personnalisable, Material 3 Expressive.",
         lang: "fr",
