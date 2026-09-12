@@ -1,12 +1,13 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import type { BirthdayEntry, BirthdayGender } from "../types/birthday";
 import { resolveBirthYearFromDate } from "../utils/birthdayYear";
-import { useK3Openable } from "../utils/useK3Openable";
+import { closeK3Overlay, useK3Openable } from "../utils/k3Overlay";
 import { K3Datepicker } from "./K3Datepicker";
 import { K3OutlinedField } from "./K3OutlinedField";
 
-const DIALOG_ID = "birthday-form-dialog";
+export const BIRTHDAY_DIALOG_ID = "birthday-form-dialog";
 
 export type BirthdayFormMode = "add" | "edit";
 
@@ -35,10 +36,14 @@ function entryToDate(entry: BirthdayEntry): Date {
   return new Date(year, entry.month - 1, entry.day);
 }
 
+export const birthdayDialogOptions = {
+  dismissible: true,
+  closeOnBackNavigation: false,
+} as const;
+
 /**
- * Dialog K3UI — anatomie M3 déclarée dans React (Dialog.buildDialogMarkup) :
- * `.dialog-container` > header + `.dialog-scroller` > content + footer.
- * Ne jamais laisser Dialog.init wrapper seul : React défait le DOM.
+ * Dialog K3UI — structure M3 déclarée dans React (évite undo du wrap k3ui au re-render)
+ * + createPortal(body) pour les clics React.
  */
 export function BirthdayFormDialog({
   open,
@@ -59,9 +64,8 @@ export function BirthdayFormDialog({
   const isEdit = mode === "edit" && entry != null;
   const title = isEdit ? t("weekCard.editFormTitle") : t("weekCard.formTitle");
 
-  useK3Openable(DIALOG_ID, "Dialog", open, k3ready, onClose, {
-    dismissible: true,
-    closeOnBackNavigation: false,
+  useK3Openable(BIRTHDAY_DIALOG_ID, "Dialog", open, k3ready, onClose, {
+    ...birthdayDialogOptions,
   });
 
   useEffect(() => {
@@ -76,6 +80,11 @@ export function BirthdayFormDialog({
       setBirthdayDate(startOfDay(date));
     }
   }, [open, mode, entry, date]);
+
+  const handleClose = () => {
+    void closeK3Overlay(BIRTHDAY_DIALOG_ID, "Dialog");
+    onClose();
+  };
 
   const toggleGender = (next: BirthdayGender) => {
     setGender((current) => (current === next ? undefined : next));
@@ -93,7 +102,7 @@ export function BirthdayFormDialog({
         year: resolveBirthYearFromDate(birthdayDate),
         gender: gender ?? null,
       });
-      onClose();
+      handleClose();
       return;
     }
 
@@ -104,11 +113,11 @@ export function BirthdayFormDialog({
       year: resolveBirthYearFromDate(birthdayDate),
       gender,
     });
-    if (created) onClose();
+    if (created) handleClose();
   };
 
-  return (
-    <k3ui-dialog id={DIALOG_ID} class="dialog no-autoinit" aria-label={title}>
+  return createPortal(
+    <k3ui-dialog id={BIRTHDAY_DIALOG_ID} class="dialog no-autoinit" aria-label={title}>
       <div className="dialog-container">
         <div className="dialog-header">
           <h2 className="dialog-title">{title}</h2>
@@ -170,7 +179,7 @@ export function BirthdayFormDialog({
           </div>
         </div>
         <div className="dialog-footer birthday-form__footer">
-          <button type="button" className="btn btn--text btn--sm" onClick={onClose}>
+          <button type="button" className="btn btn--text btn--sm" onClick={handleClose}>
             {t("weekCard.cancel")}
           </button>
           <button
@@ -183,6 +192,7 @@ export function BirthdayFormDialog({
           </button>
         </div>
       </div>
-    </k3ui-dialog>
+    </k3ui-dialog>,
+    document.body
   );
 }

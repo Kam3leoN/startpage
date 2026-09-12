@@ -1,4 +1,5 @@
 import { useMemo, type MouseEvent } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import type { BirthdayEntry } from "../types/birthday";
 import {
@@ -6,13 +7,29 @@ import {
   getWeekBirthdays,
   getWeekCelebrations,
 } from "../utils/weekCelebrations";
-import { useK3Openable } from "../utils/useK3Openable";
+import { closeK3Overlay, openK3Overlay, useK3Openable } from "../utils/k3Overlay";
 import { BirthdayNameList, entryToNamePart } from "./BirthdayNameList";
+import {
+  ALL_BIRTHDAYS_SHEET_ID,
+  allBirthdaysSheetOptions,
+} from "./AllBirthdaysSheet";
+import {
+  BIRTHDAY_DIALOG_ID,
+  birthdayDialogOptions,
+} from "./BirthdayFormDialog";
 import { EphemerisGenderIcon } from "./EphemerisGenderIcon";
 import { CloseIcon, PenIcon } from "./icons";
 import { K3IconButton } from "./K3IconButton";
 
-const DRAWER_ID = "week-celebrations-drawer";
+export const WEEK_DRAWER_ID = "week-celebrations-drawer";
+
+export const weekDrawerOptions = {
+  edge: "right",
+  width: "min(100vw, 380px)",
+  dismissible: true,
+  draggable: false,
+  preventScrolling: true,
+} as const;
 
 interface Props {
   open: boolean;
@@ -38,10 +55,20 @@ function formatBirthdayDate(day: number, month: number, locale: string): string 
   return d.toLocaleDateString(lang, { day: "numeric", month: "short" });
 }
 
+/** Ouvre un overlay après le clic courant (évite mouseup → dismiss immédiat). */
+function openAfterClick(
+  id: string,
+  kind: "Dialog" | "Sheet",
+  options: Record<string, unknown>
+): void {
+  window.setTimeout(() => {
+    void openK3Overlay(id, kind, options);
+  }, 0);
+}
+
 /**
- * Drawer K3UI à droite.
- * Important : pas d'`initK3UISubtree` (AutoInit Ripple casse les onClick React).
- * Boutons d'action sans classe `ripple`.
+ * Drawer K3UI — monté via createPortal(body) pour que React reçoive les clics
+ * (sinon k3ui portal hors #root → onClick morts, close/add/list cassés).
  */
 export function WeekCelebrationsDrawer({
   open,
@@ -56,11 +83,8 @@ export function WeekCelebrationsDrawer({
 }: Props) {
   const { t, i18n } = useTranslation();
 
-  useK3Openable(DRAWER_ID, "Drawer", open, k3ready, onClose, {
-    edge: "right",
-    width: "min(100vw, 380px)",
-    dismissible: true,
-    draggable: true,
+  useK3Openable(WEEK_DRAWER_ID, "Drawer", open, k3ready, onClose, {
+    ...weekDrawerOptions,
   });
 
   const weekCelebrations = useMemo(
@@ -78,16 +102,25 @@ export function WeekCelebrationsDrawer({
     [date, birthdays]
   );
 
+  const handleClose = (event: MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    void closeK3Overlay(WEEK_DRAWER_ID, "Drawer");
+    onClose();
+  };
+
   const handleAddClick = (event: MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
     onAddBirthday();
+    openAfterClick(BIRTHDAY_DIALOG_ID, "Dialog", { ...birthdayDialogOptions });
   };
 
   const handleShowAllClick = (event: MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
     onShowAllBirthdays();
+    openAfterClick(ALL_BIRTHDAYS_SHEET_ID, "Sheet", { ...allBirthdaysSheetOptions });
   };
 
   const renderBirthdayItem = (
@@ -138,7 +171,10 @@ export function WeekCelebrationsDrawer({
             size="xs"
             className="week-drawer__birthday-edit-btn"
             label={t("weekCard.editBirthday", { name: entry.name })}
-            onClick={() => onEditBirthday(entry)}
+            onClick={() => {
+              onEditBirthday(entry);
+              openAfterClick(BIRTHDAY_DIALOG_ID, "Dialog", { ...birthdayDialogOptions });
+            }}
           >
             <PenIcon width={14} height={14} />
           </K3IconButton>
@@ -156,9 +192,9 @@ export function WeekCelebrationsDrawer({
     );
   };
 
-  return (
+  return createPortal(
     <div
-      id={DRAWER_ID}
+      id={WEEK_DRAWER_ID}
       className="drawer no-autoinit drawer--right week-drawer"
       aria-hidden="true"
     >
@@ -179,9 +215,11 @@ export function WeekCelebrationsDrawer({
               type="button"
               className="btn btn--icon btn--sm week-drawer__close"
               aria-label={t("navBar.close")}
-              onClick={onClose}
+              onClick={handleClose}
             >
-              <CloseIcon width={18} height={18} aria-hidden="true" />
+              <span className="week-drawer__close-glyph" aria-hidden="true">
+                ×
+              </span>
             </button>
           </div>
         </div>
@@ -293,6 +331,7 @@ export function WeekCelebrationsDrawer({
           </section>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

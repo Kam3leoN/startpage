@@ -1,12 +1,21 @@
 import { useMemo, type MouseEvent } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import type { BirthdayEntry } from "../types/birthday";
 import { getAgeAtNextBirthday, sortBirthdaysUpcoming } from "../utils/weekCelebrations";
-import { useK3Openable } from "../utils/useK3Openable";
+import { closeK3Overlay, openK3Overlay, useK3Openable } from "../utils/k3Overlay";
 import { CloseIcon, PenIcon } from "./icons";
 import { K3IconButton } from "./K3IconButton";
+import { BIRTHDAY_DIALOG_ID, birthdayDialogOptions } from "./BirthdayFormDialog";
 
-const SHEET_ID = "all-birthdays-sheet";
+export const ALL_BIRTHDAYS_SHEET_ID = "all-birthdays-sheet";
+
+export const allBirthdaysSheetOptions = {
+  position: "bottom",
+  size: "large",
+  dismissible: true,
+  draggable: true,
+} as const;
 
 interface Props {
   open: boolean;
@@ -25,7 +34,7 @@ function formatBirthdayDate(day: number, month: number, locale: string): string 
   return d.toLocaleDateString(lang, { day: "numeric", month: "short" });
 }
 
-/** Bottom sheet K3UI — liste scrollable de tous les anniversaires. */
+/** Bottom sheet K3UI — createPortal(body) pour clics React après portal k3ui. */
 export function AllBirthdaysSheet({
   open,
   k3ready,
@@ -38,11 +47,8 @@ export function AllBirthdaysSheet({
 }: Props) {
   const { t, i18n } = useTranslation();
 
-  useK3Openable(SHEET_ID, "Sheet", open, k3ready, onClose, {
-    position: "bottom",
-    size: "large",
-    dismissible: true,
-    draggable: true,
+  useK3Openable(ALL_BIRTHDAYS_SHEET_ID, "Sheet", open, k3ready, onClose, {
+    ...allBirthdaysSheetOptions,
   });
 
   const sorted = useMemo(
@@ -50,30 +56,63 @@ export function AllBirthdaysSheet({
     [date, birthdays]
   );
 
+  const handleClose = (event?: MouseEvent) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+    void closeK3Overlay(ALL_BIRTHDAYS_SHEET_ID, "Sheet");
+    onClose();
+  };
+
   const handleAdd = (event: MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
+    void closeK3Overlay(ALL_BIRTHDAYS_SHEET_ID, "Sheet");
+    onClose();
     onAddBirthday();
+    window.setTimeout(() => {
+      void openK3Overlay(BIRTHDAY_DIALOG_ID, "Dialog", { ...birthdayDialogOptions });
+    }, 50);
   };
 
-  return (
+  const handleEdit = (entry: BirthdayEntry) => {
+    void closeK3Overlay(ALL_BIRTHDAYS_SHEET_ID, "Sheet");
+    onClose();
+    onEditBirthday(entry);
+    window.setTimeout(() => {
+      void openK3Overlay(BIRTHDAY_DIALOG_ID, "Dialog", { ...birthdayDialogOptions });
+    }, 50);
+  };
+
+  return createPortal(
     <div
-      id={SHEET_ID}
+      id={ALL_BIRTHDAYS_SHEET_ID}
       className="sheet no-autoinit sheet--bottom sheet--large birthdays-sheet"
       aria-hidden="true"
     >
       <div className="sheet-container">
         <div className="sheet-header birthdays-sheet__header">
           <h2 className="birthdays-sheet__title">{t("weekCard.allBirthdaysTitle")}</h2>
-          <button
-            type="button"
-            className="btn btn--filled btn--sm btn--primary"
-            aria-label={t("weekCard.addBirthday")}
-            onClick={handleAdd}
-          >
-            <span aria-hidden="true">+</span>
-            <span className="birthdays-sheet__add-label">{t("weekCard.addShort")}</span>
-          </button>
+          <div className="birthdays-sheet__header-actions">
+            <button
+              type="button"
+              className="btn btn--filled btn--sm btn--primary"
+              aria-label={t("weekCard.addBirthday")}
+              onClick={handleAdd}
+            >
+              <span aria-hidden="true">+</span>
+              <span className="birthdays-sheet__add-label">{t("weekCard.addShort")}</span>
+            </button>
+            <button
+              type="button"
+              className="btn btn--icon btn--sm birthdays-sheet__close"
+              aria-label={t("navBar.close")}
+              onClick={handleClose}
+            >
+              <span className="birthdays-sheet__close-glyph" aria-hidden="true">
+                ×
+              </span>
+            </button>
+          </div>
         </div>
         <div className="sheet-content birthdays-sheet__content">
           {sorted.length === 0 ? (
@@ -115,7 +154,7 @@ export function AllBirthdaysSheet({
                         variant="standard"
                         size="xs"
                         label={t("weekCard.editBirthday", { name: entry.name })}
-                        onClick={() => onEditBirthday(entry)}
+                        onClick={() => handleEdit(entry)}
                       >
                         <PenIcon width={14} height={14} />
                       </K3IconButton>
@@ -135,6 +174,7 @@ export function AllBirthdaysSheet({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
