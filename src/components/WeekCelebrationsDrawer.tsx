@@ -1,12 +1,10 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { BirthdayEntry } from "../types/birthday";
 import {
-  getAgeAtNextBirthday,
   getNextUpcomingBirthdayGroup,
   getWeekBirthdays,
   getWeekCelebrations,
-  sortBirthdaysUpcoming,
 } from "../utils/weekCelebrations";
 import { initK3UISubtree } from "../utils/k3uiDeferred";
 import { BirthdayNameList, entryToNamePart } from "./BirthdayNameList";
@@ -25,6 +23,7 @@ interface Props {
   onAddBirthday: () => void;
   onEditBirthday: (entry: BirthdayEntry) => void;
   onRemoveBirthday: (id: string) => void;
+  onShowAllBirthdays: () => void;
 }
 
 function formatWeekday(d: Date, locale: string, compact: boolean): string {
@@ -51,11 +50,11 @@ export function WeekCelebrationsDrawer({
   onAddBirthday,
   onEditBirthday,
   onRemoveBirthday,
+  onShowAllBirthdays,
 }: Props) {
   const { t, i18n } = useTranslation();
   const rootRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
-  const [showAllBirthdays, setShowAllBirthdays] = useState(false);
   onCloseRef.current = onClose;
 
   const weekCelebrations = useMemo(
@@ -65,11 +64,6 @@ export function WeekCelebrationsDrawer({
 
   const weekBirthdays = useMemo(
     () => getWeekBirthdays(date, birthdays),
-    [date, birthdays]
-  );
-
-  const allBirthdaysSorted = useMemo(
-    () => sortBirthdaysUpcoming(date, birthdays),
     [date, birthdays]
   );
 
@@ -237,7 +231,7 @@ export function WeekCelebrationsDrawer({
               </button>
               <button
                 type="button"
-                className="drawer-close week-drawer__close"
+                className="btn btn--icon btn--sm ripple week-drawer__close"
                 aria-label={t("navBar.close")}
                 onClick={onClose}
               >
@@ -346,28 +340,15 @@ export function WeekCelebrationsDrawer({
               {birthdays.length > 0 && (
                 <button
                   type="button"
-                  className="btn btn--text btn--sm ripple week-drawer__birthdays-all-toggle"
-                  aria-expanded={showAllBirthdays}
-                  onClick={() => setShowAllBirthdays((value) => !value)}
+                  className="btn btn--outlined btn--sm ripple week-drawer__birthdays-all-toggle"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onShowAllBirthdays();
+                  }}
                 >
-                  {showAllBirthdays
-                    ? t("weekCard.hideAllBirthdays")
-                    : t("weekCard.showAllBirthdays")}
+                  {t("weekCard.showAllBirthdays")}
                 </button>
-              )}
-              {showAllBirthdays && birthdays.length > 0 && (
-                <ul
-                  className="week-drawer__birthdays-list week-drawer__birthdays-list--all"
-                  aria-label={t("weekCard.allBirthdaysTitle")}
-                >
-                  {allBirthdaysSorted.map(({ entry, isToday, age, daysUntil }) =>
-                    renderBirthdayItem(entry, {
-                      isToday,
-                      age: age ?? getAgeAtNextBirthday(entry, date),
-                      daysUntil,
-                    })
-                  )}
-                </ul>
               )}
             </section>
           </div>

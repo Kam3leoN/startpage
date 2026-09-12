@@ -30,6 +30,7 @@ import { SearchOverlay } from "./components/SearchOverlay";
 import { ShortcutDialog } from "./components/ShortcutDialog";
 import { BootScreen } from "./components/BootScreen";
 import { WeekCelebrationsDrawer } from "./components/WeekCelebrationsDrawer";
+import { AllBirthdaysSheet } from "./components/AllBirthdaysSheet";
 import { BirthdayFormDialog, type BirthdayFormMode } from "./components/BirthdayFormDialog";
 import { StartPageNavigationBar } from "./components/StartPageNavigationBar";
 import { WeatherDialog } from "./components/WeatherDialog";
@@ -126,6 +127,7 @@ export default function App() {
     mode: BirthdayFormMode;
     entry?: BirthdayEntry | null;
   }>({ open: false, mode: "add", entry: null });
+  const [allBirthdaysOpen, setAllBirthdaysOpen] = useState(false);
   const [deckEditor, setDeckEditor] = useState<{
     open: boolean;
     mode: DeckEditorMode;
@@ -249,6 +251,18 @@ export default function App() {
         date={date}
         birthdays={birthdays}
         onClose={() => setShowWeekCelebrations(false)}
+        onAddBirthday={() => setBirthdayForm({ open: true, mode: "add", entry: null })}
+        onEditBirthday={(entry) => setBirthdayForm({ open: true, mode: "edit", entry })}
+        onRemoveBirthday={removeBirthday}
+        onShowAllBirthdays={() => setAllBirthdaysOpen(true)}
+      />
+
+      <AllBirthdaysSheet
+        open={allBirthdaysOpen}
+        k3ready={k3ready}
+        date={date}
+        birthdays={birthdays}
+        onClose={() => setAllBirthdaysOpen(false)}
         onAddBirthday={() => setBirthdayForm({ open: true, mode: "add", entry: null })}
         onEditBirthday={(entry) => setBirthdayForm({ open: true, mode: "edit", entry })}
         onRemoveBirthday={removeBirthday}

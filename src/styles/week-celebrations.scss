@@ -9,10 +9,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  position: relative;
 }
 
 .week-drawer__title {
   margin: 0;
+  flex: 1;
+  min-width: 0;
   font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -23,6 +26,8 @@
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .week-drawer__add {
@@ -41,11 +46,17 @@
   justify-content: center;
   width: 36px;
   height: 36px;
+  min-width: 36px;
+  padding: 0;
   border: 0;
   border-radius: 999px;
   background: transparent;
   color: var(--md-sys-color-on-surface-variant);
   cursor: pointer;
+  /* Ne jamais utiliser .drawer-close (absolute) ici — ça recouvrait « Ajouter ». */
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
 }
 
 .week-drawer__content {
@@ -200,7 +211,9 @@
 }
 
 .week-drawer__birthdays-all-toggle {
-  margin-top: 8px;
+  margin-top: 10px;
+  width: 100%;
+  justify-content: center;
 }
 
 .week-drawer__birthdays-list {
@@ -282,6 +295,103 @@
 }
 
 .week-drawer__birthday-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+/* All birthdays bottom sheet */
+.birthdays-sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.birthdays-sheet__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.birthdays-sheet__add-label {
+  margin-inline-start: 4px;
+  font-weight: 600;
+}
+
+.birthdays-sheet__content {
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: 12px;
+}
+
+.birthdays-sheet__empty {
+  margin: 8px 0;
+  font-size: 0.88rem;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.birthdays-sheet__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.birthdays-sheet__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-high) 55%, transparent);
+}
+
+.birthdays-sheet__item--today {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 14%, transparent);
+}
+
+.birthdays-sheet__cake {
+  flex-shrink: 0;
+}
+
+.birthdays-sheet__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.birthdays-sheet__name {
+  font-weight: 600;
+}
+
+.birthdays-sheet__name--female {
+  color: #e91e8c;
+}
+
+.birthdays-sheet__name--male {
+  color: #1a73e8;
+}
+
+[data-theme="dark"] .birthdays-sheet__name--female {
+  color: #f48fb1;
+}
+
+[data-theme="dark"] .birthdays-sheet__name--male {
+  color: #8ab4f8;
+}
+
+.birthdays-sheet__meta {
+  font-size: 0.78rem;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.birthdays-sheet__actions {
   display: flex;
   gap: 2px;
   flex-shrink: 0;
@@ -387,7 +497,8 @@
 }
 
 @media (max-width: 480px) {
-  .week-drawer__add-label {
+  .week-drawer__add-label,
+  .birthdays-sheet__add-label {
     display: none;
   }
 }
