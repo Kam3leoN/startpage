@@ -481,6 +481,18 @@ body.drawer-open .drawer-overlay {
   gap: 14px;
 }
 
+/*
+ * Datepicker modal (body) vs Dialog ouvert :
+ * Dialog ≈ 2000–2003+, datepicker k3ui défaut 2000/2001 → calendrier derrière.
+ */
+.datepicker__backdrop {
+  z-index: 3200 !important;
+}
+
+.datepicker__modal {
+  z-index: 3201 !important;
+}
+
 .birthday-form__footer {
   display: flex;
   justify-content: flex-end;
