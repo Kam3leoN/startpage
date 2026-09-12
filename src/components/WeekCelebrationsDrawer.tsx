@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, type MouseEvent } from "react";
+import { useEffect, useMemo, useState, type MouseEvent } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import type { BirthdayEntry } from "../types/birthday";
 import {
@@ -6,13 +7,10 @@ import {
   getWeekBirthdays,
   getWeekCelebrations,
 } from "../utils/weekCelebrations";
-import { initK3UISubtree } from "../utils/k3uiDeferred";
 import { BirthdayNameList, entryToNamePart } from "./BirthdayNameList";
 import { EphemerisGenderIcon } from "./EphemerisGenderIcon";
 import { CloseIcon, PenIcon } from "./icons";
 import { K3IconButton } from "./K3IconButton";
-
-const DRAWER_ID = "week-celebrations-drawer";
 
 interface Props {
   open: boolean;
@@ -39,11 +37,12 @@ function formatBirthdayDate(day: number, month: number, locale: string): string 
 }
 
 /**
- * Drawer K3UI à droite — liste scrollable des fêtes + anniversaires.
+ * Panneau droit React contrôlé (fêtes + anniversaires).
+ * Plus d'API Drawer k3ui : les clics React ne sont plus avalés par Ripple/AutoInit.
  */
 export function WeekCelebrationsDrawer({
   open,
-  k3ready,
+  k3ready: _k3ready,
   date,
   birthdays,
   onClose,
@@ -53,9 +52,7 @@ export function WeekCelebrationsDrawer({
   onShowAllBirthdays,
 }: Props) {
   const { t, i18n } = useTranslation();
-  const rootRef = useRef<HTMLDivElement>(null);
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+  const [dismissible, setDismissible] = useState(false);
 
   const weekCelebrations = useMemo(
     () => getWeekCelebrations(date, i18n.language),
@@ -73,74 +70,40 @@ export function WeekCelebrationsDrawer({
   );
 
   useEffect(() => {
-    if (!k3ready) return;
-    const el = document.getElementById(DRAWER_ID) as HTMLElement | null;
-    if (!el) return;
+    if (!open) {
+      setDismissible(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setDismissible(true), 120);
+    return () => window.clearTimeout(timer);
+  }, [open]);
 
-    let cancelled = false;
-
-    const boot = async () => {
-      if (rootRef.current) await initK3UISubtree(rootRef.current);
-      if (cancelled) return;
-
-      const K = window.K;
-      if (!K?.Drawer?.init) return;
-
-      if (!K.Drawer.getInstance(el)) {
-        K.Drawer.init(el, {
-          edge: "right",
-          width: "min(100vw, 380px)",
-          dismissible: true,
-          draggable: true,
-          onCloseEnd: () => onCloseRef.current(),
-        });
-      }
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
     };
-
-    void boot();
-
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      cancelled = true;
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
     };
-  }, [k3ready]);
+  }, [open, onClose]);
 
-  useEffect(() => {
-    if (!k3ready || !open) return;
-    const el = document.getElementById(DRAWER_ID) as HTMLElement | null;
-    if (!el) return;
-
-    const openDrawer = async () => {
-      if (rootRef.current) await initK3UISubtree(rootRef.current);
-      const K = window.K;
-      if (!K?.Drawer) return;
-      let instance = K.Drawer.getInstance(el);
-      if (!instance) {
-        K.Drawer.init(el, {
-          edge: "right",
-          width: "min(100vw, 380px)",
-          dismissible: true,
-          draggable: true,
-          onCloseEnd: () => onCloseRef.current(),
-        });
-        instance = K.Drawer.getInstance(el);
-      }
-      instance?.open?.();
-    };
-
-    void openDrawer();
-  }, [open, k3ready]);
-
-  useEffect(() => {
-    if (!k3ready || open) return;
-    const el = document.getElementById(DRAWER_ID) as HTMLElement | null;
-    if (!el) return;
-    window.K?.Drawer?.getInstance(el)?.close?.();
-  }, [open, k3ready]);
+  if (!open) return null;
 
   const handleAddClick = (event: MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
     onAddBirthday();
+  };
+
+  const handleShowAllClick = (event: MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onShowAllBirthdays();
   };
 
   const renderBirthdayItem = (
@@ -209,151 +172,151 @@ export function WeekCelebrationsDrawer({
     );
   };
 
-  return (
-    <div ref={rootRef}>
-      <div
-        id={DRAWER_ID}
-        className="drawer no-autoinit drawer--right week-drawer"
-        aria-hidden="true"
+  return createPortal(
+    <div
+      className="week-drawer-overlay"
+      role="presentation"
+      onClick={dismissible ? onClose : undefined}
+    >
+      <aside
+        id="week-celebrations-drawer"
+        className="week-drawer-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("weekCard.title")}
+        onClick={(event) => event.stopPropagation()}
       >
-        <div className="drawer-wrapper">
-          <div className="drawer-header week-drawer__header">
-            <h2 className="drawer-header__title week-drawer__title">{t("weekCard.title")}</h2>
-            <div className="week-drawer__header-actions">
-              <button
-                type="button"
-                className="btn btn--filled btn--sm btn--primary ripple week-drawer__add"
-                aria-label={t("weekCard.addBirthday")}
-                onClick={handleAddClick}
-              >
-                <span aria-hidden="true">+</span>
-                <span className="week-drawer__add-label">{t("weekCard.addShort")}</span>
-              </button>
-              <button
-                type="button"
-                className="btn btn--icon btn--sm ripple week-drawer__close"
-                aria-label={t("navBar.close")}
-                onClick={onClose}
-              >
-                <CloseIcon width={18} height={18} aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-          <div className="drawer-content week-drawer__content">
-            <section className="week-drawer__section" aria-label={t("weekCard.holidays")}>
-              <h3 className="week-drawer__section-title">{t("weekCard.holidays")}</h3>
-              <ul className="week-drawer__days">
-                {weekCelebrations.map((item) => (
-                  <li
-                    key={item.date.toISOString()}
-                    className={`week-drawer__day${item.isToday ? " week-drawer__day--today" : ""}${item.names.length === 0 ? " week-drawer__day--empty" : ""}`}
-                  >
-                    <div className="week-drawer__day-head">
-                      <span className="week-drawer__weekday">
-                        {formatWeekday(item.date, i18n.language, true)}
-                      </span>
-                      <span className="week-drawer__date-num">{item.date.getDate()}</span>
-                    </div>
-                    <div className="week-drawer__day-content">
-                      {item.names.length > 0 ? (
-                        <ul className="week-drawer__names">
-                          {item.names.map((celebration) => (
-                            <li
-                              key={`${celebration.gender}-${celebration.name}`}
-                              className={`week-drawer__name-entry week-drawer__name-entry--${celebration.gender}`}
-                            >
-                              <EphemerisGenderIcon
-                                kind={celebration.gender}
-                                label={
-                                  celebration.gender === "male"
-                                    ? t("weekCard.saint")
-                                    : t("weekCard.sainte")
-                                }
-                                className="week-drawer__gender-icon"
-                              />
-                              <span className="week-drawer__name">{celebration.name}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <span className="week-drawer__empty-day">{t("weekCard.noEvents")}</span>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            <section
-              className="week-drawer__section week-drawer__section--birthdays"
-              aria-label={t("weekCard.birthdays")}
+        <div className="week-drawer__header">
+          <h2 className="week-drawer__title">{t("weekCard.title")}</h2>
+          <div className="week-drawer__header-actions">
+            <button
+              type="button"
+              className="btn btn--filled btn--sm btn--primary week-drawer__add"
+              aria-label={t("weekCard.addBirthday")}
+              onClick={handleAddClick}
             >
-              <h3 className="week-drawer__section-title week-drawer__section-title--birthdays">
-                {t("weekCard.birthdays")}
-              </h3>
-              {weekBirthdays.length === 0 ? (
-                <p className="week-drawer__birthdays-empty">
-                  {t("weekCard.noBirthdays")}
-                  {birthdays.length > 0 ? (
-                    <span className="week-drawer__birthdays-saved-hint">
-                      {" "}
-                      {t("weekCard.noBirthdaysSaved", { count: birthdays.length })}
-                    </span>
-                  ) : null}
-                </p>
-              ) : (
-                <ul className="week-drawer__birthdays-list">
-                  {weekBirthdays.map(({ entry, isToday, age }) =>
-                    renderBirthdayItem(entry, { isToday, age, highlightWeek: true })
-                  )}
-                </ul>
-              )}
-              {nextUpcomingGroup && weekBirthdays.length === 0 && (
-                <p className="week-drawer__next-up" role="status">
-                  {nextUpcomingGroup.isToday ? (
-                    <>
-                      {t("weekCard.nextUpTodayPrefix")}
-                      <BirthdayNameList
-                        entries={nextUpcomingGroup.items.map((item) =>
-                          entryToNamePart(item.entry, item.age)
-                        )}
-                        nameClassName="week-drawer__birthday-name"
-                      />
-                      {t("weekCard.nextUpTodaySuffix")}
-                    </>
-                  ) : (
-                    <>
-                      {t("weekCard.nextUpPrefix")}
-                      <BirthdayNameList
-                        entries={nextUpcomingGroup.items.map((item) =>
-                          entryToNamePart(item.entry, item.age)
-                        )}
-                        nameClassName="week-drawer__birthday-name"
-                      />
-                      {t("weekCard.nextUpSuffix", {
-                        count: nextUpcomingGroup.daysUntil,
-                      })}
-                    </>
-                  )}
-                </p>
-              )}
-              {birthdays.length > 0 && (
-                <button
-                  type="button"
-                  className="btn btn--outlined btn--sm ripple week-drawer__birthdays-all-toggle"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    onShowAllBirthdays();
-                  }}
-                >
-                  {t("weekCard.showAllBirthdays")}
-                </button>
-              )}
-            </section>
+              <span aria-hidden="true">+</span>
+              <span className="week-drawer__add-label">{t("weekCard.addShort")}</span>
+            </button>
+            <button
+              type="button"
+              className="btn btn--icon btn--sm week-drawer__close"
+              aria-label={t("navBar.close")}
+              onClick={onClose}
+            >
+              <CloseIcon width={18} height={18} aria-hidden="true" />
+            </button>
           </div>
         </div>
-      </div>
-    </div>
+        <div className="week-drawer__content">
+          <section className="week-drawer__section" aria-label={t("weekCard.holidays")}>
+            <h3 className="week-drawer__section-title">{t("weekCard.holidays")}</h3>
+            <ul className="week-drawer__days">
+              {weekCelebrations.map((item) => (
+                <li
+                  key={item.date.toISOString()}
+                  className={`week-drawer__day${item.isToday ? " week-drawer__day--today" : ""}${item.names.length === 0 ? " week-drawer__day--empty" : ""}`}
+                >
+                  <div className="week-drawer__day-head">
+                    <span className="week-drawer__weekday">
+                      {formatWeekday(item.date, i18n.language, true)}
+                    </span>
+                    <span className="week-drawer__date-num">{item.date.getDate()}</span>
+                  </div>
+                  <div className="week-drawer__day-content">
+                    {item.names.length > 0 ? (
+                      <ul className="week-drawer__names">
+                        {item.names.map((celebration) => (
+                          <li
+                            key={`${celebration.gender}-${celebration.name}`}
+                            className={`week-drawer__name-entry week-drawer__name-entry--${celebration.gender}`}
+                          >
+                            <EphemerisGenderIcon
+                              kind={celebration.gender}
+                              label={
+                                celebration.gender === "male"
+                                  ? t("weekCard.saint")
+                                  : t("weekCard.sainte")
+                              }
+                              className="week-drawer__gender-icon"
+                            />
+                            <span className="week-drawer__name">{celebration.name}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <span className="week-drawer__empty-day">{t("weekCard.noEvents")}</span>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section
+            className="week-drawer__section week-drawer__section--birthdays"
+            aria-label={t("weekCard.birthdays")}
+          >
+            <h3 className="week-drawer__section-title week-drawer__section-title--birthdays">
+              {t("weekCard.birthdays")}
+            </h3>
+            {weekBirthdays.length === 0 ? (
+              <p className="week-drawer__birthdays-empty">
+                {t("weekCard.noBirthdays")}
+                {birthdays.length > 0 ? (
+                  <span className="week-drawer__birthdays-saved-hint">
+                    {" "}
+                    {t("weekCard.noBirthdaysSaved", { count: birthdays.length })}
+                  </span>
+                ) : null}
+              </p>
+            ) : (
+              <ul className="week-drawer__birthdays-list">
+                {weekBirthdays.map(({ entry, isToday, age }) =>
+                  renderBirthdayItem(entry, { isToday, age, highlightWeek: true })
+                )}
+              </ul>
+            )}
+            {nextUpcomingGroup && weekBirthdays.length === 0 && (
+              <p className="week-drawer__next-up" role="status">
+                {nextUpcomingGroup.isToday ? (
+                  <>
+                    {t("weekCard.nextUpTodayPrefix")}
+                    <BirthdayNameList
+                      entries={nextUpcomingGroup.items.map((item) =>
+                        entryToNamePart(item.entry, item.age)
+                      )}
+                      nameClassName="week-drawer__birthday-name"
+                    />
+                    {t("weekCard.nextUpTodaySuffix")}
+                  </>
+                ) : (
+                  <>
+                    {t("weekCard.nextUpPrefix")}
+                    <BirthdayNameList
+                      entries={nextUpcomingGroup.items.map((item) =>
+                        entryToNamePart(item.entry, item.age)
+                      )}
+                      nameClassName="week-drawer__birthday-name"
+                    />
+                    {t("weekCard.nextUpSuffix", {
+                      count: nextUpcomingGroup.daysUntil,
+                    })}
+                  </>
+                )}
+              </p>
+            )}
+            <button
+              type="button"
+              className="btn btn--outlined btn--sm week-drawer__birthdays-all-toggle"
+              onClick={handleShowAllClick}
+            >
+              {t("weekCard.showAllBirthdays")}
+            </button>
+          </section>
+        </div>
+      </aside>
+    </div>,
+    document.body
   );
 }

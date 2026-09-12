@@ -251,19 +251,10 @@ export default function App() {
         date={date}
         birthdays={birthdays}
         onClose={() => setShowWeekCelebrations(false)}
-        onAddBirthday={() => {
-          setShowWeekCelebrations(false);
-          setBirthdayForm({ open: true, mode: "add", entry: null });
-        }}
-        onEditBirthday={(entry) => {
-          setShowWeekCelebrations(false);
-          setBirthdayForm({ open: true, mode: "edit", entry });
-        }}
+        onAddBirthday={() => setBirthdayForm({ open: true, mode: "add", entry: null })}
+        onEditBirthday={(entry) => setBirthdayForm({ open: true, mode: "edit", entry })}
         onRemoveBirthday={removeBirthday}
-        onShowAllBirthdays={() => {
-          setShowWeekCelebrations(false);
-          setAllBirthdaysOpen(true);
-        }}
+        onShowAllBirthdays={() => setAllBirthdaysOpen(true)}
       />
 
       <AllBirthdaysSheet
@@ -274,11 +265,16 @@ export default function App() {
         onClose={() => setAllBirthdaysOpen(false)}
         onAddBirthday={() => {
           setAllBirthdaysOpen(false);
-          setBirthdayForm({ open: true, mode: "add", entry: null });
+          // Laisser passer le clic courant avant d'ouvrir le dialog
+          window.setTimeout(() => {
+            setBirthdayForm({ open: true, mode: "add", entry: null });
+          }, 0);
         }}
         onEditBirthday={(entry) => {
           setAllBirthdaysOpen(false);
-          setBirthdayForm({ open: true, mode: "edit", entry });
+          window.setTimeout(() => {
+            setBirthdayForm({ open: true, mode: "edit", entry });
+          }, 0);
         }}
         onRemoveBirthday={removeBirthday}
       />

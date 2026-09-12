@@ -1,12 +1,10 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import type { BirthdayEntry } from "../types/birthday";
 import { getAgeAtNextBirthday, sortBirthdaysUpcoming } from "../utils/weekCelebrations";
-import { initK3UISubtree } from "../utils/k3uiDeferred";
 import { CloseIcon, PenIcon } from "./icons";
 import { K3IconButton } from "./K3IconButton";
-
-const SHEET_ID = "all-birthdays-sheet";
 
 interface Props {
   open: boolean;
@@ -26,11 +24,12 @@ function formatBirthdayDate(day: number, month: number, locale: string): string 
 }
 
 /**
- * Bottom sheet K3UI — liste scrollable de tous les anniversaires enregistrés.
+ * Liste des anniversaires — sheet React contrôlé (même modèle que SettingsSheet).
+ * Backdrop non dismissible pendant le premier tick (évite mouseup click-through).
  */
 export function AllBirthdaysSheet({
   open,
-  k3ready,
+  k3ready: _k3ready,
   date,
   birthdays,
   onClose,
@@ -39,9 +38,7 @@ export function AllBirthdaysSheet({
   onRemoveBirthday,
 }: Props) {
   const { t, i18n } = useTranslation();
-  const rootRef = useRef<HTMLDivElement>(null);
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+  const [dismissible, setDismissible] = useState(false);
 
   const sorted = useMemo(
     () => sortBirthdaysUpcoming(date, birthdays),
@@ -49,152 +46,120 @@ export function AllBirthdaysSheet({
   );
 
   useEffect(() => {
-    if (!k3ready) return;
-    const el = document.getElementById(SHEET_ID) as HTMLElement | null;
-    if (!el) return;
+    if (!open) {
+      setDismissible(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setDismissible(true), 120);
+    return () => window.clearTimeout(timer);
+  }, [open]);
 
-    let cancelled = false;
-
-    const boot = async () => {
-      if (rootRef.current) await initK3UISubtree(rootRef.current);
-      if (cancelled) return;
-      const K = window.K;
-      if (!K?.Sheet?.init) return;
-      if (!K.Sheet.getInstance(el)) {
-        K.Sheet.init(el, {
-          position: "bottom",
-          size: "large",
-          dismissible: true,
-          draggable: true,
-          onCloseEnd: () => onCloseRef.current(),
-        });
-      }
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
     };
-
-    void boot();
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      cancelled = true;
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
     };
-  }, [k3ready]);
+  }, [open, onClose]);
 
-  useEffect(() => {
-    if (!k3ready || !open) return;
-    const el = document.getElementById(SHEET_ID) as HTMLElement | null;
-    if (!el) return;
+  if (!open) return null;
 
-    const openSheet = async () => {
-      if (rootRef.current) await initK3UISubtree(rootRef.current);
-      const K = window.K;
-      if (!K?.Sheet) return;
-      let instance = K.Sheet.getInstance(el);
-      if (!instance) {
-        K.Sheet.init(el, {
-          position: "bottom",
-          size: "large",
-          dismissible: true,
-          draggable: true,
-          onCloseEnd: () => onCloseRef.current(),
-        });
-        instance = K.Sheet.getInstance(el);
-      }
-      instance?.open?.();
-    };
-
-    void openSheet();
-  }, [open, k3ready]);
-
-  useEffect(() => {
-    if (!k3ready || open) return;
-    const el = document.getElementById(SHEET_ID) as HTMLElement | null;
-    if (!el) return;
-    window.K?.Sheet?.getInstance(el)?.close?.();
-  }, [open, k3ready]);
-
-  return (
-    <div ref={rootRef}>
+  return createPortal(
+    <div
+      className="sheet-backdrop birthdays-sheet-backdrop"
+      onClick={dismissible ? onClose : undefined}
+    >
       <div
-        id={SHEET_ID}
-        className="sheet no-autoinit sheet--bottom sheet--large birthdays-sheet"
-        aria-hidden="true"
+        className="sheet birthdays-sheet-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("weekCard.allBirthdaysTitle")}
+        onClick={(event) => event.stopPropagation()}
       >
-        <div className="sheet-container">
-          <div className="sheet-header birthdays-sheet__header">
-            <h2 className="birthdays-sheet__title">{t("weekCard.allBirthdaysTitle")}</h2>
-            <button
-              type="button"
-              className="btn btn--filled btn--sm btn--primary ripple"
-              aria-label={t("weekCard.addBirthday")}
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onAddBirthday();
-              }}
-            >
-              <span aria-hidden="true">+</span>
-              <span className="birthdays-sheet__add-label">{t("weekCard.addShort")}</span>
-            </button>
-          </div>
-          <div className="sheet-content birthdays-sheet__content">
-            {sorted.length === 0 ? (
-              <p className="birthdays-sheet__empty">{t("weekCard.noBirthdaysSavedEmpty")}</p>
-            ) : (
-              <ul className="birthdays-sheet__list" aria-label={t("weekCard.allBirthdaysTitle")}>
-                {sorted.map(({ entry, isToday, age, daysUntil }) => {
-                  const resolvedAge = age ?? getAgeAtNextBirthday(entry, date);
-                  return (
-                    <li
-                      key={entry.id}
-                      className={`birthdays-sheet__item${isToday ? " birthdays-sheet__item--today" : ""}`}
-                    >
-                      <span className="birthdays-sheet__cake" aria-hidden="true">
-                        🎂
+        <div className="sheet__grab" />
+        <div className="birthdays-sheet__header">
+          <h2 className="sheet__title birthdays-sheet__title">{t("weekCard.allBirthdaysTitle")}</h2>
+          <button
+            type="button"
+            className="btn btn--filled btn--sm btn--primary"
+            aria-label={t("weekCard.addBirthday")}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onAddBirthday();
+            }}
+          >
+            <span aria-hidden="true">+</span>
+            <span className="birthdays-sheet__add-label">{t("weekCard.addShort")}</span>
+          </button>
+        </div>
+        <div className="birthdays-sheet__content">
+          {sorted.length === 0 ? (
+            <p className="birthdays-sheet__empty">{t("weekCard.noBirthdaysSavedEmpty")}</p>
+          ) : (
+            <ul className="birthdays-sheet__list" aria-label={t("weekCard.allBirthdaysTitle")}>
+              {sorted.map(({ entry, isToday, age, daysUntil }) => {
+                const resolvedAge = age ?? getAgeAtNextBirthday(entry, date);
+                return (
+                  <li
+                    key={entry.id}
+                    className={`birthdays-sheet__item${isToday ? " birthdays-sheet__item--today" : ""}`}
+                  >
+                    <span className="birthdays-sheet__cake" aria-hidden="true">
+                      🎂
+                    </span>
+                    <div className="birthdays-sheet__info">
+                      <span
+                        className={`birthdays-sheet__name${entry.gender ? ` birthdays-sheet__name--${entry.gender}` : ""}`}
+                      >
+                        {entry.name}
                       </span>
-                      <div className="birthdays-sheet__info">
-                        <span
-                          className={`birthdays-sheet__name${entry.gender ? ` birthdays-sheet__name--${entry.gender}` : ""}`}
-                        >
-                          {entry.name}
-                        </span>
-                        <span className="birthdays-sheet__meta">
-                          {formatBirthdayDate(entry.day, entry.month, i18n.language)}
-                          {resolvedAge !== null && (
-                            <>
-                              {" · "}
-                              {t("weekCard.turns", { age: resolvedAge })}
-                            </>
-                          )}
-                          {" · "}
-                          {daysUntil === 0
-                            ? t("weekCard.todayShort")
-                            : t("weekCard.daysLeft", { count: daysUntil })}
-                        </span>
-                      </div>
-                      <div className="birthdays-sheet__actions">
-                        <K3IconButton
-                          variant="standard"
-                          size="xs"
-                          label={t("weekCard.editBirthday", { name: entry.name })}
-                          onClick={() => onEditBirthday(entry)}
-                        >
-                          <PenIcon width={14} height={14} />
-                        </K3IconButton>
-                        <K3IconButton
-                          variant="standard"
-                          size="xs"
-                          label={t("weekCard.removeBirthday", { name: entry.name })}
-                          onClick={() => onRemoveBirthday(entry.id)}
-                        >
-                          <CloseIcon width={14} height={14} />
-                        </K3IconButton>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
+                      <span className="birthdays-sheet__meta">
+                        {formatBirthdayDate(entry.day, entry.month, i18n.language)}
+                        {resolvedAge !== null && (
+                          <>
+                            {" · "}
+                            {t("weekCard.turns", { age: resolvedAge })}
+                          </>
+                        )}
+                        {" · "}
+                        {daysUntil === 0
+                          ? t("weekCard.todayShort")
+                          : t("weekCard.daysLeft", { count: daysUntil })}
+                      </span>
+                    </div>
+                    <div className="birthdays-sheet__actions">
+                      <K3IconButton
+                        variant="standard"
+                        size="xs"
+                        label={t("weekCard.editBirthday", { name: entry.name })}
+                        onClick={() => onEditBirthday(entry)}
+                      >
+                        <PenIcon width={14} height={14} />
+                      </K3IconButton>
+                      <K3IconButton
+                        variant="standard"
+                        size="xs"
+                        label={t("weekCard.removeBirthday", { name: entry.name })}
+                        onClick={() => onRemoveBirthday(entry.id)}
+                      >
+                        <CloseIcon width={14} height={14} />
+                      </K3IconButton>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
