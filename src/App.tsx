@@ -21,6 +21,7 @@ import { SettingsSheet } from "./components/SettingsSheet";
 import { SettingsFabMenu } from "./components/SettingsFabMenu";
 import { Greeting } from "./components/Greeting";
 import { TodayDate } from "./components/TodayDate";
+import { NextBirthdayReminder } from "./components/NextBirthdayReminder";
 import { PersonalMessage } from "./components/PersonalMessage";
 import { AnalogClock } from "./components/AnalogClock";
 import { AiToolsBar } from "./components/AiToolsBar";
@@ -276,6 +277,7 @@ export default function App() {
               <PersonalMessage message={personalMessage} onChange={setPersonalMessage} />
             )}
             <TodayDate date={date} compactDate={compactDate} />
+            <NextBirthdayReminder date={date} birthdays={birthdays} />
           </div>
         </section>
 

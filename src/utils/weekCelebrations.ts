@@ -135,12 +135,30 @@ export function getWeekBirthdays(
   return result.sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
+export interface UpcomingBirthday {
+  entry: BirthdayEntry;
+  nextDate: Date;
+  daysUntil: number;
+  isThisWeek: boolean;
+  isToday: boolean;
+  age: number | null;
+}
+
+const MS_PER_DAY = 86_400_000;
+
+/** Nombre de jours calendaires entre deux dates (à minuit local). */
+export function daysBetween(from: Date, to: Date): number {
+  const a = startOfDay(from);
+  const b = startOfDay(to);
+  return Math.round((b.getTime() - a.getTime()) / MS_PER_DAY);
+}
+
 /** Anniversaires triés par prochaine occurrence à partir de la date de référence. */
 export function sortBirthdaysUpcoming(
   reference: Date,
   birthdays: BirthdayEntry[]
-): Array<{ entry: BirthdayEntry; nextDate: Date; isThisWeek: boolean; isToday: boolean; age: number | null }> {
-  const today = new Date(reference.getFullYear(), reference.getMonth(), reference.getDate());
+): UpcomingBirthday[] {
+  const today = startOfDay(reference);
   const weekDays = getWeekDays(reference);
   const weekKeys = new Set(weekDays.map((d) => `${d.getMonth()}-${d.getDate()}`));
 
@@ -152,9 +170,21 @@ export function sortBirthdaysUpcoming(
       }
       const key = `${entry.month - 1}-${entry.day}`;
       const isThisWeek = weekKeys.has(key);
-      const isToday = isSameDay(nextDate, today) || (entry.month === today.getMonth() + 1 && entry.day === today.getDate());
+      const isToday =
+        isSameDay(nextDate, today) ||
+        (entry.month === today.getMonth() + 1 && entry.day === today.getDate());
       const age = getAgeAtNextBirthday(entry, reference);
-      return { entry, nextDate, isThisWeek, isToday, age };
+      const daysUntil = daysBetween(today, nextDate);
+      return { entry, nextDate, daysUntil, isThisWeek, isToday, age };
     })
     .sort((a, b) => a.nextDate.getTime() - b.nextDate.getTime());
+}
+
+/** Prochain anniversaire à souhaiter (null si la liste est vide). */
+export function getNextUpcomingBirthday(
+  reference: Date,
+  birthdays: BirthdayEntry[]
+): UpcomingBirthday | null {
+  const sorted = sortBirthdaysUpcoming(reference, birthdays);
+  return sorted[0] ?? null;
 }

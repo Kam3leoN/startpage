@@ -4,7 +4,7 @@ import { WEEK_CELEBRATIONS_POSITION_KEY } from "../config/defaults";
 import { useDraggablePosition } from "../hooks/useDraggablePosition";
 import type { BirthdayEntry } from "../types/birthday";
 import { resolveBirthYearFromDate } from "../utils/birthdayYear";
-import { getAgeAtNextBirthday, getWeekBirthdays, getWeekCelebrations, sortBirthdaysUpcoming } from "../utils/weekCelebrations";
+import { getAgeAtNextBirthday, getNextUpcomingBirthday, getWeekBirthdays, getWeekCelebrations, sortBirthdaysUpcoming } from "../utils/weekCelebrations";
 import { EphemerisGenderIcon } from "./EphemerisGenderIcon";
 import { CloseIcon, PenIcon } from "./icons";
 import { K3Datepicker } from "./K3Datepicker";
@@ -91,6 +91,11 @@ export function WeekCelebrationsCard({
     [date, birthdays]
   );
 
+  const nextUpcoming = useMemo(
+    () => getNextUpcomingBirthday(date, birthdays),
+    [date, birthdays]
+  );
+
   const pickerLocale = i18n.language.startsWith("fr") ? "fr-FR" : "en-US";
 
   const closeForm = () => {
@@ -157,9 +162,14 @@ export function WeekCelebrationsCard({
 
   const renderBirthdayItem = (
     entry: BirthdayEntry,
-    options: { isToday: boolean; age: number | null; highlightWeek?: boolean }
+    options: {
+      isToday: boolean;
+      age: number | null;
+      highlightWeek?: boolean;
+      daysUntil?: number;
+    }
   ) => {
-    const { isToday, age, highlightWeek = false } = options;
+    const { isToday, age, highlightWeek = false, daysUntil } = options;
     return (
       <li
         key={entry.id}
@@ -209,6 +219,14 @@ export function WeekCelebrationsCard({
                   <span className="week-card__birthday-age">
                     {" · "}
                     {t("weekCard.turns", { age })}
+                  </span>
+                )}
+                {typeof daysUntil === "number" && (
+                  <span className="week-card__birthday-countdown">
+                    {" · "}
+                    {daysUntil === 0
+                      ? t("weekCard.todayShort")
+                      : t("weekCard.daysLeft", { count: daysUntil })}
                   </span>
                 )}
               </span>
@@ -373,6 +391,16 @@ export function WeekCelebrationsCard({
               )}
             </ul>
           )}
+          {nextUpcoming && weekBirthdays.length === 0 && (
+            <p className="week-card__next-up" role="status">
+              {nextUpcoming.isToday
+                ? t("weekCard.nextUpToday", { name: nextUpcoming.entry.name })
+                : t("weekCard.nextUp", {
+                    name: nextUpcoming.entry.name,
+                    count: nextUpcoming.daysUntil,
+                  })}
+            </p>
+          )}
           {birthdays.length > 0 && (
             <button
               type="button"
@@ -390,10 +418,11 @@ export function WeekCelebrationsCard({
               className="week-card__birthdays-list week-card__birthdays-list--all"
               aria-label={t("weekCard.allBirthdaysTitle")}
             >
-              {allBirthdaysSorted.map(({ entry, isToday, age }) =>
+              {allBirthdaysSorted.map(({ entry, isToday, age, daysUntil }) =>
                 renderBirthdayItem(entry, {
                   isToday,
                   age: age ?? getAgeAtNextBirthday(entry, date),
+                  daysUntil,
                 })
               )}
             </ul>
