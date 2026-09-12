@@ -1,11 +1,11 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import type { BirthdayEntry, BirthdayGender } from "../types/birthday";
 import { resolveBirthYearFromDate } from "../utils/birthdayYear";
 import { closeK3Overlay, useK3Openable } from "../utils/k3Overlay";
 import { K3Datepicker } from "./K3Datepicker";
-import { K3OutlinedField } from "./K3OutlinedField";
+import { K3OutlinedField, readK3FieldValue } from "./K3OutlinedField";
 
 export const BIRTHDAY_DIALOG_ID = "birthday-form-dialog";
 
@@ -56,6 +56,7 @@ export function BirthdayFormDialog({
   onUpdate,
 }: Props) {
   const { t, i18n } = useTranslation();
+  const formHostRef = useRef<HTMLDivElement>(null);
   const [name, setName] = useState("");
   const [gender, setGender] = useState<BirthdayGender | undefined>();
   const [birthdayDate, setBirthdayDate] = useState<Date | null>(() => startOfDay(date));
@@ -63,23 +64,26 @@ export function BirthdayFormDialog({
   const pickerLocale = i18n.language.startsWith("fr") ? "fr-FR" : "en-US";
   const isEdit = mode === "edit" && entry != null;
   const title = isEdit ? t("weekCard.editFormTitle") : t("weekCard.formTitle");
+  const entryId = entry?.id ?? null;
 
   useK3Openable(BIRTHDAY_DIALOG_ID, "Dialog", open, k3ready, onClose, {
     ...birthdayDialogOptions,
   });
 
+  // Ne pas dépendre de `date` (useClock tick 1s) — sinon le formulaire se reset en boucle.
   useEffect(() => {
     if (!open) return;
     if (mode === "edit" && entry) {
       setName(entry.name);
       setGender(entry.gender);
       setBirthdayDate(entryToDate(entry));
-    } else {
-      setName("");
-      setGender(undefined);
-      setBirthdayDate(startOfDay(date));
+      return;
     }
-  }, [open, mode, entry, date]);
+    setName("");
+    setGender(undefined);
+    setBirthdayDate(startOfDay(date));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- snapshot date only when dialog opens / mode changes
+  }, [open, mode, entryId]);
 
   const handleClose = () => {
     void closeK3Overlay(BIRTHDAY_DIALOG_ID, "Dialog");
@@ -90,30 +94,53 @@ export function BirthdayFormDialog({
     setGender((current) => (current === next ? undefined : next));
   };
 
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    if (!birthdayDate || !name.trim()) return;
+  const resolveName = (): string => {
+    const fromState = name.trim();
+    if (fromState) return fromState;
+    const host = formHostRef.current;
+    if (!host) return "";
+    return readK3FieldValue(host, "birthday-name").trim();
+  };
+
+  const saveEntry = (): boolean => {
+    const resolvedName = resolveName();
+    if (!birthdayDate || !resolvedName) return false;
 
     if (isEdit && entry) {
       onUpdate(entry.id, {
-        name: name.trim(),
+        name: resolvedName,
         day: birthdayDate.getDate(),
         month: birthdayDate.getMonth() + 1,
         year: resolveBirthYearFromDate(birthdayDate),
         gender: gender ?? null,
       });
       handleClose();
-      return;
+      return true;
     }
 
     const created = onAdd({
-      name,
+      name: resolvedName,
       day: birthdayDate.getDate(),
       month: birthdayDate.getMonth() + 1,
       year: resolveBirthYearFromDate(birthdayDate),
       gender,
     });
-    if (created) handleClose();
+    if (created) {
+      handleClose();
+      return true;
+    }
+    return false;
+  };
+
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    saveEntry();
+  };
+
+  const handleSaveClick = (event: MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    saveEntry();
   };
 
   return createPortal(
@@ -123,7 +150,7 @@ export function BirthdayFormDialog({
           <h2 className="dialog-title">{title}</h2>
         </div>
         <div className="dialog-scroller">
-          <div className="dialog-content birthday-form">
+          <div ref={formHostRef} className="dialog-content birthday-form">
             <p className="birthday-dialog__lead">{t("weekCard.formLead")}</p>
             <form id="birthday-form-fields" onSubmit={handleSubmit}>
               <K3OutlinedField
@@ -183,10 +210,10 @@ export function BirthdayFormDialog({
             {t("weekCard.cancel")}
           </button>
           <button
-            type="submit"
-            form="birthday-form-fields"
+            type="button"
             className="btn btn--filled btn--sm btn--primary"
-            disabled={!name.trim() || !birthdayDate}
+            disabled={!birthdayDate}
+            onClick={handleSaveClick}
           >
             {isEdit ? t("weekCard.update") : t("weekCard.save")}
           </button>

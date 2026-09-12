@@ -50,14 +50,13 @@ export function useBirthdays() {
           : {}),
       };
 
-      let created: BirthdayEntry | null = null;
       setBirthdaysState((prev) => {
         const next = [...prev, entry];
         saveBirthdaysToStorage(next);
-        created = entry;
         return next;
       });
-      return created;
+      // Retour synchrone : l’updater setState peut être différé.
+      return entry;
     },
     []
   );
