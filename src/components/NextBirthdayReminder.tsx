@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { BirthdayEntry } from "../types/birthday";
-import { getNextUpcomingBirthday } from "../utils/weekCelebrations";
+import { getNextUpcomingBirthdayGroup } from "../utils/weekCelebrations";
+import { BirthdayNameList, entryToNamePart } from "./BirthdayNameList";
 
 interface Props {
   date: Date;
@@ -9,36 +10,42 @@ interface Props {
 }
 
 /**
- * Rappel accueil : prochain anniversaire à souhaiter + jours restants.
- * Invisible tant qu'aucun anniversaire n'est enregistré.
+ * Rappel accueil : prochain(s) anniversaire(s) à souhaiter + jours restants.
+ * Plusieurs prénoms le même jour sont listés ensemble (colorés par genre).
  */
 export function NextBirthdayReminder({ date, birthdays }: Props) {
   const { t } = useTranslation();
 
-  const next = useMemo(
-    () => getNextUpcomingBirthday(date, birthdays),
+  const group = useMemo(
+    () => getNextUpcomingBirthdayGroup(date, birthdays),
     [date, birthdays]
   );
 
-  if (!next) return null;
+  if (!group) return null;
 
-  const { entry, daysUntil, age, isToday } = next;
-  const name = entry.name;
-  const withAge = age != null;
+  const { items, daysUntil, isToday } = group;
+  const names = items.map((item) => entryToNamePart(item.entry, item.age));
+  const single = items.length === 1 ? items[0] : null;
+  const withAge = single?.age != null;
 
-  let label: string;
+  let prefix: string;
+  let suffix: string;
+
   if (isToday) {
-    label = withAge
-      ? t("nextBirthday.todayWithAge", { name, age })
-      : t("nextBirthday.today", { name });
+    prefix = t("nextBirthday.prefixToday");
+    suffix = withAge
+      ? t("nextBirthday.suffixTodayWithAge", { age: single.age })
+      : t("nextBirthday.suffixToday");
   } else if (daysUntil === 1) {
-    label = withAge
-      ? t("nextBirthday.tomorrowWithAge", { name, age })
-      : t("nextBirthday.tomorrow", { name });
+    prefix = t("nextBirthday.prefix");
+    suffix = withAge
+      ? t("nextBirthday.suffixTomorrowWithAge", { age: single.age })
+      : t("nextBirthday.suffixTomorrow");
   } else {
-    label = withAge
-      ? t("nextBirthday.inDaysWithAge", { name, count: daysUntil, age })
-      : t("nextBirthday.inDays", { name, count: daysUntil });
+    prefix = t("nextBirthday.prefix");
+    suffix = withAge
+      ? t("nextBirthday.suffixInDaysWithAge", { count: daysUntil, age: single.age })
+      : t("nextBirthday.suffixInDays", { count: daysUntil });
   }
 
   return (
@@ -46,7 +53,15 @@ export function NextBirthdayReminder({ date, birthdays }: Props) {
       <span className="next-birthday__cake" aria-hidden="true">
         🎂
       </span>
-      <span className="next-birthday__text">{label}</span>
+      <span className="next-birthday__text">
+        {prefix}
+        <BirthdayNameList
+          entries={names}
+          showAge={items.length > 1}
+          nameClassName="next-birthday__name"
+        />
+        {suffix}
+      </span>
     </p>
   );
 }

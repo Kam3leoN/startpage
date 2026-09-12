@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { WEEK_CELEBRATIONS_POSITION_KEY } from "../config/defaults";
 import { useDraggablePosition } from "../hooks/useDraggablePosition";
-import type { BirthdayEntry } from "../types/birthday";
+import type { BirthdayEntry, BirthdayGender } from "../types/birthday";
 import { resolveBirthYearFromDate } from "../utils/birthdayYear";
-import { getAgeAtNextBirthday, getNextUpcomingBirthday, getWeekBirthdays, getWeekCelebrations, sortBirthdaysUpcoming } from "../utils/weekCelebrations";
+import { getAgeAtNextBirthday, getNextUpcomingBirthdayGroup, getWeekBirthdays, getWeekCelebrations, sortBirthdaysUpcoming } from "../utils/weekCelebrations";
+import { BirthdayNameList, entryToNamePart } from "./BirthdayNameList";
 import { EphemerisGenderIcon } from "./EphemerisGenderIcon";
 import { CloseIcon, PenIcon } from "./icons";
 import { K3Datepicker } from "./K3Datepicker";
@@ -18,7 +19,9 @@ interface Props {
   onRemoveBirthday: (id: string) => void;
   onUpdateBirthday: (
     id: string,
-    patch: Partial<Pick<BirthdayEntry, "name" | "day" | "month" | "year">>
+    patch: Partial<Pick<BirthdayEntry, "name" | "day" | "month" | "year">> & {
+      gender?: BirthdayGender | null;
+    }
   ) => boolean;
 }
 
@@ -68,8 +71,10 @@ export function WeekCelebrationsCard({
   const [showAllBirthdays, setShowAllBirthdays] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
+  const [gender, setGender] = useState<BirthdayGender | undefined>();
   const [birthdayDate, setBirthdayDate] = useState<Date | null>(() => startOfDay(date));
   const [editDate, setEditDate] = useState<Date | null>(null);
+  const [editGender, setEditGender] = useState<BirthdayGender | undefined>();
 
   const { elementRef, position, dragging, onDragHandlePointerDown } = useDraggablePosition({
     storageKey: WEEK_CELEBRATIONS_POSITION_KEY,
@@ -91,22 +96,32 @@ export function WeekCelebrationsCard({
     [date, birthdays]
   );
 
-  const nextUpcoming = useMemo(
-    () => getNextUpcomingBirthday(date, birthdays),
+  const nextUpcomingGroup = useMemo(
+    () => getNextUpcomingBirthdayGroup(date, birthdays),
     [date, birthdays]
   );
 
   const pickerLocale = i18n.language.startsWith("fr") ? "fr-FR" : "en-US";
 
+  const toggleGender = (
+    current: BirthdayGender | undefined,
+    next: BirthdayGender,
+    setter: (value: BirthdayGender | undefined) => void
+  ) => {
+    setter(current === next ? undefined : next);
+  };
+
   const closeForm = () => {
     setShowForm(false);
     setName("");
+    setGender(undefined);
     setBirthdayDate(startOfDay(date));
   };
 
   const closeEdit = () => {
     setEditingId(null);
     setEditDate(null);
+    setEditGender(undefined);
   };
 
   const openForm = () => {
@@ -119,6 +134,7 @@ export function WeekCelebrationsCard({
     closeForm();
     setEditingId(entry.id);
     setEditDate(entryToDate(entry));
+    setEditGender(entry.gender);
   };
 
   useEffect(() => {
@@ -142,6 +158,7 @@ export function WeekCelebrationsCard({
       day: birthdayDate.getDate(),
       month: birthdayDate.getMonth() + 1,
       year: resolveBirthYearFromDate(birthdayDate),
+      gender,
     });
     if (!created) return;
     closeForm();
@@ -155,10 +172,47 @@ export function WeekCelebrationsCard({
       day: editDate.getDate(),
       month: editDate.getMonth() + 1,
       year: resolveBirthYearFromDate(editDate),
+      gender: editGender ?? null,
     });
     if (!ok) return;
     closeEdit();
   };
+
+  const renderGenderToggle = (
+    value: BirthdayGender | undefined,
+    onToggle: (next: BirthdayGender) => void,
+    idPrefix: string
+  ) => (
+    <fieldset className="week-card__gender-fieldset">
+      <legend className="week-card__gender-legend">{t("weekCard.gender")}</legend>
+      <div className="week-card__gender-options" role="group" aria-label={t("weekCard.gender")}>
+        <label
+          className={`week-card__gender-option week-card__gender-option--female${value === "female" ? " week-card__gender-option--checked" : ""}`}
+          htmlFor={`${idPrefix}-female`}
+        >
+          <input
+            id={`${idPrefix}-female`}
+            type="checkbox"
+            checked={value === "female"}
+            onChange={() => onToggle("female")}
+          />
+          <span>{t("weekCard.girl")}</span>
+        </label>
+        <label
+          className={`week-card__gender-option week-card__gender-option--male${value === "male" ? " week-card__gender-option--checked" : ""}`}
+          htmlFor={`${idPrefix}-male`}
+        >
+          <input
+            id={`${idPrefix}-male`}
+            type="checkbox"
+            checked={value === "male"}
+            onChange={() => onToggle("male")}
+          />
+          <span>{t("weekCard.boy")}</span>
+        </label>
+      </div>
+    </fieldset>
+  );
 
   const renderBirthdayItem = (
     entry: BirthdayEntry,
@@ -191,6 +245,7 @@ export function WeekCelebrationsCard({
               onChange={setEditDate}
               locale={pickerLocale}
             />
+            {renderGenderToggle(editGender, (next) => toggleGender(editGender, next, setEditGender), `edit-${entry.id}`)}
             <div className="week-card__form-actions">
               <button
                 type="button"
@@ -212,7 +267,11 @@ export function WeekCelebrationsCard({
           <>
             <span className="week-card__birthday-cake" aria-hidden="true">🎂</span>
             <div className="week-card__birthday-info">
-              <span className="week-card__birthday-name">{entry.name}</span>
+              <span
+                className={`week-card__birthday-name${entry.gender ? ` week-card__birthday-name--${entry.gender}` : ""}`}
+              >
+                {entry.name}
+              </span>
               <span className="week-card__birthday-date">
                 {formatBirthdayDate(entry.day, entry.month, i18n.language)}
                 {age !== null && (
@@ -308,6 +367,7 @@ export function WeekCelebrationsCard({
             onChange={setBirthdayDate}
             locale={pickerLocale}
           />
+          {renderGenderToggle(gender, (next) => toggleGender(gender, next, setGender), "add")}
           <div className="week-card__form-actions">
             <button
               type="button"
@@ -391,14 +451,31 @@ export function WeekCelebrationsCard({
               )}
             </ul>
           )}
-          {nextUpcoming && weekBirthdays.length === 0 && (
+          {nextUpcomingGroup && weekBirthdays.length === 0 && (
             <p className="week-card__next-up" role="status">
-              {nextUpcoming.isToday
-                ? t("weekCard.nextUpToday", { name: nextUpcoming.entry.name })
-                : t("weekCard.nextUp", {
-                    name: nextUpcoming.entry.name,
-                    count: nextUpcoming.daysUntil,
-                  })}
+              {nextUpcomingGroup.isToday ? (
+                <>
+                  {t("weekCard.nextUpTodayPrefix")}
+                  <BirthdayNameList
+                    entries={nextUpcomingGroup.items.map((item) =>
+                      entryToNamePart(item.entry, item.age)
+                    )}
+                    nameClassName="week-card__birthday-name"
+                  />
+                  {t("weekCard.nextUpTodaySuffix")}
+                </>
+              ) : (
+                <>
+                  {t("weekCard.nextUpPrefix")}
+                  <BirthdayNameList
+                    entries={nextUpcomingGroup.items.map((item) =>
+                      entryToNamePart(item.entry, item.age)
+                    )}
+                    nameClassName="week-card__birthday-name"
+                  />
+                  {t("weekCard.nextUpSuffix", { count: nextUpcomingGroup.daysUntil })}
+                </>
+              )}
             </p>
           )}
           {birthdays.length > 0 && (

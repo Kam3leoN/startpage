@@ -568,6 +568,26 @@ button.weather-widget:active {
   text-wrap: pretty;
 }
 
+.next-birthday__name--female {
+  color: #e91e8c;
+}
+
+.next-birthday__name--male {
+  color: #1a73e8;
+}
+
+[data-theme="dark"] .next-birthday__name--female {
+  color: #f48fb1;
+}
+
+[data-theme="dark"] .next-birthday__name--male {
+  color: #8ab4f8;
+}
+
+.birthday-name-sep {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
 .clock__ephemeris {
   margin: 6px 0 0;
   display: flex;

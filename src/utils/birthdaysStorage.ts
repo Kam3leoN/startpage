@@ -1,5 +1,5 @@
 import { BIRTHDAYS_STORAGE_KEY } from "../config/defaults";
-import type { BirthdayEntry } from "../types/birthday";
+import type { BirthdayEntry, BirthdayGender } from "../types/birthday";
 import { coerceBirthYear } from "./birthdayYear";
 
 export interface BirthdaysFile {
@@ -8,6 +8,10 @@ export interface BirthdaysFile {
 }
 
 const EMPTY_FILE: BirthdaysFile = { version: 1, birthdays: [] };
+
+function coerceGender(value: unknown): BirthdayGender | undefined {
+  return value === "female" || value === "male" ? value : undefined;
+}
 
 function isValidEntry(item: unknown): item is BirthdayEntry {
   if (!item || typeof item !== "object") return false;
@@ -21,17 +25,20 @@ function isValidEntry(item: unknown): item is BirthdayEntry {
 }
 
 function normalizeBirthday(entry: BirthdayEntry): BirthdayEntry {
+  const gender = coerceGender(entry.gender);
   const y = coerceBirthYear(entry.year);
-  if (y == null) {
-    const { year: _removed, ...rest } = entry;
-    return rest as BirthdayEntry;
-  }
+  const base: BirthdayEntry = {
+    id: entry.id,
+    name: entry.name,
+    day: entry.day,
+    month: entry.month,
+    ...(gender ? { gender } : {}),
+  };
+
+  if (y == null) return base;
   const currentYear = new Date().getFullYear();
-  if (y >= currentYear) {
-    const { year: _removed, ...rest } = entry;
-    return rest as BirthdayEntry;
-  }
-  return { ...entry, year: y };
+  if (y >= currentYear) return base;
+  return { ...base, year: y };
 }
 
 function parseEntries(raw: unknown): BirthdayEntry[] {

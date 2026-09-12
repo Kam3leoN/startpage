@@ -180,11 +180,31 @@ export function sortBirthdaysUpcoming(
     .sort((a, b) => a.nextDate.getTime() - b.nextDate.getTime());
 }
 
+/** Prochain(s) anniversaire(s) à souhaiter — tous ceux du même jour le plus proche. */
+export function getNextUpcomingBirthdayGroup(
+  reference: Date,
+  birthdays: BirthdayEntry[]
+): { items: UpcomingBirthday[]; daysUntil: number; isToday: boolean; nextDate: Date } | null {
+  const sorted = sortBirthdaysUpcoming(reference, birthdays);
+  const first = sorted[0];
+  if (!first) return null;
+
+  const items = sorted.filter(
+    (item) => item.nextDate.getTime() === first.nextDate.getTime()
+  );
+
+  return {
+    items,
+    daysUntil: first.daysUntil,
+    isToday: first.isToday,
+    nextDate: first.nextDate,
+  };
+}
+
 /** Prochain anniversaire à souhaiter (null si la liste est vide). */
 export function getNextUpcomingBirthday(
   reference: Date,
   birthdays: BirthdayEntry[]
 ): UpcomingBirthday | null {
-  const sorted = sortBirthdaysUpcoming(reference, birthdays);
-  return sorted[0] ?? null;
+  return getNextUpcomingBirthdayGroup(reference, birthdays)?.items[0] ?? null;
 }

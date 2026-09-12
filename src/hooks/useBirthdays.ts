@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { BirthdayEntry } from "../types/birthday";
+import type { BirthdayEntry, BirthdayGender } from "../types/birthday";
 import {
   ensureBirthdaysStorageFormat,
   loadBirthdaysFromStorage,
@@ -45,6 +45,9 @@ export function useBirthdays() {
         day: input.day,
         month: input.month,
         year: input.year,
+        ...(input.gender === "female" || input.gender === "male"
+          ? { gender: input.gender }
+          : {}),
       };
 
       let created: BirthdayEntry | null = null;
@@ -68,7 +71,12 @@ export function useBirthdays() {
   }, []);
 
   const updateBirthday = useCallback(
-    (id: string, patch: Partial<Pick<BirthdayEntry, "name" | "day" | "month" | "year">>) => {
+    (
+      id: string,
+      patch: Partial<Pick<BirthdayEntry, "name" | "day" | "month" | "year">> & {
+        gender?: BirthdayGender | null;
+      }
+    ) => {
       let updated = false;
       setBirthdaysState((prev) => {
         const next = prev.map((entry) => {
@@ -77,13 +85,21 @@ export function useBirthdays() {
           const month = patch.month ?? entry.month;
           if (day < 1 || day > 31 || month < 1 || month > 12) return entry;
           updated = true;
-          return {
+          const nextEntry: BirthdayEntry = {
             ...entry,
             name: patch.name != null ? patch.name.trim() : entry.name,
             day,
             month,
             year: patch.year !== undefined ? patch.year : entry.year,
           };
+          if ("gender" in patch) {
+            if (patch.gender === "female" || patch.gender === "male") {
+              nextEntry.gender = patch.gender;
+            } else {
+              delete nextEntry.gender;
+            }
+          }
+          return nextEntry;
         });
         if (updated) saveBirthdaysToStorage(next);
         return next;
