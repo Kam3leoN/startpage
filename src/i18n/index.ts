@@ -81,7 +81,7 @@ const resources = {
         compactDate: "Date compacte",
         compactDateHint: "Ex. Sam, 13 juin 2026",
         weekCelebrations: "Fêtes & anniversaires",
-        weekCelebrationsHint: "Ouvre la feuille depuis la barre du bas (Fêtes)",
+        weekCelebrationsHint: "Ouvre le panneau droit depuis la barre du bas (Fêtes)",
       },
       navBar: {
         ariaLabel: "Navigation StartPage",
@@ -412,7 +412,7 @@ const resources = {
         compactDate: "Compact date",
         compactDateHint: "e.g. Sat, Jun 13, 2026",
         weekCelebrations: "Holidays & birthdays",
-        weekCelebrationsHint: "Opens the sheet from the bottom nav (Events)",
+        weekCelebrationsHint: "Opens the right drawer from the bottom nav (Events)",
       },
       navBar: {
         ariaLabel: "StartPage navigation",

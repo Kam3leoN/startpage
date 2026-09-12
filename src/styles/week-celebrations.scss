@@ -1,43 +1,64 @@
-/* ====== Week celebrations — K3UI bottom sheet + birthday dialog ====== */
+/* ====== Week celebrations — K3UI right drawer + birthday dialog ====== */
 
-.week-sheet__header {
+.week-drawer.drawer--right {
+  --week-drawer-width: min(100vw, 380px);
+}
+
+.week-drawer__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding-inline: 4px;
+  gap: 10px;
 }
 
-.week-sheet__title {
+.week-drawer__title {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--md-sys-color-on-surface);
 }
 
-.week-sheet__add {
-  display: inline-flex;
+.week-drawer__header-actions {
+  display: flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
 }
 
-.week-sheet__add-label {
+.week-drawer__add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.week-drawer__add-label {
   font-weight: 600;
 }
 
-.week-sheet__content {
-  max-height: min(70vh, 640px);
+.week-drawer__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+}
+
+.week-drawer__content {
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-bottom: 12px;
+  padding-bottom: 16px;
   display: flex;
   flex-direction: column;
   gap: 18px;
+  max-height: calc(100vh - 88px);
 }
 
-.week-sheet__section-title {
+.week-drawer__section-title {
   margin: 0 0 10px;
   font-size: 0.72rem;
   font-weight: 700;
@@ -46,11 +67,11 @@
   color: var(--md-sys-color-on-surface-variant);
 }
 
-.week-sheet__section-title--birthdays {
+.week-drawer__section-title--birthdays {
   color: var(--md-sys-color-tertiary, var(--md-sys-color-primary));
 }
 
-.week-sheet__days {
+.week-drawer__days {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -59,7 +80,7 @@
   gap: 6px;
 }
 
-.week-sheet__day {
+.week-drawer__day {
   display: grid;
   grid-template-columns: 52px 1fr;
   gap: 8px;
@@ -69,16 +90,16 @@
   background: color-mix(in srgb, var(--md-sys-color-surface-container-high) 55%, transparent);
 }
 
-.week-sheet__day--today {
+.week-drawer__day--today {
   background: color-mix(in srgb, var(--md-sys-color-primary) 14%, transparent);
   outline: 1px solid color-mix(in srgb, var(--md-sys-color-primary) 35%, transparent);
 }
 
-.week-sheet__day--empty {
+.week-drawer__day--empty {
   opacity: 0.72;
 }
 
-.week-sheet__day-head {
+.week-drawer__day-head {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -86,7 +107,7 @@
   padding-top: 2px;
 }
 
-.week-sheet__weekday {
+.week-drawer__weekday {
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -94,18 +115,18 @@
   color: var(--md-sys-color-on-surface-variant);
 }
 
-.week-sheet__date-num {
+.week-drawer__date-num {
   font-size: 1rem;
   font-weight: 700;
   line-height: 1;
   color: var(--md-sys-color-on-surface);
 }
 
-.week-sheet__day--today .week-sheet__date-num {
+.week-drawer__day--today .week-drawer__date-num {
   color: var(--md-sys-color-primary);
 }
 
-.week-sheet__names {
+.week-drawer__names {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -114,47 +135,47 @@
   gap: 3px;
 }
 
-.week-sheet__name-entry {
+.week-drawer__name-entry {
   display: flex;
   align-items: center;
   gap: 6px;
   min-width: 0;
 }
 
-.week-sheet__gender-icon {
+.week-drawer__gender-icon {
   flex-shrink: 0;
   width: 14px;
   height: 14px;
 }
 
-.week-sheet__name-entry--male .week-sheet__name {
+.week-drawer__name-entry--male .week-drawer__name {
   color: #1a73e8;
 }
 
-.week-sheet__name-entry--female .week-sheet__name {
+.week-drawer__name-entry--female .week-drawer__name {
   color: #e91e8c;
 }
 
-[data-theme="dark"] .week-sheet__name-entry--male .week-sheet__name {
+[data-theme="dark"] .week-drawer__name-entry--male .week-drawer__name {
   color: #8ab4f8;
 }
 
-[data-theme="dark"] .week-sheet__name-entry--female .week-sheet__name {
+[data-theme="dark"] .week-drawer__name-entry--female .week-drawer__name {
   color: #f48fb1;
 }
 
-.week-sheet__name {
+.week-drawer__name {
   font-size: 0.84rem;
   line-height: 1.3;
   font-weight: 500;
 }
 
-.week-sheet__empty-day {
+.week-drawer__empty-day {
   font-size: 0.8rem;
   color: var(--md-sys-color-on-surface-variant);
 }
 
-.week-sheet__birthdays-empty {
+.week-drawer__birthdays-empty {
   margin: 0;
   padding: 8px 4px;
   font-size: 0.8rem;
@@ -162,12 +183,12 @@
   color: var(--md-sys-color-on-surface-variant);
 }
 
-.week-sheet__birthdays-saved-hint {
+.week-drawer__birthdays-saved-hint {
   font-style: normal;
   opacity: 0.85;
 }
 
-.week-sheet__next-up {
+.week-drawer__next-up {
   margin: 8px 0 0;
   padding: 10px 12px;
   border-radius: 14px;
@@ -178,11 +199,11 @@
   color: var(--md-sys-color-primary);
 }
 
-.week-sheet__birthdays-all-toggle {
+.week-drawer__birthdays-all-toggle {
   margin-top: 8px;
 }
 
-.week-sheet__birthdays-list {
+.week-drawer__birthdays-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -191,11 +212,11 @@
   gap: 6px;
 }
 
-.week-sheet__birthdays-list--all {
+.week-drawer__birthdays-list--all {
   margin-top: 8px;
 }
 
-.week-sheet__birthday-item {
+.week-drawer__birthday-item {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -204,20 +225,20 @@
   background: color-mix(in srgb, var(--md-sys-color-surface-container-high) 55%, transparent);
 }
 
-.week-sheet__birthday-item--week {
+.week-drawer__birthday-item--week {
   outline: 1px solid color-mix(in srgb, var(--md-sys-color-tertiary, var(--md-sys-color-primary)) 30%, transparent);
 }
 
-.week-sheet__birthday-item--today {
+.week-drawer__birthday-item--today {
   background: color-mix(in srgb, var(--md-sys-color-tertiary, var(--md-sys-color-primary)) 14%, transparent);
 }
 
-.week-sheet__birthday-cake {
+.week-drawer__birthday-cake {
   flex-shrink: 0;
   font-size: 1rem;
 }
 
-.week-sheet__birthday-info {
+.week-drawer__birthday-info {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -225,42 +246,42 @@
   gap: 2px;
 }
 
-.week-sheet__birthday-name {
+.week-drawer__birthday-name {
   font-weight: 600;
   color: var(--md-sys-color-on-surface);
 }
 
-.week-sheet__birthday-name--female {
+.week-drawer__birthday-name--female {
   color: #e91e8c;
 }
 
-.week-sheet__birthday-name--male {
+.week-drawer__birthday-name--male {
   color: #1a73e8;
 }
 
-[data-theme="dark"] .week-sheet__birthday-name--female {
+[data-theme="dark"] .week-drawer__birthday-name--female {
   color: #f48fb1;
 }
 
-[data-theme="dark"] .week-sheet__birthday-name--male {
+[data-theme="dark"] .week-drawer__birthday-name--male {
   color: #8ab4f8;
 }
 
-.week-sheet__birthday-date {
+.week-drawer__birthday-date {
   font-size: 0.74rem;
   color: var(--md-sys-color-on-surface-variant);
 }
 
-.week-sheet__birthday-age {
+.week-drawer__birthday-age {
   font-weight: 500;
 }
 
-.week-sheet__birthday-countdown {
+.week-drawer__birthday-countdown {
   font-weight: 600;
   color: var(--md-sys-color-primary);
 }
 
-.week-sheet__birthday-actions {
+.week-drawer__birthday-actions {
   display: flex;
   gap: 2px;
   flex-shrink: 0;
@@ -366,7 +387,7 @@
 }
 
 @media (max-width: 480px) {
-  .week-sheet__add-label {
+  .week-drawer__add-label {
     display: none;
   }
 }

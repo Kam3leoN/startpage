@@ -78,6 +78,15 @@ export interface K3API {
       isOpen?: boolean;
     } | undefined;
   };
+  Drawer: {
+    init(el: Element, opts?: Record<string, unknown>): unknown;
+    getInstance(el: HTMLElement): {
+      open?: (trigger?: HTMLElement) => void;
+      close?: () => void;
+      destroy?: () => void;
+      isOpen?: boolean;
+    } | undefined;
+  };
   Menu: {
     init(
       el: Element,

@@ -59,6 +59,7 @@ export function BirthdayFormDialog({
   onCloseRef.current = onClose;
   const pickerLocale = i18n.language.startsWith("fr") ? "fr-FR" : "en-US";
   const isEdit = mode === "edit" && entry != null;
+  const title = isEdit ? t("weekCard.editFormTitle") : t("weekCard.formTitle");
 
   useEffect(() => {
     if (!open) return;
@@ -75,46 +76,42 @@ export function BirthdayFormDialog({
   }, [open, mode, entry, date]);
 
   useEffect(() => {
-    if (!k3ready) return;
+    if (!k3ready || !open) return;
     const el = document.getElementById(DIALOG_ID) as HTMLElement | null;
     if (!el) return;
 
     let cancelled = false;
 
-    const boot = async () => {
+    const openDialog = async () => {
       if (rootRef.current) await initK3UISubtree(rootRef.current);
       if (cancelled) return;
 
       const K = window.K;
       if (!K?.Dialog?.init) return;
 
-      if (!K.Dialog.getInstance(el)) {
+      let instance = K.Dialog.getInstance(el);
+      if (!instance) {
         K.Dialog.init(el, {
           dismissible: true,
           onCloseEnd: () => onCloseRef.current(),
         });
+        instance = K.Dialog.getInstance(el);
       }
-    };
 
-    void boot();
+      // Laisser React peindre le formulaire / datepicker avant d'ouvrir.
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      });
+      if (cancelled) return;
 
-    return () => {
-      cancelled = true;
-    };
-  }, [k3ready]);
-
-  useEffect(() => {
-    if (!k3ready || !open) return;
-    const el = document.getElementById(DIALOG_ID) as HTMLElement | null;
-    if (!el) return;
-
-    const openDialog = async () => {
-      if (rootRef.current) await initK3UISubtree(rootRef.current);
-      const instance = window.K?.Dialog?.getInstance(el);
       instance?.open?.() ?? (el as HTMLElement & { open?: () => void }).open?.();
     };
 
     void openDialog();
+
+    return () => {
+      cancelled = true;
+    };
   }, [open, k3ready, formKey]);
 
   useEffect(() => {
@@ -154,8 +151,6 @@ export function BirthdayFormDialog({
     });
     if (created) onClose();
   };
-
-  const title = isEdit ? t("weekCard.editFormTitle") : t("weekCard.formTitle");
 
   return (
     <div ref={rootRef}>

@@ -29,7 +29,7 @@ import { StartPageAppBar } from "./components/StartPageAppBar";
 import { SearchOverlay } from "./components/SearchOverlay";
 import { ShortcutDialog } from "./components/ShortcutDialog";
 import { BootScreen } from "./components/BootScreen";
-import { WeekCelebrationsSheet } from "./components/WeekCelebrationsSheet";
+import { WeekCelebrationsDrawer } from "./components/WeekCelebrationsDrawer";
 import { BirthdayFormDialog, type BirthdayFormMode } from "./components/BirthdayFormDialog";
 import { StartPageNavigationBar } from "./components/StartPageNavigationBar";
 import { WeatherDialog } from "./components/WeatherDialog";
@@ -243,7 +243,7 @@ export default function App() {
     <>
       <BootScreen appReady={k3ready} />
 
-      <WeekCelebrationsSheet
+      <WeekCelebrationsDrawer
         open={showWeekCelebrations}
         k3ready={k3ready}
         date={date}
