@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
+import { useMemo, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { BirthdayEntry } from "../types/birthday";
 import { getAgeAtNextBirthday, sortBirthdaysUpcoming } from "../utils/weekCelebrations";
+import { useK3Openable } from "../utils/useK3Openable";
 import { CloseIcon, PenIcon } from "./icons";
 import { K3IconButton } from "./K3IconButton";
+
+const SHEET_ID = "all-birthdays-sheet";
 
 interface Props {
   open: boolean;
@@ -23,13 +25,10 @@ function formatBirthdayDate(day: number, month: number, locale: string): string 
   return d.toLocaleDateString(lang, { day: "numeric", month: "short" });
 }
 
-/**
- * Liste des anniversaires — sheet React contrôlé (même modèle que SettingsSheet).
- * Backdrop non dismissible pendant le premier tick (évite mouseup click-through).
- */
+/** Bottom sheet K3UI — liste scrollable de tous les anniversaires. */
 export function AllBirthdaysSheet({
   open,
-  k3ready: _k3ready,
+  k3ready,
   date,
   birthdays,
   onClose,
@@ -38,68 +37,45 @@ export function AllBirthdaysSheet({
   onRemoveBirthday,
 }: Props) {
   const { t, i18n } = useTranslation();
-  const [dismissible, setDismissible] = useState(false);
+
+  useK3Openable(SHEET_ID, "Sheet", open, k3ready, onClose, {
+    position: "bottom",
+    size: "large",
+    dismissible: true,
+    draggable: true,
+  });
 
   const sorted = useMemo(
     () => sortBirthdaysUpcoming(date, birthdays),
     [date, birthdays]
   );
 
-  useEffect(() => {
-    if (!open) {
-      setDismissible(false);
-      return;
-    }
-    const timer = window.setTimeout(() => setDismissible(true), 120);
-    return () => window.clearTimeout(timer);
-  }, [open]);
+  const handleAdd = (event: MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onAddBirthday();
+  };
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [open, onClose]);
-
-  if (!open) return null;
-
-  return createPortal(
+  return (
     <div
-      className="sheet-backdrop birthdays-sheet-backdrop"
-      onClick={dismissible ? onClose : undefined}
+      id={SHEET_ID}
+      className="sheet no-autoinit sheet--bottom sheet--large birthdays-sheet"
+      aria-hidden="true"
     >
-      <div
-        className="sheet birthdays-sheet-panel"
-        role="dialog"
-        aria-modal="true"
-        aria-label={t("weekCard.allBirthdaysTitle")}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="sheet__grab" />
-        <div className="birthdays-sheet__header">
-          <h2 className="sheet__title birthdays-sheet__title">{t("weekCard.allBirthdaysTitle")}</h2>
+      <div className="sheet-container">
+        <div className="sheet-header birthdays-sheet__header">
+          <h2 className="birthdays-sheet__title">{t("weekCard.allBirthdaysTitle")}</h2>
           <button
             type="button"
             className="btn btn--filled btn--sm btn--primary"
             aria-label={t("weekCard.addBirthday")}
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              onAddBirthday();
-            }}
+            onClick={handleAdd}
           >
             <span aria-hidden="true">+</span>
             <span className="birthdays-sheet__add-label">{t("weekCard.addShort")}</span>
           </button>
         </div>
-        <div className="birthdays-sheet__content">
+        <div className="sheet-content birthdays-sheet__content">
           {sorted.length === 0 ? (
             <p className="birthdays-sheet__empty">{t("weekCard.noBirthdaysSavedEmpty")}</p>
           ) : (
@@ -159,7 +135,6 @@ export function AllBirthdaysSheet({
           )}
         </div>
       </div>
-    </div>,
-    document.body
+    </div>
   );
 }

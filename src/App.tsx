@@ -265,16 +265,15 @@ export default function App() {
         onClose={() => setAllBirthdaysOpen(false)}
         onAddBirthday={() => {
           setAllBirthdaysOpen(false);
-          // Laisser passer le clic courant avant d'ouvrir le dialog
           window.setTimeout(() => {
             setBirthdayForm({ open: true, mode: "add", entry: null });
-          }, 0);
+          }, 40);
         }}
         onEditBirthday={(entry) => {
           setAllBirthdaysOpen(false);
           window.setTimeout(() => {
             setBirthdayForm({ open: true, mode: "edit", entry });
-          }, 0);
+          }, 40);
         }}
         onRemoveBirthday={removeBirthday}
       />

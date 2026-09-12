@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState, type MouseEvent } from "react";
-import { createPortal } from "react-dom";
+import { useMemo, type MouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { BirthdayEntry } from "../types/birthday";
 import {
@@ -7,10 +6,13 @@ import {
   getWeekBirthdays,
   getWeekCelebrations,
 } from "../utils/weekCelebrations";
+import { useK3Openable } from "../utils/useK3Openable";
 import { BirthdayNameList, entryToNamePart } from "./BirthdayNameList";
 import { EphemerisGenderIcon } from "./EphemerisGenderIcon";
 import { CloseIcon, PenIcon } from "./icons";
 import { K3IconButton } from "./K3IconButton";
+
+const DRAWER_ID = "week-celebrations-drawer";
 
 interface Props {
   open: boolean;
@@ -37,12 +39,13 @@ function formatBirthdayDate(day: number, month: number, locale: string): string 
 }
 
 /**
- * Panneau droit React contrôlé (fêtes + anniversaires).
- * Plus d'API Drawer k3ui : les clics React ne sont plus avalés par Ripple/AutoInit.
+ * Drawer K3UI à droite.
+ * Important : pas d'`initK3UISubtree` (AutoInit Ripple casse les onClick React).
+ * Boutons d'action sans classe `ripple`.
  */
 export function WeekCelebrationsDrawer({
   open,
-  k3ready: _k3ready,
+  k3ready,
   date,
   birthdays,
   onClose,
@@ -52,7 +55,13 @@ export function WeekCelebrationsDrawer({
   onShowAllBirthdays,
 }: Props) {
   const { t, i18n } = useTranslation();
-  const [dismissible, setDismissible] = useState(false);
+
+  useK3Openable(DRAWER_ID, "Drawer", open, k3ready, onClose, {
+    edge: "right",
+    width: "min(100vw, 380px)",
+    dismissible: true,
+    draggable: true,
+  });
 
   const weekCelebrations = useMemo(
     () => getWeekCelebrations(date, i18n.language),
@@ -68,31 +77,6 @@ export function WeekCelebrationsDrawer({
     () => getNextUpcomingBirthdayGroup(date, birthdays),
     [date, birthdays]
   );
-
-  useEffect(() => {
-    if (!open) {
-      setDismissible(false);
-      return;
-    }
-    const timer = window.setTimeout(() => setDismissible(true), 120);
-    return () => window.clearTimeout(timer);
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [open, onClose]);
-
-  if (!open) return null;
 
   const handleAddClick = (event: MouseEvent) => {
     event.preventDefault();
@@ -172,22 +156,15 @@ export function WeekCelebrationsDrawer({
     );
   };
 
-  return createPortal(
+  return (
     <div
-      className="week-drawer-overlay"
-      role="presentation"
-      onClick={dismissible ? onClose : undefined}
+      id={DRAWER_ID}
+      className="drawer no-autoinit drawer--right week-drawer"
+      aria-hidden="true"
     >
-      <aside
-        id="week-celebrations-drawer"
-        className="week-drawer-panel"
-        role="dialog"
-        aria-modal="true"
-        aria-label={t("weekCard.title")}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="week-drawer__header">
-          <h2 className="week-drawer__title">{t("weekCard.title")}</h2>
+      <div className="drawer-wrapper">
+        <div className="drawer-header week-drawer__header">
+          <h2 className="drawer-header__title week-drawer__title">{t("weekCard.title")}</h2>
           <div className="week-drawer__header-actions">
             <button
               type="button"
@@ -208,7 +185,7 @@ export function WeekCelebrationsDrawer({
             </button>
           </div>
         </div>
-        <div className="week-drawer__content">
+        <div className="drawer-content week-drawer__content">
           <section className="week-drawer__section" aria-label={t("weekCard.holidays")}>
             <h3 className="week-drawer__section-title">{t("weekCard.holidays")}</h3>
             <ul className="week-drawer__days">
@@ -315,8 +292,7 @@ export function WeekCelebrationsDrawer({
             </button>
           </section>
         </div>
-      </aside>
-    </div>,
-    document.body
+      </div>
+    </div>
   );
 }

@@ -1,10 +1,12 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import type { BirthdayEntry, BirthdayGender } from "../types/birthday";
 import { resolveBirthYearFromDate } from "../utils/birthdayYear";
+import { useK3Openable } from "../utils/useK3Openable";
 import { K3Datepicker } from "./K3Datepicker";
 import { K3OutlinedField } from "./K3OutlinedField";
+
+const DIALOG_ID = "birthday-form-dialog";
 
 export type BirthdayFormMode = "add" | "edit";
 
@@ -34,12 +36,13 @@ function entryToDate(entry: BirthdayEntry): Date {
 }
 
 /**
- * Dialog d'ajout / édition — overlay React contrôlé (même modèle que SettingsSheet).
- * Backdrop non dismissible pendant le premier tick (évite mouseup click-through).
+ * Dialog K3UI — anatomie M3 déclarée dans React (Dialog.buildDialogMarkup) :
+ * `.dialog-container` > header + `.dialog-scroller` > content + footer.
+ * Ne jamais laisser Dialog.init wrapper seul : React défait le DOM.
  */
 export function BirthdayFormDialog({
   open,
-  k3ready: _k3ready,
+  k3ready,
   mode,
   date,
   entry,
@@ -51,11 +54,15 @@ export function BirthdayFormDialog({
   const [name, setName] = useState("");
   const [gender, setGender] = useState<BirthdayGender | undefined>();
   const [birthdayDate, setBirthdayDate] = useState<Date | null>(() => startOfDay(date));
-  const [dismissible, setDismissible] = useState(false);
 
   const pickerLocale = i18n.language.startsWith("fr") ? "fr-FR" : "en-US";
   const isEdit = mode === "edit" && entry != null;
   const title = isEdit ? t("weekCard.editFormTitle") : t("weekCard.formTitle");
+
+  useK3Openable(DIALOG_ID, "Dialog", open, k3ready, onClose, {
+    dismissible: true,
+    closeOnBackNavigation: false,
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -69,31 +76,6 @@ export function BirthdayFormDialog({
       setBirthdayDate(startOfDay(date));
     }
   }, [open, mode, entry, date]);
-
-  useEffect(() => {
-    if (!open) {
-      setDismissible(false);
-      return;
-    }
-    const timer = window.setTimeout(() => setDismissible(true), 120);
-    return () => window.clearTimeout(timer);
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [open, onClose]);
-
-  if (!open) return null;
 
   const toggleGender = (next: BirthdayGender) => {
     setGender((current) => (current === next ? undefined : next));
@@ -125,86 +107,82 @@ export function BirthdayFormDialog({
     if (created) onClose();
   };
 
-  return createPortal(
-    <div
-      className="birthday-overlay"
-      role="presentation"
-      onClick={dismissible ? onClose : undefined}
-    >
-      <div
-        className="birthday-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <h2 className="birthday-dialog__title">{title}</h2>
-        <p className="birthday-dialog__lead">{t("weekCard.formLead")}</p>
-        <form className="birthday-form" onSubmit={handleSubmit}>
-          <K3OutlinedField
-            className="birthday-form__field"
-            name="birthday-name"
-            label={t("weekCard.namePlaceholder")}
-            placeholder={t("weekCard.namePlaceholder")}
-            value={name}
-            onChange={setName}
-          />
-          <K3Datepicker
-            className="birthday-form__datepicker"
-            label={t("weekCard.birthDate")}
-            placeholder={t("weekCard.birthDatePlaceholder")}
-            value={birthdayDate}
-            onChange={setBirthdayDate}
-            locale={pickerLocale}
-          />
-          <fieldset className="birthday-form__gender-fieldset">
-            <legend className="birthday-form__gender-legend">{t("weekCard.gender")}</legend>
-            <div
-              className="birthday-form__gender-options"
-              role="group"
-              aria-label={t("weekCard.gender")}
-            >
-              <label
-                className={`birthday-form__gender-option birthday-form__gender-option--female${gender === "female" ? " birthday-form__gender-option--checked" : ""}`}
-                htmlFor="birthday-form-female"
-              >
-                <input
-                  id="birthday-form-female"
-                  type="checkbox"
-                  checked={gender === "female"}
-                  onChange={() => toggleGender("female")}
-                />
-                <span>{t("weekCard.girl")}</span>
-              </label>
-              <label
-                className={`birthday-form__gender-option birthday-form__gender-option--male${gender === "male" ? " birthday-form__gender-option--checked" : ""}`}
-                htmlFor="birthday-form-male"
-              >
-                <input
-                  id="birthday-form-male"
-                  type="checkbox"
-                  checked={gender === "male"}
-                  onChange={() => toggleGender("male")}
-                />
-                <span>{t("weekCard.boy")}</span>
-              </label>
-            </div>
-          </fieldset>
-          <div className="birthday-form__footer">
-            <button type="button" className="btn btn--text btn--sm ripple" onClick={onClose}>
-              {t("weekCard.cancel")}
-            </button>
-            <button
-              type="submit"
-              className="btn btn--filled btn--sm btn--primary ripple"
-              disabled={!name.trim() || !birthdayDate}
-            >
-              {isEdit ? t("weekCard.update") : t("weekCard.save")}
-            </button>
+  return (
+    <k3ui-dialog id={DIALOG_ID} class="dialog no-autoinit" aria-label={title}>
+      <div className="dialog-container">
+        <div className="dialog-header">
+          <h2 className="dialog-title">{title}</h2>
+        </div>
+        <div className="dialog-scroller">
+          <div className="dialog-content birthday-form">
+            <p className="birthday-dialog__lead">{t("weekCard.formLead")}</p>
+            <form id="birthday-form-fields" onSubmit={handleSubmit}>
+              <K3OutlinedField
+                className="birthday-form__field"
+                name="birthday-name"
+                label={t("weekCard.namePlaceholder")}
+                placeholder={t("weekCard.namePlaceholder")}
+                value={name}
+                onChange={setName}
+              />
+              <K3Datepicker
+                className="birthday-form__datepicker"
+                label={t("weekCard.birthDate")}
+                placeholder={t("weekCard.birthDatePlaceholder")}
+                value={birthdayDate}
+                onChange={setBirthdayDate}
+                locale={pickerLocale}
+              />
+              <fieldset className="birthday-form__gender-fieldset">
+                <legend className="birthday-form__gender-legend">{t("weekCard.gender")}</legend>
+                <div
+                  className="birthday-form__gender-options"
+                  role="group"
+                  aria-label={t("weekCard.gender")}
+                >
+                  <label
+                    className={`birthday-form__gender-option birthday-form__gender-option--female${gender === "female" ? " birthday-form__gender-option--checked" : ""}`}
+                    htmlFor="birthday-form-female"
+                  >
+                    <input
+                      id="birthday-form-female"
+                      type="checkbox"
+                      checked={gender === "female"}
+                      onChange={() => toggleGender("female")}
+                    />
+                    <span>{t("weekCard.girl")}</span>
+                  </label>
+                  <label
+                    className={`birthday-form__gender-option birthday-form__gender-option--male${gender === "male" ? " birthday-form__gender-option--checked" : ""}`}
+                    htmlFor="birthday-form-male"
+                  >
+                    <input
+                      id="birthday-form-male"
+                      type="checkbox"
+                      checked={gender === "male"}
+                      onChange={() => toggleGender("male")}
+                    />
+                    <span>{t("weekCard.boy")}</span>
+                  </label>
+                </div>
+              </fieldset>
+            </form>
           </div>
-        </form>
+        </div>
+        <div className="dialog-footer birthday-form__footer">
+          <button type="button" className="btn btn--text btn--sm" onClick={onClose}>
+            {t("weekCard.cancel")}
+          </button>
+          <button
+            type="submit"
+            form="birthday-form-fields"
+            className="btn btn--filled btn--sm btn--primary"
+            disabled={!name.trim() || !birthdayDate}
+          >
+            {isEdit ? t("weekCard.update") : t("weekCard.save")}
+          </button>
+        </div>
       </div>
-    </div>,
-    document.body
+    </k3ui-dialog>
   );
 }

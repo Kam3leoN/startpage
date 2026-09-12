@@ -1,36 +1,7 @@
-/* ====== Week celebrations — React right panel + birthday dialog ====== */
+/* ====== Week celebrations — K3UI Drawer + Sheet + Dialog ====== */
 
-.week-drawer-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 2100;
-  background: rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(10px) saturate(160%);
-  -webkit-backdrop-filter: blur(10px) saturate(160%);
-  animation: fade 0.2s ease;
-}
-
-.week-drawer-panel {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: min(100vw, 380px);
-  display: flex;
-  flex-direction: column;
-  background: var(--md-sys-color-surface-container-low);
-  color: var(--md-sys-color-on-surface);
-  box-shadow: var(--md-sys-elevation-2, -4px 0 24px rgba(0, 0, 0, 0.18));
-  animation: week-drawer-in 0.28s cubic-bezier(0.2, 0, 0, 1);
-}
-
-@keyframes week-drawer-in {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+.week-drawer.drawer--right {
+  --week-drawer-width: min(100vw, 380px);
 }
 
 .week-drawer__header {
@@ -39,8 +10,6 @@
   justify-content: space-between;
   gap: 10px;
   position: relative;
-  padding: 16px 16px 12px;
-  border-bottom: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 55%, transparent);
 }
 
 .week-drawer__title {
@@ -93,12 +62,11 @@
 .week-drawer__content {
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 16px;
+  padding-bottom: 16px;
   display: flex;
   flex-direction: column;
   gap: 18px;
-  flex: 1;
-  min-height: 0;
+  max-height: calc(100vh - 88px);
 }
 
 .week-drawer__section-title {
@@ -332,18 +300,7 @@
   flex-shrink: 0;
 }
 
-/* All birthdays bottom sheet */
-.birthdays-sheet-backdrop {
-  z-index: 2200;
-  align-items: end;
-}
-
-.birthdays-sheet-panel {
-  max-height: min(88vh, 720px);
-  display: flex;
-  flex-direction: column;
-}
-
+/* All birthdays K3UI sheet */
 .birthdays-sheet__header {
   display: flex;
   align-items: center;
@@ -441,41 +398,9 @@
   flex-shrink: 0;
 }
 
-/* Birthday form dialog — React overlay above drawer */
-.birthday-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 2300;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(12px) saturate(160%);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
-  animation: fade 0.2s ease;
-}
-
-.birthday-dialog {
-  width: min(100%, 420px);
-  max-height: min(90vh, 640px);
-  overflow: auto;
-  border-radius: 28px;
-  padding: 22px 22px 18px;
-  background: var(--md-sys-color-surface-container-high);
-  color: var(--md-sys-color-on-surface);
-  box-shadow: var(--md-sys-elevation-3, 0 8px 24px rgba(0, 0, 0, 0.28));
-  animation: rise 0.28s cubic-bezier(0.2, 0, 0, 1);
-}
-
-.birthday-dialog__title {
-  margin: 0 0 6px;
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
+/* Birthday form inside K3UI dialog */
 .birthday-dialog__lead {
-  margin: 0 0 16px;
+  margin: 0 0 14px;
   font-size: 0.88rem;
   line-height: 1.4;
   color: var(--md-sys-color-on-surface-variant);
