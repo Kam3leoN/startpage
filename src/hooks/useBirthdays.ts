@@ -77,7 +77,6 @@ export function useBirthdays() {
       }
     ) => {
       let didUpdate = false;
-
       setBirthdaysState((prev) => {
         const index = prev.findIndex((entry) => entry.id === id);
         if (index < 0) return prev;

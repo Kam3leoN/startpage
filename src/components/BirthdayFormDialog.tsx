@@ -60,6 +60,7 @@ export function BirthdayFormDialog({
   const [name, setName] = useState("");
   const [gender, setGender] = useState<BirthdayGender | undefined>();
   const [birthdayDate, setBirthdayDate] = useState<Date | null>(() => startOfDay(date));
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const pickerLocale = i18n.language.startsWith("fr") ? "fr-FR" : "en-US";
   const isEdit = mode === "edit" && entry != null;
@@ -68,7 +69,23 @@ export function BirthdayFormDialog({
 
   useK3Openable(BIRTHDAY_DIALOG_ID, "Dialog", open, k3ready, onClose, {
     ...birthdayDialogOptions,
+    dismissible: !pickerOpen,
   });
+
+  useEffect(() => {
+    if (!open) setPickerOpen(false);
+  }, [open]);
+
+  // Sync dismissible on live Dialog instance (datepicker ouvert par-dessus).
+  useEffect(() => {
+    if (!k3ready) return;
+    const el = document.getElementById(BIRTHDAY_DIALOG_ID) as HTMLElement | null;
+    if (!el) return;
+    const inst = window.K?.Dialog?.getInstance(el) as
+      | { options?: { dismissible?: boolean } }
+      | undefined;
+    if (inst?.options) inst.options.dismissible = !pickerOpen;
+  }, [pickerOpen, k3ready]);
 
   // Ne pas dépendre de `date` (useClock tick 1s) — sinon le formulaire se reset en boucle.
   useEffect(() => {
@@ -168,6 +185,9 @@ export function BirthdayFormDialog({
                 value={birthdayDate}
                 onChange={setBirthdayDate}
                 locale={pickerLocale}
+                nestedOverlay
+                onOpen={() => setPickerOpen(true)}
+                onClose={() => setPickerOpen(false)}
               />
               <fieldset className="birthday-form__gender-fieldset">
                 <legend className="birthday-form__gender-legend">{t("weekCard.gender")}</legend>

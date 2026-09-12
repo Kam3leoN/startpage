@@ -486,11 +486,11 @@ body.drawer-open .drawer-overlay {
  * Dialog ≈ 2000–2003+, datepicker k3ui défaut 2000/2001 → calendrier derrière.
  */
 .datepicker__backdrop {
-  z-index: 3200 !important;
+  z-index: 10000 !important;
 }
 
 .datepicker__modal {
-  z-index: 3201 !important;
+  z-index: 10001 !important;
 }
 
 .birthday-form__footer {

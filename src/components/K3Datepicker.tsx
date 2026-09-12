@@ -10,6 +10,10 @@ interface Props {
   maxDate?: Date;
   className?: string;
   inputVariant?: "filled" | "outlined";
+  /** Dans un Dialog : pas de lock body (sinon Confirmer casse le dialog parent). */
+  nestedOverlay?: boolean;
+  onOpen?: () => void;
+  onClose?: () => void;
 }
 
 function isSameCalendarDay(a: Date, b: Date): boolean {
@@ -26,6 +30,27 @@ function refreshIcons(root: HTMLElement | null | undefined): void {
   window.K?.IconManager?.forceDisplayIcons?.();
 }
 
+function bumpDatepickerStack(): void {
+  const backdrop = document.querySelector<HTMLElement>(".datepicker__backdrop");
+  const modal = document.querySelector<HTMLElement>(".datepicker__modal");
+  if (backdrop) {
+    backdrop.style.zIndex = "10000";
+    backdrop.style.pointerEvents = "auto";
+  }
+  if (modal) {
+    modal.style.zIndex = "10001";
+    modal.style.pointerEvents = "auto";
+  }
+}
+
+function emitDate(
+  next: Date | null | { start: Date; end: Date },
+  onChange: (date: Date | null) => void
+): void {
+  if (next instanceof Date) onChange(next);
+  else if (next === null) onChange(null);
+}
+
 /** Datepicker K3UI — init unique, cleanup DOM explicite (évite les champs empilés). */
 export function K3Datepicker({
   label,
@@ -36,16 +61,25 @@ export function K3Datepicker({
   maxDate,
   className,
   inputVariant = "outlined",
+  nestedOverlay = false,
+  onOpen,
+  onClose,
 }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const pickerRef = useRef<HTMLElement | null>(null);
   const onChangeRef = useRef(onChange);
+  const onOpenRef = useRef(onOpen);
+  const onCloseRef = useRef(onClose);
   const valueRef = useRef(value);
   const maxDateRef = useRef(maxDate);
+  const nestedRef = useRef(nestedOverlay);
 
   onChangeRef.current = onChange;
+  onOpenRef.current = onOpen;
+  onCloseRef.current = onClose;
   valueRef.current = value;
   maxDateRef.current = maxDate;
+  nestedRef.current = nestedOverlay;
 
   useEffect(() => {
     let cancelled = false;
@@ -62,6 +96,10 @@ export function K3Datepicker({
 
       pickerRef.current = el;
 
+      const pushDate = (next: Date | null | { start: Date; end: Date }) => {
+        emitDate(next, (d) => onChangeRef.current(d));
+      };
+
       const initOptions: Parameters<NonNullable<typeof window.K.Datepicker>["init"]>[1] = {
         label,
         locale,
@@ -70,14 +108,28 @@ export function K3Datepicker({
         icon: "calendar",
         selectedDate: valueRef.current,
         showTodayButton: true,
-        showClearButton: true,
-        onChange: (next) => {
-          if (next instanceof Date) onChangeRef.current(next);
-          else if (next === null) onChangeRef.current(null);
+        // Clear dans un dialog birthday → date null → Enregistrer mort.
+        showClearButton: !nestedRef.current,
+        // Le Dialog parent gère déjà le scroll ; le datepicker ne doit pas reset body.
+        preventScrolling: !nestedRef.current,
+        onChange: pushDate,
+        onSelect: pushDate,
+        onOpenStart: () => {
+          onOpenRef.current?.();
         },
         onOpenEnd: () => {
+          bumpDatepickerStack();
           refreshIcons(hostRef.current);
           refreshIcons(document.body);
+        },
+        onCloseEnd: () => {
+          if (nestedRef.current) {
+            // Re-locker le scroll du Dialog parent (datepicker l’avait éventuellement touché).
+            document.documentElement.style.overflow = "hidden";
+            document.body.style.overflow = "hidden";
+            document.body.classList.add("dialog-open");
+          }
+          onCloseRef.current?.();
         },
       };
 
@@ -104,7 +156,7 @@ export function K3Datepicker({
       }
       pickerRef.current = null;
     };
-  }, [inputVariant, label, locale, placeholder]);
+  }, [inputVariant, label, locale, placeholder, nestedOverlay]);
 
   useEffect(() => {
     const el = pickerRef.current;

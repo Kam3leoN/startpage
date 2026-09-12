@@ -201,8 +201,20 @@ export interface K3API {
         maxDate?: Date;
         showTodayButton?: boolean;
         showClearButton?: boolean;
+        showConfirmButton?: boolean;
+        preventScrolling?: boolean;
+        onOpenStart?: () => void;
         onOpenEnd?: () => void;
-        onChange?: (date: Date | null | { start: Date; end: Date }, instance?: K3DatepickerInstance) => void;
+        onCloseStart?: () => void;
+        onCloseEnd?: () => void;
+        onSelect?: (
+          date: Date | null | { start: Date; end: Date },
+          instance?: K3DatepickerInstance
+        ) => void;
+        onChange?: (
+          date: Date | null | { start: Date; end: Date },
+          instance?: K3DatepickerInstance
+        ) => void;
       }
     ): K3DatepickerInstance;
     getInstance(el: HTMLElement): K3DatepickerInstance | undefined;
