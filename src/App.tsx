@@ -251,10 +251,19 @@ export default function App() {
         date={date}
         birthdays={birthdays}
         onClose={() => setShowWeekCelebrations(false)}
-        onAddBirthday={() => setBirthdayForm({ open: true, mode: "add", entry: null })}
-        onEditBirthday={(entry) => setBirthdayForm({ open: true, mode: "edit", entry })}
+        onAddBirthday={() => {
+          setShowWeekCelebrations(false);
+          setBirthdayForm({ open: true, mode: "add", entry: null });
+        }}
+        onEditBirthday={(entry) => {
+          setShowWeekCelebrations(false);
+          setBirthdayForm({ open: true, mode: "edit", entry });
+        }}
         onRemoveBirthday={removeBirthday}
-        onShowAllBirthdays={() => setAllBirthdaysOpen(true)}
+        onShowAllBirthdays={() => {
+          setShowWeekCelebrations(false);
+          setAllBirthdaysOpen(true);
+        }}
       />
 
       <AllBirthdaysSheet
@@ -263,8 +272,14 @@ export default function App() {
         date={date}
         birthdays={birthdays}
         onClose={() => setAllBirthdaysOpen(false)}
-        onAddBirthday={() => setBirthdayForm({ open: true, mode: "add", entry: null })}
-        onEditBirthday={(entry) => setBirthdayForm({ open: true, mode: "edit", entry })}
+        onAddBirthday={() => {
+          setAllBirthdaysOpen(false);
+          setBirthdayForm({ open: true, mode: "add", entry: null });
+        }}
+        onEditBirthday={(entry) => {
+          setAllBirthdaysOpen(false);
+          setBirthdayForm({ open: true, mode: "edit", entry });
+        }}
         onRemoveBirthday={removeBirthday}
       />
 
