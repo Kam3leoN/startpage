@@ -77,34 +77,40 @@ export function useBirthdays() {
         gender?: BirthdayGender | null;
       }
     ) => {
-      let updated = false;
+      let didUpdate = false;
+
       setBirthdaysState((prev) => {
-        const next = prev.map((entry) => {
-          if (entry.id !== id) return entry;
-          const day = patch.day ?? entry.day;
-          const month = patch.month ?? entry.month;
-          if (day < 1 || day > 31 || month < 1 || month > 12) return entry;
-          updated = true;
-          const nextEntry: BirthdayEntry = {
-            ...entry,
-            name: patch.name != null ? patch.name.trim() : entry.name,
-            day,
-            month,
-            year: patch.year !== undefined ? patch.year : entry.year,
-          };
-          if ("gender" in patch) {
-            if (patch.gender === "female" || patch.gender === "male") {
-              nextEntry.gender = patch.gender;
-            } else {
-              delete nextEntry.gender;
-            }
+        const index = prev.findIndex((entry) => entry.id === id);
+        if (index < 0) return prev;
+
+        const entry = prev[index];
+        const day = patch.day ?? entry.day;
+        const month = patch.month ?? entry.month;
+        if (day < 1 || day > 31 || month < 1 || month > 12) return prev;
+
+        const nextEntry: BirthdayEntry = {
+          ...entry,
+          name: patch.name != null ? patch.name.trim() : entry.name,
+          day,
+          month,
+          year: patch.year !== undefined ? patch.year : entry.year,
+        };
+        if ("gender" in patch) {
+          if (patch.gender === "female" || patch.gender === "male") {
+            nextEntry.gender = patch.gender;
+          } else {
+            delete nextEntry.gender;
           }
-          return nextEntry;
-        });
-        if (updated) saveBirthdaysToStorage(next);
+        }
+
+        const next = [...prev];
+        next[index] = nextEntry;
+        didUpdate = true;
+        saveBirthdaysToStorage(next);
         return next;
       });
-      return updated;
+
+      return didUpdate;
     },
     []
   );

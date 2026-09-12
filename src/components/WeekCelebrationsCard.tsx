@@ -164,18 +164,20 @@ export function WeekCelebrationsCard({
     closeForm();
   };
 
-  const handleUpdateBirthday = (event: FormEvent, entryId: string) => {
-    event.preventDefault();
+  const saveEdit = (entryId: string) => {
     if (!editDate) return;
-
-    const ok = onUpdateBirthday(entryId, {
+    onUpdateBirthday(entryId, {
       day: editDate.getDate(),
       month: editDate.getMonth() + 1,
       year: resolveBirthYearFromDate(editDate),
       gender: editGender ?? null,
     });
-    if (!ok) return;
     closeEdit();
+  };
+
+  const handleUpdateBirthday = (event: FormEvent, entryId: string) => {
+    event.preventDefault();
+    saveEdit(entryId);
   };
 
   const renderGenderToggle = (
@@ -255,9 +257,10 @@ export function WeekCelebrationsCard({
                 {t("weekCard.cancel")}
               </button>
               <button
-                type="submit"
+                type="button"
                 className="btn btn--filled btn--sm btn--primary ripple"
                 disabled={!editDate}
+                onClick={() => saveEdit(entry.id)}
               >
                 {t("weekCard.update")}
               </button>
