@@ -21,7 +21,9 @@ export default defineConfig({
       includeAssets: [
         "k3ui/k3ui.min.css",
         "k3ui/k3ui.min.js",
+        "k3ui/k3ui*.js",
         "k3ui/init.js",
+        "k3ui/VERSION.txt",
         "assets/icons/**/*.svg",
         "fonts/Digital-7.ttf",
         "icons/*.svg",

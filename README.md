@@ -6,10 +6,23 @@ Page de démarrage installable (PWA), **mobile-first**, refonte de l'ancienne ve
 
 - **Vite + React 18 + TypeScript** (strict)
 - **SCSS** + **Tailwind** (utilitaires, `preflight` désactivé pour ne pas écraser k3ui)
-- **k3ui** (`k3ui.min.js` / `k3ui.min.css`) — Web Components Material 3 Expressive
+- **k3ui** (`public/k3ui/`, sync depuis [Kam3leoN/K3ui](https://github.com/Kam3leoN/K3ui)) — Web Components Material 3 Expressive
 - **@material/material-color-utilities** — génération dynamique des palettes M3
 - **i18next** — internationalisation FR / EN
 - **vite-plugin-pwa** — manifest + service worker (installable, hors-ligne)
+
+## Mettre à jour k3ui
+
+```bash
+# dans le repo K3ui (sibling ../K3ui)
+npm ci
+npm run build:ci   # ignore le budget bundle si besoin : npm run clean:dist:final après
+
+# dans startpage
+npm run sync:k3ui
+```
+
+Le SHA k3ui synchronisé est noté dans `public/k3ui/VERSION.txt`.
 
 ## Ce qui a été retiré (et remplacé)
 

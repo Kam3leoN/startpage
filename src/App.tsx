@@ -29,9 +29,11 @@ import { StartPageAppBar } from "./components/StartPageAppBar";
 import { SearchOverlay } from "./components/SearchOverlay";
 import { ShortcutDialog } from "./components/ShortcutDialog";
 import { BootScreen } from "./components/BootScreen";
-import { WeekCelebrationsCard } from "./components/WeekCelebrationsCard";
+import { WeekCelebrationsSheet } from "./components/WeekCelebrationsSheet";
+import { BirthdayFormDialog, type BirthdayFormMode } from "./components/BirthdayFormDialog";
 import { StartPageNavigationBar } from "./components/StartPageNavigationBar";
 import { WeatherDialog } from "./components/WeatherDialog";
+import type { BirthdayEntry } from "./types/birthday";
 import type { SettingsSection } from "./types/settings";
 import type { DeckCategoryEditorValues, DeckSlot, DeckSlotEditorValues } from "./types/deck";
 import { registerDeckCallback, resolveSlotAction } from "./utils/deckCallbacks";
@@ -119,6 +121,11 @@ export default function App() {
   const [shortcutDialogOpen, setShortcutDialogOpen] = useState(false);
   const [weatherDialogOpen, setWeatherDialogOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [birthdayForm, setBirthdayForm] = useState<{
+    open: boolean;
+    mode: BirthdayFormMode;
+    entry?: BirthdayEntry | null;
+  }>({ open: false, mode: "add", entry: null });
   const [deckEditor, setDeckEditor] = useState<{
     open: boolean;
     mode: DeckEditorMode;
@@ -236,15 +243,27 @@ export default function App() {
     <>
       <BootScreen appReady={k3ready} />
 
-      {showWeekCelebrations && (
-        <WeekCelebrationsCard
-          date={date}
-          birthdays={birthdays}
-          onAddBirthday={addBirthday}
-          onRemoveBirthday={removeBirthday}
-          onUpdateBirthday={updateBirthday}
-        />
-      )}
+      <WeekCelebrationsSheet
+        open={showWeekCelebrations}
+        k3ready={k3ready}
+        date={date}
+        birthdays={birthdays}
+        onClose={() => setShowWeekCelebrations(false)}
+        onAddBirthday={() => setBirthdayForm({ open: true, mode: "add", entry: null })}
+        onEditBirthday={(entry) => setBirthdayForm({ open: true, mode: "edit", entry })}
+        onRemoveBirthday={removeBirthday}
+      />
+
+      <BirthdayFormDialog
+        open={birthdayForm.open}
+        k3ready={k3ready}
+        mode={birthdayForm.mode}
+        date={date}
+        entry={birthdayForm.entry}
+        onClose={() => setBirthdayForm((prev) => ({ ...prev, open: false }))}
+        onAdd={addBirthday}
+        onUpdate={updateBirthday}
+      />
 
       <SettingsFabMenu k3ready={k3ready} onOpenSection={openSettings} />
       {showAiTools && <AiToolsBar k3ready={k3ready} />}
